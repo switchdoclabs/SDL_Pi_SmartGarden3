@@ -6,11 +6,53 @@ from subprocess import PIPE, Popen, STDOUT
 from threading  import Thread
 #import json
 import datetime
+import config
+import traceback
+
+import MySQLdb as mdb
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 print("Starting Bluetooth Read")
 cmd = [ '/usr/bin/hcitool', 'lescan']
 
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+#  database update functions
+
+
+def addBluetooth(sLine):
+       print("Found Sensor: ", sLine) 
+
+       splitline = sLine.split(" ")
+       # find out if address exists in data base
+       print("splitline = ", splitline)
+       try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                cur = con.cursor()
+                query = "SELECT *  WHERE fulladdress = '%s'" % (splitline[0])
+
+                print("query=", query)
+                cur.execute(query)
+                myRecords = cur.fetchall()
+                print("myRecords = ", myRecords)
+       except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                myRecords = [];
+       finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+
+
+
+       # add it if it doesnt exist
+       if (len(myRecords) == 0):
+            print("add new record")
+     
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 #   A few helper functions...
 
@@ -59,11 +101,12 @@ while True:
     else: # got line
         pulse -= 1
         sLine = line.decode()
-        #print(sLine)
+        print(sLine)
         #   See if the data is something we need to act on...
         if ( sLine.find('Flower') != -1): 
             sys.stdout.write('This is the raw data: ' + sLine + '\n')
-
+            action = addBluetooth(sLine) 
+            print("action=", action)
 
     sys.stdout.flush()
 
