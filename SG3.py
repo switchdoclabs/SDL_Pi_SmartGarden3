@@ -11,7 +11,7 @@ from __future__ import print_function
 from builtins import range
 from past.utils import old_div
 
-SGSVERSION = "030"
+SGSVERSION = "031"
 
 #imports 
 
@@ -25,7 +25,6 @@ import pickle
 import picamera
 import subprocess
 
-from  bmp280 import BMP280
 import SkyCamera
 import readJSON
 
@@ -34,9 +33,8 @@ logging.basicConfig(level=logging.ERROR)
 
 import updateBlynk
 
+import bluetoothSensor
 #appends
-sys.path.append('./SDL_Pi_SSD1306')
-sys.path.append('./Adafruit_Python_SSD1306')
 
 from neopixel import *
 
@@ -47,9 +45,6 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-import Adafruit_SSD1306
-
-import Scroll_SSD1306
 
 
 import ultrasonicRanger
@@ -80,8 +75,6 @@ import Valves
 import AccessMS
 
 import AccessValves
-
-import weatherSensors
 
 import wiredSensors
 
@@ -131,26 +124,6 @@ def blinkLED(pixel, color, times, length):
 
 
     
-################
-#SSD 1306 setup
-################
-
-# OLED SSD_1306 Detection
-
-try:
-        RST =27
-        display = Adafruit_SSD1306.SSD1306_128_64(rst=RST, i2c_address=0x3C)
-        # Initialize library.
-        display.begin()
-        display.clear()
-        display.display()
-        config.OLED_Present = True
-        OLEDLock = threading.Lock()
-except:
-        config.OLED_Present = False
-        #print("Smart Garden System must have OLED Present")
-        #raise SystemExit
-
 
 
 ###############
@@ -188,19 +161,6 @@ except ImportError:
     from smbus import SMBus
 
 
-# Initialise the BMP280
-bus = SMBus(1)
-bmp280 = BMP280(i2c_dev=bus, i2c_addr=0x77)
-
-try:
-        bmp280 = BMP280(i2c_dev=bus, i2c_addr=0x77)
-        config.BMP280_Present = True
-except Exception as e: 
-        if (config.SWDEBUG):
-            print ("I/O error({0}): {1}".format(e.errno, e.strerror))
-            print(traceback.format_exc())
-
-        config.BMP280_Present = False
 
 ################
 # SkyCamera Setup 
@@ -325,8 +285,6 @@ def initializeSGSPart1():
         pclogging.systemlog(config.INFO,"Garden Cam NOT Present")
         
     # scan and check for resources
-    # get if weather is being used
-    config.Weather_Present = readJSON.getJSONValue("weather") 
 
 
     pass
@@ -338,8 +296,6 @@ def initializeSGSPart2():
         print("----------------------")
         print("Local Devices")
         print("----------------------")
-        print(returnStatusLine("OLED",config.OLED_Present))
-        print(returnStatusLine("BMP280",config.BMP280_Present))
         print(returnStatusLine("DustSensor",config.DustSensor_Present))
         #print(returnStatusLine("Sunlight Sensor",config.Sunlight_Present))
         #print(returnStatusLine("hdc1000 Sensor",config.hdc1000_Present))
@@ -350,6 +306,8 @@ def initializeSGSPart2():
         print("----------------------")
     
         scanForResources.updateDeviceStatus(True)
+
+        bluetoothSensor.assignBluetoothSensors()
         
         # turn off All Valves
         AccessValves.turnOffAllValves()
@@ -411,10 +369,7 @@ def initializeSGSPart2():
         print("----------------------")
         print("Other Smart Garden System Expansions")
         print("----------------------")
-        print(returnStatusLine("Weather",config.Weather_Present))
         print(returnStatusLine("GardenCam",config.GardenCam_Present))
-        print(returnStatusLine("SunAirPlus",config.SunAirPlus_Present))
-        print(returnStatusLine("SolarMAX",config.SunAirPlus_Present))
         print(returnStatusLine("Lightning Mode",config.Lightning_Mode))
     
         print(returnStatusLine("MySQL Logging Mode",config.enable_MySQL_Logging))
@@ -422,9 +377,6 @@ def initializeSGSPart2():
         print()
         print("----------------------")
     
-        #Establish WeatherSTEMHash
-        if (config.USEWEATHERSTEM == True):
-            state.WeatherSTEMHash = SkyCamera.SkyWeatherKeyGeneration(config.STATIONKEY)
 
     
 def initializeScheduler():
@@ -440,20 +392,6 @@ def initializeScheduler():
         
         # read wireless sensor package
         #print("Before Adding readSensors Job")
-        if(config.Weather_Present):
-             print("Adding readSensors Job")
-	     # start in 10 seconds
-             starttime = datetime.datetime.now() + datetime.timedelta(seconds=30)
-    
-             wsjob = state.scheduler.add_job(weatherSensors.readSensors,run_date=starttime) # run in background
-             #weatherSensors.readSensors()
-
-             state.scheduler.add_job(weatherSensors.writeWeatherRecord, 'interval', seconds=15*60)
-             state.scheduler.add_job(weatherSensors.writeITWeatherRecord, 'interval', seconds=15*60)
-        
-        if (config.BMP280_Present):
-             wiredSensors.readWiredSensors(bmp280)
-             state.scheduler.add_job(wiredSensors.readWiredSensors, 'interval', args=[bmp280 ], seconds = 500) 	
     
         # blink optional life light
         state.scheduler.add_job(blinkLED, 'interval', seconds=5, args=[0,Color(0,0,255),1,0.250])
@@ -471,9 +409,8 @@ def initializeScheduler():
     
    
         # sky camera
-        if (config.USEWEATHERSTEM):
-            if (config.GardenCam_Present):
-                state.scheduler.add_job(SkyCamera.takeSkyPicture, 'interval', seconds=int(config.INTERVAL_CAM_PICS__SECONDS))
+        if (config.GardenCam_Present):
+           state.scheduler.add_job(SkyCamera.takeSkyPicture, 'interval', seconds=int(config.INTERVAL_CAM_PICS__SECONDS))
 
         # check for force water - note the interval difference with updateState
         #state.scheduler.add_job(forceWaterPlantCheck, 'interval', seconds=8)
@@ -531,12 +468,6 @@ def initializeSGSPart3():
         if (config.USEBLYNK):
             updateBlynk.blynkEventUpdate()
     
-        if (config.OLED_Present):
-            if (config.LOCKDEBUG):
-                 print("Attempt OLEDLock acquired")
-            OLEDLock.acquire()
-            if (config.LOCKDEBUG):
-                 print("OLEDLock acquired")
     	# display logo
             image = Image.open('SmartPlantPiSquare128x64.ppm').convert('1')
     
@@ -545,13 +476,6 @@ def initializeSGSPart3():
             time.sleep(3.0)
             display.clear()
     
-            Scroll_SSD1306.addLineOLED(display,  ("    Welcome to "))
-            Scroll_SSD1306.addLineOLED(display,  ("   Smart Garden "))
-            if (config.LOCKDEBUG):
-                 print("Attempt OLEDLock released")
-            OLEDLock.release()
-            if (config.LOCKDEBUG):
-                 print("OLEDLock released")
     
         
          

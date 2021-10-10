@@ -31,6 +31,7 @@ MQTTVALVECHANGE = 1
 MQTTALARM = 2
 MQTTDEBUG = 3
 MQTTSENSORS = 4
+MQTTBLUETOOTHSENSOR = 5
 
 #############
 # MQTT Publish Message Type
@@ -68,6 +69,17 @@ def on_WirelessMQTTClientmessage(client, userdata, message):
         if (config.SWDEBUG):
             print("Sensor Message Recieved")
         processSensorMessage(MQTTJSON)
+
+    if (str(MQTTJSON['messagetype']) == str(MQTTBLUETOOTHSENSOR)):
+        if (config.SWDEBUG):
+            print("Bluetooth Sensor Message Recieved")
+        processBluetoothSensorMessage(MQTTJSON)
+
+def processBluetoothSensorMessage(MQTTJSON):
+
+    # add bluetooth reading to database
+
+    pclogging.processBluetoothSensor(MQTTJSON)
 
 
 
@@ -114,7 +126,6 @@ def on_WirelessMQTTClientlog(client, userdata, level, buf):
 
 def startWirelessMQTTClient():
 
-    state.WirelessMQTTClientConnected = False   #global variable for the state of the connection
 
     broker_address= "127.0.0.1"  #Broker address
     port = 1883                         #Broker port

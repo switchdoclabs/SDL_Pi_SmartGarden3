@@ -17,6 +17,10 @@ import datetime
 import sys
 import os
 
+import config
+import MySQLdb as mdb
+import traceback
+
 class AppURLopener(urllib.request.FancyURLopener):
     version = "Mozilla/5.0"
 
@@ -81,15 +85,7 @@ class SGSConfigure(App):
         self.pixelPin = 21
         self.SolarMAX_Present = False
         self.SolarMAX_Type = "LEAD"
-        self.BMP280_Altitude_Meters = 626.0
-        self.Sunlight_Gain = 0
-        self.weather = False
-        self.USEWEATHERSTEM = False
         self.INTERVAL_CAM_PICS__SECONDS = 60
-        self.STATIONKEY = ""
-        self.WeatherUnderground_Present = False
-        self.WeatherUnderground_StationID = "KWXXXXX"
-        self.WeatherUnderground_StationKey = "YYYYYY"
         self.USEBLYNK = False
         self.BLYNK_AUTH = ""
         self.AS3935_Lightning_Config = "[2,1,3,0,3,3]"
@@ -122,15 +118,7 @@ class SGSConfigure(App):
         self.dataDefaults['pixelPin'] = self.pixelPin 
         self.dataDefaults['SolarMAX_Present'] = self.SolarMAX_Present 
         self.dataDefaults['SolarMAX_Type'] = self.SolarMAX_Type 
-        self.dataDefaults['BMP280_Altitude_Meters'] = self.BMP280_Altitude_Meters 
-        self.dataDefaults['Sunlight_Gain'] = self.Sunlight_Gain 
-        self.dataDefaults['weather'] = self.weather 
-        self.dataDefaults['USEWEATHERSTEM'] = self.USEWEATHERSTEM 
         self.dataDefaults['INTERVAL_CAM_PICS__SECONDS'] = self.INTERVAL_CAM_PICS__SECONDS 
-        self.dataDefaults['STATIONKEY'] = self.STATIONKEY 
-        self.dataDefaults['WeatherUnderground_Present'] = self.WeatherUnderground_Present 
-        self.dataDefaults['WeatherUnderground_StationID'] = self.WeatherUnderground_StationID 
-        self.dataDefaults['WeatherUnderground_StationKey'] = self.WeatherUnderground_StationKey 
         self.dataDefaults['USEBLYNK'] = self.USEBLYNK 
         self.dataDefaults['BLYNK_AUTH'] = self.BLYNK_AUTH 
         self.dataDefaults['AS3935_Lightning_Config'] = self.AS3935_Lightning_Config 
@@ -197,15 +185,7 @@ class SGSConfigure(App):
                 self.pixelPin = self.getJSONValue('pixelPin')
                 self.SolarMAX_Present = self.getJSONValue('SolarMAX_Present')
                 self.SolarMAX_Type = self.getJSONValue('SolarMAX_Type')
-                self.BMP280_Altitude_Meters = self.getJSONValue('BMP280_Altitude_Meters')
-                self.Sunlight_Gain = self.getJSONValue('Sunlight_Gain')
-                self.weather = self.getJSONValue('weather')
-                self.USEWEATHERSTEM = self.getJSONValue('USEWEATHERSTEM')
                 self.INTERVAL_CAM_PICS__SECONDS = self.getJSONValue('INTERVAL_CAM_PICS__SECONDS')
-                self.STATIONKEY = self.getJSONValue('STATIONKEY')
-                self.WeatherUnderground_Present = self.getJSONValue('WeatherUnderground_Present')
-                self.WeatherUnderground_StationID = self.getJSONValue('WeatherUnderground_StationID')
-                self.WeatherUnderground_StationKey = self.getJSONValue('WeatherUnderground_StationKey')
                 self.USEBLYNK = self.getJSONValue('USEBLYNK')
                 self.BLYNK_AUTH = self.getJSONValue('BLYNK_AUTH')
                 self.AS3935_Lightning_Config = self.getJSONValue('AS3935_Lightning_Config')
@@ -260,15 +240,7 @@ class SGSConfigure(App):
         data['pixelPin'] = self.F_pixelPin.get_value()
         data['SolarMAX_Present'] = self.F_SolarMAX_Present.get_value()
         data['SolarMAX_Type'] = self.F_SolarMAX_Type.get_value()
-        data['BMP280_Altitude_Meters'] = self.F_BMP280_Altitude_Meters.get_value()
-        data['Sunlight_Gain'] = self.F_Sunlight_Gain.get_value()
-        data['weather'] = self.F_weather.get_value()
-        data['USEWEATHERSTEM'] = self.F_USEWEATHERSTEM.get_value()
         data['INTERVAL_CAM_PICS__SECONDS'] = self.F_INTERVAL_CAM_PICS__SECONDS.get_value()
-        data['STATIONKEY'] = self.F_STATIONKEY.get_value()
-        data['WeatherUnderground_Present'] = self.F_WeatherUnderground_Present.get_value()
-        data['WeatherUnderground_StationID'] = self.F_WeatherUnderground_StationID.get_value()
-        data['WeatherUnderground_StationKey'] = self.F_WeatherUnderground_StationKey.get_value()
         data['USEBLYNK'] = self.F_USEBLYNK.get_value()
         data['BLYNK_AUTH'] = self.F_BLYNK_AUTH.get_value()
         data['AS3935_Lightning_Config'] = self.F_AS3935_Lightning_Config.get_value()
@@ -443,11 +415,11 @@ class SGSConfigure(App):
         self.ValveBlock.style['flex-direction'] = 'row'
 
 
+        print("pre listView2 items=", items)
 
-
-        self.listView1 = gui.ListView.new_from_list(items, width=400, height=25*len(valves), margin='10px')
-        self.listView1.onselection.do(self.list_view_on_selected)
-        self.ValveBlock.append(self.listView1)
+        self.listView2 = gui.ListView.new_from_list(items, width=400, height=25*len(valves), margin='10px')
+        self.listView2.onselection.do(self.list_view_on_selected)
+        self.ValveBlock.append(self.listView2)
 
         vbox.append(self.ValveBlock)
         
@@ -459,7 +431,10 @@ class SGSConfigure(App):
             You can retrieve the item rapidly
         """
         print("selected_item_key=", selected_item_key)
-        myUnit =  self.listView1.children[selected_item_key].get_text()
+        print("widget =", widget)
+        myUnit =  widget.children[selected_item_key].get_text()
+        #myUnit =  self.listView2.children[selected_item_key].get_text()
+        print("myUnit=", myUnit)
         # for on save
         self.current_listView_key = myUnit
 
@@ -467,7 +442,55 @@ class SGSConfigure(App):
         name = myUnit.split("/")[0]
         
         self.myValve = self.buildAValve(id, name,myUnit)
+        print(self.myValve)
+
         self.ValveBlock.append(self.myValve, "currentValve") 
+
+    def wireless_list_view_on_selected(self, widget, selected_item_key):
+        """ The selection event of the listView, returns a key of the clicked event.
+            You can retrieve the item rapidly
+        """
+        myUnit =  self.listView1.children[selected_item_key].get_text()
+        print("list_view: myUnit=", myUnit)
+        # for on save
+        self.current_listView_key = myUnit
+
+        id = myUnit.split("/")[1]
+        name = myUnit.split("/")[0]
+
+        mySplit = myUnit.split(":")
+        assignedAddress = mySplit[3]
+        assignedAddress = assignedAddress.replace(" ", "")
+        print("assignedAddress=", assignedAddress)
+
+        wirelessUnits=[]
+        wirelessItems =('Not Assigned',) 
+        selectAddress = "Not Assigned"
+        # wireless units
+        for wireless in self.WirelessDeviceJSON:
+            wirelessDevice = wireless
+            id = wirelessDevice['id']
+            ipAddress = wirelessDevice['ipaddress']
+            name = wirelessDevice['name']
+            wirelessUnits.append([id, name, ipAddress ])
+            wirelessItems = wirelessItems + (id+"/"+name+"/"+ipAddress,)
+            if (id == assignedAddress):
+                selectAddress = id+"/"+name+"/"+ipAddress
+            #vbox.append(wirelessBlock)
+
+        self.DisplaySelect = gui.Label('Select Wireless Device ',width=100, height=15, margin='5px')
+
+
+        self.dropDownWireless = gui.DropDown.new_from_list(wirelessItems,  width=300, height=20, margin='5px')
+        self.dropDownWireless.onchange.do(self.wireless_drop_down_valve_changed)
+        self.dropDownWireless.select_by_value(selectAddress )
+ 
+
+
+
+        #self.myValve = self.buildAValve(id, name,myUnit)
+        #self.ValveBlock.append(self.DisplaySelect, "currentwireless") 
+        self.ValveBlock1.append(self.dropDownWireless, "currentwireless") 
 
 
 ######################
@@ -501,7 +524,7 @@ class SGSConfigure(App):
                 "Control": "Off",
                 "MSThresholdPercent": "65",
                 "TimerSelect": "Daily",
-                "DOWCoverage": "1111111",
+                "DOWCoverage": "YYYYYYYY",
                 "StartTime": "05:00",
                 "OnTimeInSeconds": "10",
                 "ShowGraph" : False
@@ -756,7 +779,7 @@ class SGSConfigure(App):
 
 
 
-        self.DisplaySelect = gui.Label('Valve Select',width=100, height=15, margin='5px')
+        self.DisplaySelect = gui.Label('Valve Select (%s)'% (myID),width=200, height=15, margin='5px')
         self.dropDownValve = gui.DropDown.new_from_list(self.valvelist, width=200, height=20, margin='10px')
         
         self.dropDownValve.onchange.do(self.drop_down_valve_changed)
@@ -771,13 +794,13 @@ class SGSConfigure(App):
         self.DisplayMS = gui.Label('Moisture Sensor Threshold Percent',width=300, height=15, margin='10px')
         self.DisplayST_MS = gui.TextInput(width=100, height=15, style="margin:10px")
         self.DisplayDOW = gui.Label('Day of Week Filter',width=200, height=15, margin='10px')
-        self.Display_Su = gui.CheckBoxLabel( 'Su', False, height=30, style='margin:5px; background: LightGray ')
-        self.Display_Mo = gui.CheckBoxLabel( 'Mo', False, height=30, style='margin:5px; background: LightGray ')
-        self.Display_Tu = gui.CheckBoxLabel( 'Tu', False, height=30, style='margin:5px; background: LightGray ')
-        self.Display_We = gui.CheckBoxLabel( 'We', False, height=30, style='margin:5px; background: LightGray ')
-        self.Display_Th = gui.CheckBoxLabel( 'Th', False, height=30, style='margin:5px; background: LightGray ')
-        self.Display_Fr = gui.CheckBoxLabel( 'Fr', False, height=30, style='margin:5px; background: LightGray ')
-        self.Display_Sa = gui.CheckBoxLabel( 'Sa', False, height=30, style='margin:5px; background: LightGray ')
+        self.Display_Su = gui.CheckBoxLabel( 'Su', True, height=30, style='margin:5px; background: LightGray ')
+        self.Display_Mo = gui.CheckBoxLabel( 'Mo', True, height=30, style='margin:5px; background: LightGray ')
+        self.Display_Tu = gui.CheckBoxLabel( 'Tu', True, height=30, style='margin:5px; background: LightGray ')
+        self.Display_We = gui.CheckBoxLabel( 'We', True, height=30, style='margin:5px; background: LightGray ')
+        self.Display_Th = gui.CheckBoxLabel( 'Th', True, height=30, style='margin:5px; background: LightGray ')
+        self.Display_Fr = gui.CheckBoxLabel( 'Fr', True, height=30, style='margin:5px; background: LightGray ')
+        self.Display_Sa = gui.CheckBoxLabel( 'Sa', True, height=30, style='margin:5px; background: LightGray ')
 
         self.DisplayTimed = gui.Label('Timer Selection',width=200, height=15, margin='10px')
         self.dropDownTimed = gui.DropDown.new_from_list(self.TimedItems, width=200, height=20, margin='10px')
@@ -848,6 +871,54 @@ class SGSConfigure(App):
             print('disabled')
             self.DisplayST_TB.set_enabled(False)
             self.dropDownTimed.set_enabled(False)
+
+
+
+    def wireless_drop_down_valve_changed (self, widget, selected_item_key):
+        print("selected item key=", selected_item_key)
+        # update the selected bluetooth sensor with the wireless ID
+        try:
+            print("listView key=",self.current_listView_key)
+            
+            mySplit = self.current_listView_key.split('/')
+            print("mySplit=", mySplit)
+            if (selected_item_key  == "Not Assigned"):
+                myPickaddress = mySplit[1]
+                myWirelessAddress = ""
+            else: 
+                myPickaddress = mySplit[1]
+                mySplit = selected_item_key.split("/")
+                myWirelessAddress = mySplit[0]
+            # open the sql file and update
+        
+            try:
+                    #print("trying database")
+                    con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                    cur = con.cursor()
+                 
+                    query = "UPDATE BluetoothSensors SET assignedwirelessid = '%s' WHERE pickaddress= '%s'" % ( myWirelessAddress, myPickaddress)
+    
+                    print("query=", query)
+                    cur.execute(query)
+                    con.commit()
+            except mdb.Error as e:
+                    traceback.print_exc()
+                    print("Error %d: %s" % (e.args[0],e.args[1]))
+            finally:
+                    cur.close()
+                    con.close()
+    
+                    del cur
+                    del con
+    
+        except:
+            widget.select_by_value('Not Assigned' )        
+            pass
+        # refresh
+        self.removeAllScreens()
+        self.screen4 = self.buildScreen4()
+        self.mainContainer.append(self.screen4,'screen4')
+
 
 
     def drop_down_valve_changed (self, widget, selected_item_key):
@@ -1012,6 +1083,23 @@ class SGSConfigure(App):
 
         print("myUnit =", myUnit)
         self.open_input_dialog(widget, myUnit)
+        # for on save
+        self.current_listView_key = myUnit
+
+        id = myUnit.split("/")[1]
+        name = myUnit.split("/")[2]
+       
+    def wireless_names_list_view_on_selected(self, widget, selected_item_key):
+        """ The selection event of the listView, returns a key of the clicked event.
+            You can retrieve the item rapidly
+        """
+        print("wireless_select_item_key=", selected_item_key)
+        myUnit =  self.listView2.children[selected_item_key].get_text()
+
+        print("myUnit =", myUnit)
+        # put dropdown on unit
+
+
         # for on save
         self.current_listView_key = myUnit
 
@@ -1234,25 +1322,6 @@ class SGSConfigure(App):
         P2Nheader = gui.Label("Station Height in Meters", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
         vbox.append(P2Nheader,'P2Nheader') 
 
-        self.F_BMP280_Altitude_Meters = gui.TextInput(width=300, height=30, style="margin:5px")
-        self.F_BMP280_Altitude_Meters.set_value(str(self.BMP280_Altitude_Meters))
-        vbox.append(self.F_BMP280_Altitude_Meters,'BMP280_Altitude_Meters') 
-
-        P3Nheader = gui.Label("Sunlight Gain", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
-        vbox.append(P3Nheader,'P3Nheader') 
-
-        self.F_Sunlight_Gain = gui.DropDown(width='200px')
-        self.F_Sunlight_Gain.style.update({'font-size':'large'})
-        self.F_Sunlight_Gain.add_class("form-control dropdown")
-        item1 = gui.DropDownItem("High")
-        item2 = gui.DropDownItem("Low")
-        self.F_Sunlight_Gain.append(item1,'item1')
-        self.F_Sunlight_Gain.append(item2,'item2')
-        if (self.Sunlight_Gain == 0):
-            self.F_Sunlight_Gain.select_by_value("Low")
-        if (self.Sunlight_Gain == 1):
-            self.F_Sunlight_Gain.select_by_value("High")
-        vbox.append(self.F_Sunlight_Gain, 'self.F_Sunlight_Gain')
 
 
 
@@ -1272,57 +1341,97 @@ class SGSConfigure(App):
         vbox = self.establishMenu(vbox)
    
         #screen 
-        screen1header = gui.Label("Weather / WeatherSTEM / WeatherUnderGround Configuration Tab", style='margin:10px')
+        screen1header = gui.Label("Garden Camera / Bluetooth Sensors Configuration Tab", style='margin:10px')
         vbox.append(screen1header)
 
 
-        P3_1Nheader = gui.Label("Use Weather", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
-        vbox.append(P3_1Nheader,'P3_1Nheader') 
-
-        self.F_weather = gui.CheckBoxLabel( 'Use Weather', self.weather, height=30, style='margin:5px; background: LightGray ')
-        vbox.append(self.F_weather,'self.F_weather') 
-
-        P3Nheader = gui.Label("WeatherSTEM Configuration", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
-        vbox.append(P3Nheader,'P3Nheader') 
-
-        self.F_USEWEATHERSTEM = gui.CheckBoxLabel( 'Enable WeatherSTEM', self.USEWEATHERSTEM, height=30, style='margin:5px; background: LightGray ')
-        vbox.append(self.F_USEWEATHERSTEM,'self.F_USEWEATHERSTEM') 
-
-        p5label = gui.Label("Interval between pictures (seconds)", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        p5label = gui.Label("Garden Cam Interval between pictures (seconds)", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
         vbox.append(p5label,'p5label') 
         
         self.F_INTERVAL_CAM_PICS__SECONDS = gui.TextInput(width=300, height=30, style="margin:5px")
         self.F_INTERVAL_CAM_PICS__SECONDS.set_value(str(self.INTERVAL_CAM_PICS__SECONDS))
         vbox.append(self.F_INTERVAL_CAM_PICS__SECONDS,'INTERVAL_CAM_PICS__SECONDS') 
+        p5label = gui.Label("Bluetooth Sensor Assignment (select one) ", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(p5label,'p5label') 
+       
+        # get list of bluetooth sensors
 
-        p6label = gui.Label("GardenCam Station Key", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
-        vbox.append(p6label,'p6label') 
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                cur = con.cursor()
+                
+                query = "SELECT * FROM BluetoothSensors" 
+
+                print("query=", query)
+                cur.execute(query)
+                myRecords = cur.fetchall()
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                myRecords = [];
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+
+
+
+
+        btitems = ()
+        for record in myRecords: 
+            myID = record[3]
+            myName = record[5]
+            if (myName == None):
+                myName = "No Name"
+            if (record[4] == ""):
+                myAssign = "Not Assigned"
+            else:
+                myAssign = record[4]
+
+            btitem = "bluetooth sensor:/"+ str(myID) + "/" + str(myName) + "/ Assigned To: %s" % (myAssign) 
+
+            btitems = btitems + (btitem,)
+
+        print("btitem count=", len(btitems))
+       
+
+        # list out wireless units
+       
+        wirelessList = ('Not Assigned',)
+        for wireless in self.WirelessDeviceJSON:
+            myID = wireless["id"]
+            myName = wireless["name"]
+            wirelessItem = "wireless:/"+ str(myID) + "/" + str(myName)
+
+            wirelessList = wirelessList + (wirelessItem,)
+
+
+        items = ()
+        for ext in wirelessList:
+            item = (str(ext[1])+" / "+str(ext[0])+ " / " +str(ext[2]))
+            
+            items = items +  (item, )
+
         
-        self.F_STATIONKEY = gui.TextInput(width=300, height=30, style="margin:5px")
-        self.F_STATIONKEY.set_value(str(self.STATIONKEY))
-        vbox.append(self.F_STATIONKEY,'STATIONKEY') 
+        # now set up new block
+        self.ValveBlock1 = gui.Container(width=1000, height=700, layout_orientation=gui.Container.LAYOUT_HORIZONTAL)
+        self.ValveBlock1.style['background'] = "LightGray"
 
-        #
+        self.ValveBlock1.style['align-items'] = 'right'
+        self.ValveBlock1.style['border'] = '2px'
+        self.ValveBlock1.style['border-color'] = 'blue'
+        self.ValveBlock1.style['flex-direction'] = 'row'
 
-        P4Nheader = gui.Label("WeatherUnderGround Configuration", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
-        vbox.append(P4Nheader,'P4Nheader') 
+
+
+        self.listView1 = gui.ListView.new_from_list(btitems, width=500, height=25*len(btitems), margin='10px')
+        self.listView1.onselection.do(self.wireless_list_view_on_selected)
+        self.ValveBlock1.append(self.listView1)
         
-        self.F_WeatherUnderground_Present = gui.CheckBoxLabel( 'Enable WeatherUnderground', self.WeatherUnderground_Present, height=30, style='margin:5px; background: LightGray ')
-        vbox.append(self.F_WeatherUnderground_Present,'self.F_WeatherUnderground_Present') 
-
-        p7label = gui.Label("Station ID", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
-        vbox.append(p7label,'p7label') 
-        
-        self.F_WeatherUnderground_StationID = gui.TextInput(width=300, height=30, style="margin:5px")
-        self.F_WeatherUnderground_StationID.set_value(self.WeatherUnderground_StationID)
-        vbox.append(self.F_WeatherUnderground_StationID,'WeatherUnderground_StationID') 
-
-        p8label = gui.Label("Station Key", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
-        vbox.append(p8label,'p8label') 
-        
-        self.F_WeatherUnderground_StationKey = gui.TextInput(width=300, height=30, style="margin:5px")
-        self.F_WeatherUnderground_StationKey.set_value(self.WeatherUnderground_StationKey)
-        vbox.append(self.F_WeatherUnderground_StationKey,'WeatherUnderground_StationKey') 
+        vbox.append(self.ValveBlock1)
 
         return vbox
 
@@ -1519,7 +1628,7 @@ class SGSConfigure(App):
 
 
         logo = SuperImage("./static/SGfulllogocolor.png", width=400, height =142)
-        header = gui.Label("Smart Garden System Configuration Tool V004", style='position:absolute; left:150px; top:120px')
+        header = gui.Label("SmartGarden3 Configuration Tool V005", style='position:absolute; left:150px; top:120px')
         # bottom buttons
 
         cancel = gui.Button('Cancel',style='position:absolute; left:550px; height: 30px; width:100px; margin:10px; top:5px')

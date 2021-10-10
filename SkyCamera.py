@@ -54,14 +54,7 @@ def takeSkyPicture():
 
         # set up units
         #wind
-        val = util.returnWindSpeed(state.WindSpeed)
-        WindStval = "{0:0.1f}".format(val) + util.returnWindSpeedUnit()
-        val = util.returnWindSpeed(state.WindGust)
-        WindGtval = "{0:0.1f}".format(val) + util.returnWindSpeedUnit()
-        val = util.returnTemperatureCF(state.OutdoorTemperature)
-        OTtval = "{0:0.1f} ".format(val) + util.returnTemperatureCFUnit()
-
-        myText = "SmartGardenSystem2 V%s %s Wind Speed: %s Wind Gust: %s Temp: %s " % (config.SGSVERSION,dt.datetime.now().strftime('%d-%b-%Y %H:%M:%S'),WindStval, WindGtval, OTtval)
+        myText = "SmartGarden %s %s " % (config.SGSVERSION,dt.datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
 
         # Draw the text
         color = 'rgb(255,255,255)'
@@ -120,8 +113,6 @@ def takeSkyPicture():
                 print ("--------------------")
 
 
-    if (config.USEWEATHERSTEM == True):
-        sendSkyWeather()
 
 
 import base64

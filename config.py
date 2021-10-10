@@ -43,33 +43,8 @@ enablePixel = False
 SolarMAX_Present = None
 SolarMAX_Type = None
 
-#########
-# Weather Configuration
-#########
-BMP280_Altitude_Meters = None
-Sunlight_Gain = None
-weather = False
-# printing the value of unique MAC 
-# address using uuid and getnode() function  
-MACADDRESS = hex(uuid.getnode()) 
-
-############
-# WeatherSTEM configuration
-############
-
-STATIONMAC = MACADDRESS
-STATIONHARDWARE=""
-USEWEATHERSTEM = None
 INTERVAL_CAM_PICS__SECONDS = None
-STATIONKEY = None
 Camera_Night_Enable = False
-
-############
-# WeatherUnderground
-############
-WeatherUnderground_Present = None
-WeatherUnderground_StationID = None
-WeatherUnderground_StationKey = None
 
 ############
 # Blynk configuration
@@ -131,12 +106,8 @@ DustSensorPowerPin = 12
 
 
 Lightning_Mode = False
-Weather_Present = False
 GardenCam_Present = False
-SunAirPlus_Present = False
 SolarMAX_Present = False
-OLED_Present = False
-BMP280_Present = False
 DustSensor_Present = False
 
 UltrasonicLevel_Present = True

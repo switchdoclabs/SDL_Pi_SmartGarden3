@@ -12,7 +12,9 @@ import traceback
 import MySQLdb as mdb
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-print("Starting Bluetooth Read")
+print("---------------------------------------")
+print("Starting Scan for new Bluetooth Sensors")
+print("---------------------------------------")
 cmd = [ '/usr/bin/hcitool', 'lescan']
 
 
@@ -21,21 +23,21 @@ cmd = [ '/usr/bin/hcitool', 'lescan']
 
 
 def addBluetooth(sLine):
-       print("Found Sensor: ", sLine) 
 
        splitline = sLine.split(" ")
+       pickaddresslist = splitline[0].split(":")
+       pickaddress = pickaddresslist[4] + ":" + pickaddresslist[5]
        # find out if address exists in data base
-       print("splitline = ", splitline)
        try:
                 #print("trying database")
                 con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
                 cur = con.cursor()
-                query = "SELECT *  WHERE fulladdress = '%s'" % (splitline[0])
+                
+                query = "SELECT * FROM BluetoothSensors WHERE fulladdress = '%s'" % (splitline[0])
 
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 myRecords = cur.fetchall()
-                print("myRecords = ", myRecords)
        except mdb.Error as e:
                 traceback.print_exc()
                 print("Error %d: %s" % (e.args[0],e.args[1]))
@@ -51,7 +53,29 @@ def addBluetooth(sLine):
 
        # add it if it doesnt exist
        if (len(myRecords) == 0):
-            print("add new record")
+            print("Adding New Sensor "+pickaddress+" to database")
+            try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem')
+                cur = con.cursor()
+                query = "INSERT INTO BluetoothSensors(timeadded, fulladdress, pickaddress ) VALUES(LOCALTIMESTAMP(), '%s', '%s')" % (splitline[0], pickaddress)
+                #print("query=%s" % query)
+                cur.execute(query)
+                con.commit()
+            except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+            finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+                print("Restart for Next New Sensor")
+                exit()
+       else:
+            print("Sensor Detected: "+pickaddress+". Already in SmartGarden 3 Database")
+
      
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 #   A few helper functions...
@@ -101,12 +125,13 @@ while True:
     else: # got line
         pulse -= 1
         sLine = line.decode()
-        print(sLine)
+        #print(sLine)
+        sys.stdout.write(".")
         #   See if the data is something we need to act on...
         if ( sLine.find('Flower') != -1): 
-            sys.stdout.write('This is the raw data: ' + sLine + '\n')
+            print("\n")
+            #sys.stdout.write('This is the raw data: ' + sLine + '\n')
             action = addBluetooth(sLine) 
-            print("action=", action)
 
     sys.stdout.flush()
 

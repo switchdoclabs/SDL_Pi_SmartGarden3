@@ -20,11 +20,10 @@ import moisture_sensors
 import status_page 
 import valve_graphs
 import log_page
-import weather_page
 import p_v_programming
 import valves_scheduled
-import indoorth
-
+import bluetoothTM_page
+import wired_page
 from non_impl import NotImplPage 
 
 from navbar import Navbar, Logo
@@ -33,7 +32,7 @@ print("new navbar=")
 nav = Navbar()
 
 UpdateCWJSONLock = threading.Lock()
-SGSDASHSOFTWAREVERSION = "005"
+SGSDASHSOFTWAREVERSION = "015"
 
 
 
@@ -110,11 +109,11 @@ def display_page(pathname):
     if pathname == '/log_page':
         myLayout = log_page.LogPage()
         myLayout2 = ""
-    if pathname == '/weather_page':
-        myLayout = weather_page.WeatherPage()
+    if pathname == '/bluetooth_TMpage':
+        myLayout = bluetoothTM_page.BluetoothTMPage()
         myLayout2 = ""
-    if pathname == '/indoorth':
-        myLayout = indoorth.IndoorTHPage()
+    if pathname == '/wired_page':
+        myLayout = wired_page.WiredPage()
         myLayout2 = ""
     if pathname == '/p_v_programming':
         myLayout = p_v_programming.PVProgrammingPage()
@@ -125,7 +124,7 @@ def display_page(pathname):
     
     #print("myLayout= ",myLayout)
     #print("myLayout2= ",myLayout2)
-    print("page-content= ",app.layout)
+    #print("page-content= ",app.layout)
     now = datetime.datetime.now()
     nowString =  now.strftime('%Y-%m-%d %H:%M:%S')
     print("end=",nowString)
@@ -338,48 +337,16 @@ def update_statuspage(n_intervals, id, color):
 #################
 @app.callback(
 	      [
-	      Output({'type' : 'WPIdynamic', 'index' : 'SkyCamImage'}, 'children' ),
+	      Output({'type' : 'BTGdynamic', 'index' : 'SkyCamImage'}, 'children' ),
               ],
               [Input('main-interval-component','n_intervals'),
-              Input({'type' : 'WPIdynamic', 'index' : 'SkyCamImage'}, 'id' )],
-              [State({'type' : 'WPIdynamic', 'index' : 'SkyCamImage'}, 'value'  )]
+              Input({'type' : 'BTGdynamic', 'index' : 'SkyCamImage'}, 'id' )],
+              [State({'type' : 'BTGdynamic', 'index' : 'SkyCamImage'}, 'value'  )]
               )
 
 def updateWeatherImagePage(n_intervals,id, value):
     print("updateWImageP n_intervals", n_intervals)
     if ((n_intervals % (1*6)) == 0) or (n_intervals ==0): # 1 minutes -10 second timer
-        print("--->>>updateSkyCamImage", datetime.datetime.now(), n_intervals)
-        try:
-            # delete old file names
-
-            fileList = glob.glob("/home/pi/SDL_Pi_SmartGardenSystem2/dash_app/assets/imagedisplay*")
-            # Iterate over the list of filepaths & remove each file.
-            for filePath in fileList:
-                    os.remove(filePath)
-                        
-            # build names
-            basename = "imagedisplay"+str(n_intervals)+".jpg"
-            htmlname =  "/assets/"+ basename
-            newname = "/home/pi/SDL_Pi_SmartGardenSystem2/dash_app/assets/"+basename 
-        
-            # move camera file to new name
-            shutil.copy('/home/pi/SDL_Pi_SmartGardenSystem2/dash_app/assets/skycamera.jpg', newname)
-            
-            value = html.Div( [
-                          html.Img( height=350, width=350*1.77, src=htmlname),             
-                          html.Figcaption("Smart Garden Cam"),
-                          ])
-
-
-        except:
-            print(traceback.format_exc())
-            print("camera file not found")
-            htmlname = "/assets/SGTextcolor.png"
-            value = html.Div( [
-                          html.Img( height=150, width=150*2.86, src=htmlname),             
-                          html.Figcaption("Smart Garden Cam"),
-                          ])
-
             pass
   
     else:
@@ -388,11 +355,11 @@ def updateWeatherImagePage(n_intervals,id, value):
 
 @app.callback(
 	      [
-	      Output({'type' : 'WPdynamic', 'index' : MATCH}, 'children' ),
+	      Output({'type' : 'BTGdynamic', 'index' : MATCH}, 'children' ),
               ],
               [Input('main-interval-component','n_intervals'),
-              Input({'type' : 'WPdynamic', 'index' : MATCH}, 'id' )],
-              [State({'type' : 'WPdynamic', 'index' : MATCH}, 'value'  )]
+              Input({'type' : 'BTGdynamic', 'index' : MATCH}, 'id' )],
+              [State({'type' : 'BTGdynamic', 'index' : MATCH}, 'value'  )]
               )
 
 def updateWeatherUpdate(n_intervals,id, value):
