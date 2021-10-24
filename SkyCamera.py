@@ -4,16 +4,23 @@ import requests
 import time 
 import picamera
 import state
+import glob
 
 import hashlib
 
-
+import os
+import math
+import time
+import numpy as np
 
 from PIL import ImageFont, ImageDraw, Image
 import traceback
 import util
 import datetime as dt
 
+from scipy.interpolate import griddata
+
+from colour import Color
 
 # Check for user imports
 import config
@@ -25,6 +32,112 @@ def SkyWeatherKeyGeneration(userKey):
     md5result = hashlib.md5(catkey.encode())
     #print ("hashkey =", md5result.hexdigest())
     return md5result.hexdigest()
+
+# some utility functions
+def constrain(val, min_val, max_val):
+    return min(max_val, max(min_val, val))
+
+
+def map_value(x, in_min, in_max, out_min, out_max):
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+
+def processInfraredPicture(inputpixels):
+   
+
+    inputpixels = inputpixels[0:len(inputpixels)-1]
+    print("inputpixels=", inputpixels)
+    mypixels = inputpixels.split(",")
+    fpixels = []
+    for singlepixel in mypixels:
+        fpixels.append(float(singlepixel))
+
+    print("fpixels=", fpixels)
+    pixels = fpixels
+    # low range of the sensor (this will be blue on the screen)
+    MINTEMP = 26.0
+    
+    # high range of the sensor (this will be red on the screen)
+    MAXTEMP = 32.0
+    
+    # how many color values we can have
+    COLORDEPTH = 1024
+    
+    # pylint: disable=invalid-slice-index
+    points = [(math.floor(ix / 8), (ix % 8)) for ix in range(0, 64)]
+    grid_x, grid_y = np.mgrid[0:7:32j, 0:7:32j]
+    # pylint: enable=invalid-slice-index
+
+    # sensor is an 8x8 grid so lets do a square
+    height = 256
+    width = 256
+
+    # the list of colors we can choose from
+    blue = Color("indigo")
+    colors = list(blue.range_to(Color("red"), COLORDEPTH))
+
+    # create the array of colors
+    colors = [(int(c.red * 255), int(c.green * 255), int(c.blue * 255)) for c in colors]
+
+    displayPixelWidth = width / 30
+    displayPixelHeight = height / 30
+ 
+
+    # the list of colors we can choose from
+    blue = Color("indigo")
+    colors = list(blue.range_to(Color("red"), COLORDEPTH))
+
+    # create the array of colors
+    colors = [(int(c.red * 255), int(c.green * 255), int(c.blue * 255)) for c in colors]
+
+
+
+    pixels = [map_value(p, MINTEMP, MAXTEMP, 0, COLORDEPTH - 1) for p in pixels]
+
+    # perform interpolation
+    bicubic = griddata(points, pixels, (grid_x, grid_y), method="cubic")
+    
+    
+    array = np.zeros((height, width, 3), np.uint8)
+    #array = np.reshape(array, (height, width,3))
+
+    #array = np.zeros((height, width))
+
+    # draw everything
+    array[:,:] = [255, 128, 0]
+    for ix, row in enumerate(bicubic):
+        for jx, pixel in enumerate(row):
+            pixelWidth = 8
+            pixelHeight = 8
+            for ixf in range(ix*pixelHeight, ix*pixelHeight+8):
+                for jxf in range(jx*pixelWidth, jx*pixelWidth+8):
+                    array[ixf, jxf] = colors[constrain(int(pixel), 0, COLORDEPTH - 1)]
+
+
+    cameraID = "GardenCamIR"
+    currentpicturefilename = "static/CurrentPicture/"+cameraID+".jpg"
+    currentpicturedashfilename = "dash_app/assets/"+cameraID+"_1.jpg"
+    for name in glob.glob("dash_app/assets/"+cameraID+"_*.jpg"):
+        os.remove(name)
+
+    # put together the file name
+    fileDate = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    fileDay = dt.datetime.now().strftime("%Y-%m-%d")
+
+    singlefilename =cameraID+"_1_"+fileDate+".jpg"
+    dirpathname="static/SkyCam/" + cameraID+ "/"+fileDay
+
+    os.makedirs(dirpathname, exist_ok=True)
+    os.makedirs("static/CurrentPicture", exist_ok=True)
+    filename = dirpathname+"/"+singlefilename
+    print("filename=", filename)
+    im = Image.fromarray(array)
+    im.save(currentpicturefilename)
+    im.save(currentpicturedashfilename)
+    im.save(filename)
+
+
+
 
 def takeSkyPicture():
 
@@ -92,6 +205,31 @@ def takeSkyPicture():
         pil_im.save('dash_app/assets/skycamera.jpg', format= 'JPEG')
         pil_im.save('static/skycamera.jpg', format= 'JPEG')
         pil_im.save('static/skycameraprocessed.jpg', format= 'JPEG')
+
+        cameraID = "GardenCamPi"
+        currentpicturefilename = "static/CurrentPicture/"+cameraID+".jpg"
+        currentpicturedashfilename = "dash_app/assets/"+cameraID+"_1.jpg"
+        for name in glob.glob("dash_app/assets/"+cameraID+"_*.jpg"):
+            os.remove(name)
+
+        # put together the file name
+        fileDate = dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        fileDay = dt.datetime.now().strftime("%Y-%m-%d")
+
+        singlefilename =cameraID+"_1_"+fileDate+".jpg"
+        dirpathname="static/SkyCam/" + cameraID+ "/"+fileDay
+
+        os.makedirs(dirpathname, exist_ok=True)
+        os.makedirs("static/CurrentPicture", exist_ok=True)
+        filename = dirpathname+"/"+singlefilename
+
+
+        pil_im.save(filename, format= 'JPEG')
+        pil_im.save(currentpicturefilename, format= 'JPEG')
+        pil_im.save(currentpicturedashfilename, format= 'JPEG')
+
+
+
 
         time.sleep(2)
 

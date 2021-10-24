@@ -1,5 +1,5 @@
 # 
-# contains all the state variables for SmartGardenSystem 2
+# contains all the state variables for SmartGarden3
 #
 
 # Check for user imports

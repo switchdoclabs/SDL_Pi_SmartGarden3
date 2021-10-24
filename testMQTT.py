@@ -88,9 +88,9 @@ for single in wirelessJSON:
 try:
     while True:
         time.sleep(15)
-        #client.publish("SGS/5051/Valves", "Test")
-        payload = '{"id": "5051", "messagetype": "10", "timestamp": "2020-06-27 15:30:28", "valve": "1", "state": 1, "timeon": "10"}'
-        client.publish("SGS/5051/Valves", payload)
+        #client.publish("SGS/529D/Valves", "Test")
+        payload = '{"id": "529D", "messagetype": "10", "timestamp": "2020-06-27 15:30:28", "valve": "4", "state": 1, "timeon": "10"}'
+        client.publish("SGS/529D/Valves", payload)
 
 except KeyboardInterrupt:
     print("exiting")

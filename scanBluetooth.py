@@ -30,7 +30,7 @@ def addBluetooth(sLine):
        # find out if address exists in data base
        try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 
                 query = "SELECT * FROM BluetoothSensors WHERE fulladdress = '%s'" % (splitline[0])
@@ -56,7 +56,7 @@ def addBluetooth(sLine):
             print("Adding New Sensor "+pickaddress+" to database")
             try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem')
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3')
                 cur = con.cursor()
                 query = "INSERT INTO BluetoothSensors(timeadded, fulladdress, pickaddress ) VALUES(LOCALTIMESTAMP(), '%s', '%s')" % (splitline[0], pickaddress)
                 #print("query=%s" % query)

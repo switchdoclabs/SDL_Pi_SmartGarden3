@@ -8,7 +8,8 @@ import config
 import json
 import pclogging
 import datetime
-
+import AccessMS
+import traceback
 
 def on_WirelessMQTTClientconnect(client, userdata, flags, rc):
 
@@ -32,7 +33,10 @@ MQTTALARM = 2
 MQTTDEBUG = 3
 MQTTSENSORS = 4
 MQTTBLUETOOTHSENSOR = 5
-
+MQTTREBOOT = 6
+MQTTHYDROPONICS = 7
+MQTTHYDROPONICSLEVEL = 8
+MQTTINFRARED = 9
 #############
 # MQTT Publish Message Type
 #############
@@ -64,16 +68,63 @@ def on_WirelessMQTTClientmessage(client, userdata, message):
             print("Debug Message Recieved")
         temp = str(MQTTJSON['id'])+", "+str(MQTTJSON['value'])
         pclogging.systemlog(config.DEBUG,temp)
+    
+    if (str(MQTTJSON['messagetype']) == str(MQTTREBOOT)):
+        if (config.SWDEBUG):
+            print("REBOOT Message Recieved")
+
+        temp = str(MQTTJSON['id'])+", "+str(MQTTJSON['value'])
+        pclogging.systemlog(config.DEBUG,temp)
+        processRebootMessage(MQTTJSON)
 
     if (str(MQTTJSON['messagetype']) == str(MQTTSENSORS)):
         if (config.SWDEBUG):
             print("Sensor Message Recieved")
         processSensorMessage(MQTTJSON)
 
+    if (str(MQTTJSON['messagetype']) == str(MQTTHYDROPONICS)):
+        if (config.SWDEBUG):
+            print("Hydroponics Message Recieved")
+        processHydroponicsSensorMessage(MQTTJSON)
+
+    if (str(MQTTJSON['messagetype']) == str(MQTTHYDROPONICSLEVEL)):
+        if (config.SWDEBUG):
+            print("Sensor Message Recieved")
+        processHydroponicsLevelSensorMessage(MQTTJSON)
+
     if (str(MQTTJSON['messagetype']) == str(MQTTBLUETOOTHSENSOR)):
         if (config.SWDEBUG):
             print("Bluetooth Sensor Message Recieved")
         processBluetoothSensorMessage(MQTTJSON)
+
+    if (str(MQTTJSON['messagetype']) == str(MQTTINFRARED)):
+        if (config.SWDEBUG):
+            print("Infrared Sensor Message Recieved")
+        processInfraredSensorMessage(MQTTJSON)
+
+def processRebootMessage(MQTTJSON):
+
+    print("+++++++++++++++++++++");
+    print("Processing Reboot"); 
+    print("+++++++++++++++++++++");
+    myID = MQTTJSON["id"]      
+    AccessMS.initializeOneExtender(myID)
+
+def processHydroponicsSensorMessage(MQTTJSON):
+    try:
+        print("Processing HydroponicsSensorMessage")
+        pclogging.writeHydroponicsRecord(MQTTJSON)
+    except:
+        print(traceback.format_exc())
+
+def processHydroponicsLevelSensorMessage(MQTTJSON):
+
+    print("Processing HydroponicsLevelSensorMessage")
+
+
+
+
+
 
 def processBluetoothSensorMessage(MQTTJSON):
 
@@ -81,23 +132,35 @@ def processBluetoothSensorMessage(MQTTJSON):
 
     pclogging.processBluetoothSensor(MQTTJSON)
 
+def processInfraredSensorMessage(MQTTJSON):
+    print("Processing InfraredSensorMessage")
+
+    pclogging.processInfraredSensor(MQTTJSON)
 
 
 
 
 def processSensorMessage(MQTTJSON):
+    try:
         if (config.SWDEBUG):
             print("-----------------")
             print("Processing MQTT Sensor Message")
     
         parseSensors = MQTTJSON["sensorValues"]
         parseSensorsArray = parseSensors.split(",")
+        try:
+            parseRawSensors = MQTTJSON["rawSensorValues"]
+        except:
+            parseRawSensors = "-1,-1,-1,-1"
+        parseRawSensorsArray = parseRawSensors.split(",")
         for i in range(0,4):
             for singleSensor in state.moistureSensorStates:
                 
                 if (singleSensor["id"] == str(MQTTJSON["id"])):
                     if (singleSensor["sensorNumber"] == str(i+1)):
                        singleSensor["sensorValue"] = str(parseSensorsArray[i])
+                       singleSensor["rawSensorValue"] = str(parseRawSensorsArray[i])
+
                        currentTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                        singleSensor["timestamp"] = currentTime
         
@@ -109,8 +172,9 @@ def processSensorMessage(MQTTJSON):
 
             print("-----------------")
         for singleSensor in state.moistureSensorStates:
-                pclogging.sensorlog(singleSensor["id"], singleSensor["sensorNumber"], singleSensor["sensorValue"], singleSensor["sensorType"], singleSensor["timestamp"]) 
-
+                pclogging.sensorlog(singleSensor["id"], singleSensor["sensorNumber"], singleSensor["sensorValue"], singleSensor["rawSensorValue"], singleSensor["sensorType"], singleSensor["timestamp"]) 
+    except:
+       print(traceback.format_exc()) 
 
 
 ##############
@@ -158,5 +222,6 @@ def sendMQTTValve(myID, Valve, State, TimeOn):
 
                 }
     myMessageJSON = json.dumps(myMessage)
+    #print(myMessageJSON)
     state.WirelessMQTTClient.publish("SGS/"+str(myID)+"/Valves",myMessageJSON )
 

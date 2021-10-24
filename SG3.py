@@ -126,20 +126,6 @@ def blinkLED(pixel, color, times, length):
     
 
 
-###############
-#Ultrasonic Level Test
-###############
-'''
-percentFull = ultrasonicRanger.returnPercentFull()
-# check for abort
-if (percentFull < 0.0):
-    if (config.SWDEBUG):
-        print("---->Bad Measurement from Ultrasonic Sensor for Tank Level")
-    config.UltrasonicLevel_Present = False
-else:
-    config.UltrasonicLevel_Present = True
-'''
-
 import util
 
 ###############
@@ -356,14 +342,18 @@ def initializeSGSPart2():
         print("----------------------")
         config.moisture_sensor_count = len(readJSON.getJSONValue("WirelessDeviceJSON"))*4 
         config.valve_count = len(readJSON.getJSONValue("WirelessDeviceJSON"))*8 
+        config.bluetooth_count = pclogging.countBluetooth()
+
         print( "Wireless Unit Count:", len(readJSON.getJSONValue("WirelessDeviceJSON")) )
-        print("Sensor Count: ",config.moisture_sensor_count)
+        print("Moisture Sensor Count: ",config.moisture_sensor_count)
         print("Valve Count: ",config.valve_count)
+        print("Bluetooth Sensor Count: ",config.bluetooth_count)
         print()
         if (config.USEBLYNK):
             updateBlynk.blynkTerminalUpdate( "Wireless Unit Count:%d"% len(readJSON.getJSONValue("WirelessDeviceJSON")) )
             updateBlynk.blynkTerminalUpdate("Sensor Count: %d"%config.moisture_sensor_count)
             updateBlynk.blynkTerminalUpdate("Pump Count: %d"%config.valve_count)
+            updateBlynk.blynkTerminalUpdate("Bluetooth Sensor Count: %d"%config.bluetooth_count)
             updateBlynk.updateStaticBlynk() 
 
         print("----------------------")
@@ -376,7 +366,6 @@ def initializeSGSPart2():
         print(returnStatusLine("UseBlynk",config.USEBLYNK))
         print()
         print("----------------------")
-    
 
     
 def initializeScheduler():
@@ -411,6 +400,19 @@ def initializeScheduler():
         # sky camera
         if (config.GardenCam_Present):
            state.scheduler.add_job(SkyCamera.takeSkyPicture, 'interval', seconds=int(config.INTERVAL_CAM_PICS__SECONDS))
+
+
+
+        # timelapse
+
+        # SkyCam Management Programs
+        scheduler.add_job(PictureManagement.cleanPictures, 'cron', day='*', hour=3, minute=4, args=["Daily Picture Clean"])
+
+        scheduler.add_job(PictureManagement.cleanTimeLapses, 'cron', day='*', hour=3, minute=10, args=["Daily Time Lapse Clean"])
+        
+        scheduler.add_job(PictureManagement.buildTimeLapse, 'cron', day='*', hour=5, minute=30, args=["Time Lapse Generation"])
+
+
 
         # check for force water - note the interval difference with updateState
         #state.scheduler.add_job(forceWaterPlantCheck, 'interval', seconds=8)

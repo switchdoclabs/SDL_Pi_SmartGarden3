@@ -159,7 +159,7 @@ def fetchSystemLog():
 
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "SELECT * FROM SystemLog ORDER BY ID DESC LIMIT 20" 
                 #print("query=", query)
@@ -195,7 +195,7 @@ def fetchValveLog():
 
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "SELECT * FROM ValveChanges ORDER BY ID DESC LIMIT 20" 
                 #print("query=", query)
@@ -235,7 +235,7 @@ def fetchSensorLog():
 
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "SELECT * FROM Sensors ORDER BY ID DESC LIMIT 20" 
                 #print("query=", query)

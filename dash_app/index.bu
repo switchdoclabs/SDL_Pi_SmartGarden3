@@ -23,9 +23,7 @@ import log_page
 import p_v_programming
 import valves_scheduled
 import bluetoothTM_page
-import bluetoothLC_page
-import bt_status_page
-
+import wired_page
 from non_impl import NotImplPage 
 
 from navbar import Navbar, Logo
@@ -34,7 +32,7 @@ print("new navbar=")
 nav = Navbar()
 
 UpdateCWJSONLock = threading.Lock()
-SGSDASHSOFTWAREVERSION = "005"
+SGSDASHSOFTWAREVERSION = "015"
 
 
 
@@ -58,11 +56,6 @@ app.layout =  html.Div(
             interval=10*1000, # in milliseconds - leave as 10 seconds
             n_intervals=0
             ) ,
-       #dcc.Interval(
-       #     id='weather-update-interval-component',
-       #     interval=5*1000, # in milliseconds
-       #     n_intervals=0
-       #     ) ,
        
         #dbc.Spinner(id="main-spinner", color="white" ),
         #dcc.Location(id = 'url', refresh = True),
@@ -105,23 +98,17 @@ def display_page(pathname):
     if pathname == '/status_page':
         myLayout = status_page.StatusPage() 
         myLayout2 = moisture_sensors.MoistureSensorPage()
-    if pathname == '/bluetoothTM_page':
-        myLayout = bluetoothTM_page.BluetoothTMPage()
-        myLayout2 = ""
-    if pathname == '/bluetoothLC_page':
-        myLayout = bluetoothLC_page.BluetoothLCPage()
-        myLayout2 = ""
-    if pathname == '/bluetooth_status_page':
-        myLayout = bt_status_page.BTStatusPage()
-        myLayout2 = ""
-    if pathname == '/wired_page':
-        myLayout = moisture_sensors.MoistureSensorPage()
-        myLayout2 = ""
     if pathname == '/valve_graphs':
         myLayout = valve_graphs.ValveGraphPage()
         myLayout2 = ""
     if pathname == '/log_page':
         myLayout = log_page.LogPage()
+        myLayout2 = ""
+    if pathname == '/bluetooth_TMpage':
+        myLayout = bluetoothTM_page.BluetoothTMPage()
+        myLayout2 = ""
+    if pathname == '/wired_page':
+        myLayout = wired_page.WiredPage()
         myLayout2 = ""
     if pathname == '/p_v_programming':
         myLayout = p_v_programming.PVProgrammingPage()
@@ -130,8 +117,8 @@ def display_page(pathname):
         myLayout = valves_scheduled.ValvesScheduledPage()
         myLayout2 = ""
     
-    #print("myLayout= ",myLayout)
-    #print("myLayout2= ",myLayout2)
+    print("myLayout= ",myLayout)
+    print("myLayout2= ",myLayout2)
     print("page-content= ",app.layout)
     now = datetime.datetime.now()
     nowString =  now.strftime('%Y-%m-%d %H:%M:%S')
@@ -333,9 +320,92 @@ def update_statuspage(n_intervals, id, color):
     raise PreventUpdate
 
  
-##################
+
+
+#################
+# Callbacks
+#################
+@app.callback(
+	      [
+	      Output({'type' : 'BTGdynamic', 'index' : 'SkyCamImage'}, 'children' ),
+              ],
+              [Input('main-interval-component','n_intervals'),
+              Input({'type' : 'BTGdynamic', 'index' : 'SkyCamImage'}, 'id' )],
+              [State({'type' : 'BTGdynamic', 'index' : 'SkyCamImage'}, 'value'  )]
+              )
+
+def updateWeatherImagePage(n_intervals,id, value):
+    print("updateWImageP n_intervals", n_intervals)
+    if ((n_intervals % (1*6)) == 0) or (n_intervals ==0): # 1 minutes -10 second timer
+            pass
+  
+    else:
+        raise PreventUpdate
+    return [value]
+
+@app.callback(
+	      [
+	      Output({'type' : 'BTGdynamic', 'index' : MATCH}, 'children' ),
+              ],
+              [Input('main-interval-component','n_intervals'),
+              Input({'type' : 'BTGdynamic', 'index' : MATCH}, 'id' )],
+              [State({'type' : 'BTGdynamic', 'index' : MATCH}, 'value'  )]
+              )
+
+def updateWeatherUpdate(n_intervals,id, value):
+
+
+    if ((n_intervals % (1*6)) == 0) or (n_intervals ==0): # 5 minutes -10 second timer
+    #if ((n_intervals % (5*6)) == 0) or (n_intervals ==0): # 5 minutes -10 second timer
+        print("--->>>updateWeatherUpdateString", datetime.datetime.now(), n_intervals)
+        print("updateWeatherUpdate n_intervals =", n_intervals, id['index'])
+        if (id['index'] == "StringTime"):
+            UpdateCWJSONLock.acquire()
+            weather_page.CWJSON = weather_page.generateCurrentWeatherJSON()
+            UpdateCWJSONLock.release()
+            value = str(weather_page.CWJSON[id['index']]) +" "+ weather_page.CWJSON[id['index']+'Units']
+            value = "Weather Updated at:" + value
+
+            return [value]
+        
+        UpdateCWJSONLock.acquire()
+        value = str(weather_page.CWJSON[id['index']]) +" "+ weather_page.CWJSON[id['index']+'Units']
+        UpdateCWJSONLock.release()
+    else:
+        raise PreventUpdate
+    return [value]
+
+
+@app.callback(
+	      [
+	      Output({'type' : 'WPRdynamic', 'index' : MATCH}, 'figure' ),
+              ],
+              [Input('main-interval-component','n_intervals'),
+              Input({'type' : 'WPRdynamic', 'index' : MATCH}, 'id' )],
+              [State({'type' : 'WPRdynamic', 'index' : MATCH}, 'value'  )]
+              )
+
+def updateWeatherRosePage(n_intervals,id, value):
+
+    if (n_intervals == 0): # stop first update
+        raise PreventUpdate
+    print("WeatherRose n_intervals=", n_intervals)
+    # update every 15 minutes
+    #if (True): # 15 minutes -10 second timer
+    if ((n_intervals % (15*6)) == 0): # 15 minutes -10 second timer
+        print("--->>>updateCompassRose", datetime.datetime.now(), n_intervals)
+        timeDelta = datetime.timedelta(days=7)
+        data = weather_page.fetchWindData(timeDelta)
+        fig = weather_page.figCompassRose(data)
+ 
+    else:
+        raise PreventUpdate
+    return [fig]
+
+
 # p_v_programming
-##################
+
+
 
 
 @app.callback(
@@ -362,10 +432,7 @@ def updatePVProgramming(n_intervals,id, value):
     return [fig]
 
 
-##################
 # valves_scheduled
-##################
-
 @app.callback(
 	      [
 	      Output({'type' : 'VSdynamic', 'index' : "nextevents"}, 'figure' ),
@@ -388,47 +455,6 @@ def updatePVProgramming(n_intervals,id, value):
     else:
         raise PreventUpdate
     return [fig]
-
-##################
-# bluetoothTH
-##################
-
-@app.callback(
-	      [
-	      Output({'type' : 'BTGdynamic', 'index' : MATCH}, 'figure' ),
-              ],
-              [
-              Input('main-interval-component','n_intervals'),
-              Input({'type' : 'BTGdynamic', 'index' : MATCH}, 'id' )
-              ],
-              [State({'type' : 'BTGdynamic', 'index' : MATCH}, 'value'  )]
-              )
-
-def updatebluetoothTM(n_intervals,id, value):
-
-    if (n_intervals == 0): # stop first update
-        raise PreventUpdate
-        
-    #print("BT TH interval happening")
-    #print ("id=", id)
-    #if (True): # 5 minutes -10 second timer
-    if ((n_intervals % (5*6)) == 0): # 15 minutes -10 second timer
-       
-      print ("wireless/bt =", id['index'])  
-      splitIndex = id['index'].split("/")
-      myWirelessID = splitIndex[0]
-      btaddress = splitIndex[1]
-      wireless = { 'id': myWirelessID }
-      fig = bluetoothTM_page.buildSoilTemperature_Humidity_Graph_Figure(wireless, btaddress)
-      print("fig=", fig)
-    else:
-        raise PreventUpdate
-    return [fig]
-
-
-
-
-
 
 ##########################
 

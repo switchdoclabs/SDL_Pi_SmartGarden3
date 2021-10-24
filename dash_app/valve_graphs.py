@@ -39,7 +39,7 @@ def fetchCurrentValveData(myID, ValveNumber, timeDelta):
 
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 now = datetime.datetime.now()
                 before = now - timeDelta

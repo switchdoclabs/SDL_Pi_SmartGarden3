@@ -83,11 +83,19 @@ manual_water = False
 
 moisture_sensor_count = 0
 valve_count = 0
-
+bluetooth_count = 0
 
 
 # if your pumps stick up too high, adjust this value so tank will still ready empty
 Tank_Pump_Level = 15.0
+############
+#Hydroponics 
+############
+HydroponicsMode = True 
+
+
+
+
 ############
 #pin defines
 ############

@@ -40,7 +40,7 @@ from navbar import Navbar, Logo
 def findDriestSensor(timeDelta):
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 now = datetime.datetime.now()
                 before = now - timeDelta
@@ -67,7 +67,7 @@ def findDriestSensor(timeDelta):
 def returnLatestGraphSensorValues(myID, MSNumber, timeDelta):
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 now = datetime.datetime.now()
                 before = now - timeDelta
@@ -140,7 +140,7 @@ def P1mydisplay_valve_graphs(myModCount):
 ################
 
 
-con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
 cur = con.cursor()
 
 def getNameFromID(myID):
@@ -154,10 +154,10 @@ def getNameFromID(myID):
 def returnLatestSensorValue(myID, MSNumber):
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "SELECT * FROM `Sensors` WHERE DeviceID = '%s' AND SensorNumber = %s ORDER BY id DESC LIMIT 1" % (myID, MSNumber)
-                #print("query=", query)
+                print("query=", query)
                 cur.execute(query)
                 con.commit()
                 records = cur.fetchall()
@@ -273,9 +273,8 @@ def updateGraph(id):
 ################
 
 def MoistureSensorPage():
+    print("MoistureSensor Page")
     P1tankLayout = updateGraphs()
-    #nav = Navbar()
-    #logo = Logo()
     ################
 
     Row1 = html.Div(
@@ -297,6 +296,8 @@ def MoistureSensorPage():
     #    className="p-5",
     #    id='moisturesensorpage',
     #)
+
+    print("Row1=", Row1)
     return Row1
 
 

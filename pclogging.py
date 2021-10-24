@@ -20,6 +20,7 @@ import state
 import updateBlynk
 import MySQLdb as mdb
 
+import SkyCamera
 
 import traceback
 
@@ -45,7 +46,7 @@ def systemlog(level,  message):
                         updateBlynk.blynkTerminalUpdate(message) 
                     pass
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 #print "before query"
                 query = "INSERT INTO SystemLog(TimeStamp, Level, SystemText ) VALUES(LOCALTIMESTAMP(), %i, '%s')" % (level, message)
@@ -65,6 +66,66 @@ def systemlog(level,  message):
                 del cur
                 del con
 
+
+def countBluetooth():
+
+ if (config.enable_MySQL_Logging == True):	
+	# open mysql database
+	# write log
+	# commit
+	# close
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                query = "SELECT * From BluetoothSensors " 
+                #print("query=", query)
+                cur.execute(query)
+                myRecords = cur.fetchall()
+                #print ('myRecords=',myRecords)
+                return len(myRecords) 
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                #sys.exit(1)
+
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+        return 0  
+
+def processInfraredSensor(MQTTJSON):
+ if (config.enable_MySQL_Logging == True):	
+	# open mysql database
+	# write log
+	# commit
+	# close
+        try:
+                print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                query = "INSERT INTO InfraredSensorData (DeviceID, PixelData ) VALUES('%s', '%s' )" % (MQTTJSON["id"], MQTTJSON["infrareddata"])
+                print("query=", query)
+                cur.execute(query)
+                con.commit()
+                SkyCamera.processInfraredPicture(MQTTJSON["infrareddata"])
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                con.rollback()
+                #sys.exit(1)
+
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+
+
 def processBluetoothSensor(MQTTJSON):
  if (config.enable_MySQL_Logging == True):	
 	# open mysql database
@@ -73,10 +134,10 @@ def processBluetoothSensor(MQTTJSON):
 	# close
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "INSERT INTO BluetoothSensorData(DeviceID, MacAddress, Temperature, Brightness, Moisture, Conductivity, Battery, SensorType, TimeRead, ReadCount ) VALUES('%s', '%s', %f, %d, %d, %d, %d, '%s', '%s', %d)" % (MQTTJSON["id"], MQTTJSON["macaddress"], round(float(MQTTJSON["temperature"])/10.0,1), int(MQTTJSON["brightness"]), int(MQTTJSON["moisture"]), int(MQTTJSON["conductivity"]), int(MQTTJSON["battery"]),  MQTTJSON["sensorType"], MQTTJSON["timestamp"], int(MQTTJSON["readCount"]))
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 con.commit()
         except mdb.Error as e:
@@ -93,7 +154,7 @@ def processBluetoothSensor(MQTTJSON):
                 del con
 
 
-def sensorlog(DeviceID, SensorNumber, SensorValue, SensorType, TimeRead ):
+def sensorlog(DeviceID, SensorNumber, SensorValue, RawSensorValue, SensorType, TimeRead ):
  if (config.enable_MySQL_Logging == True):	
 	# open mysql database
 	# write log
@@ -101,9 +162,9 @@ def sensorlog(DeviceID, SensorNumber, SensorValue, SensorType, TimeRead ):
 	# close
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
-                query = "INSERT INTO Sensors(DeviceID, SensorNumber, SensorValue, SensorType, TimeRead ) VALUES('%s', '%s', %f, '%s', '%s')" % (DeviceID, SensorNumber, float(SensorValue), SensorType, TimeRead)
+                query = "INSERT INTO Sensors(DeviceID, SensorNumber, SensorValue, RawSensorValue, SensorType, TimeRead ) VALUES('%s', '%s', %f, %s, '%s', '%s')" % (DeviceID, SensorNumber, float(SensorValue), RawSensorValue, SensorType, TimeRead)
                 #print("query=", query)
                 cur.execute(query)
                 con.commit()
@@ -130,7 +191,7 @@ def getValveState(id):
 	# close
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "SELECT * From ValveRecord WHERE DeviceID = '%s' ORDER BY ID DESC LIMIT 1" % id
                 #print("query=", query)
@@ -161,7 +222,7 @@ def valvelog(DeviceID, ValveNumber, State, Source, ValveType, Seconds):
 	# close
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "INSERT INTO ValveChanges(DeviceID, ValveNumber, State, Source, ValveType, SecondsOn ) VALUES('%s', '%s', %d, '%s', '%s',%d)" % (DeviceID, ValveNumber, int(State), Source, ValveType, int(Seconds))
                 #print("query=", query)
@@ -170,7 +231,7 @@ def valvelog(DeviceID, ValveNumber, State, Source, ValveType, Seconds):
         except mdb.Error as e:
                 traceback.print_exc()
                 print("Error %d: %s" % (e.args[0],e.args[1]))
-                con.rollback()
+                #con.rollback()
                 #sys.exit(1)
 
         finally:
@@ -179,6 +240,7 @@ def valvelog(DeviceID, ValveNumber, State, Source, ValveType, Seconds):
 
                 del cur
                 del con
+
 
 
 def writeMQTTValveChangeRecord(MQTTJSON):
@@ -190,7 +252,7 @@ def writeMQTTValveChangeRecord(MQTTJSON):
 	# close
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "INSERT INTO ValveRecord(DeviceID, State) VALUES('%s', '%s')" % (MQTTJSON['id'], MQTTJSON['valvestate'])
                 #print("query=", query)
@@ -223,7 +285,7 @@ def readLastHour24AQI():
                 # first calculate the 24 hour moving average for AQI
                 
                 print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
 
                 query = "SELECT id, AQI24Average FROM WeatherData ORDER BY id DESC Limit 1" 
@@ -248,10 +310,8 @@ def readLastHour24AQI():
                 con.close()
 
                 del cur
-                del con
 
-
-def writeWeatherRecord():
+def writeHydroponicsRecord(MQTTJSON):
 
  if (config.enable_MySQL_Logging == True):	
 	# open mysql database
@@ -259,36 +319,17 @@ def writeWeatherRecord():
 	# commit
 	# close
         try:
-
-                # first calculate the 24 hour moving average for AQI
-                
-                print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
-
-                timeDelta = datetime.timedelta(days=1)
-                now = datetime.datetime.now()
-                before = now - timeDelta
-                before = before.strftime('%Y-%m-%d %H:%M:%S')
-                query = "SELECT id, AQI, TimeStamp FROM WeatherData WHERE (TimeStamp > '%s') ORDER BY TimeStamp " % (before)
-
-                cur.execute(query)
-                myAQIRecords = cur.fetchall()
-                myAQITotal = 0.0
-                #print("AQIRecords=",myAQIRecords)
-                if (len(myAQIRecords) > 0):
-                    for i in range(0, len(myAQIRecords)):
-
-                        myAQITotal = myAQITotal + myAQIRecords[i][1] 
-                    myAQI24 = (myAQITotal+state.AQI)/(len(myAQIRecords)+1)
-                else:
-                    myAQI24  = 0.0
-                state.Hour24_AQI = myAQI24 
-
-                fields = "OutdoorTemperature, OutdoorHumidity, IndoorTemperature, IndoorHumidity, TotalRain, SunlightVisible, SunlightUVIndex, WindSpeed, WindGust, WindDirection,BarometricPressure, BarometricPressureSeaLevel, BarometricTemperature, AQI, AQI24Average"
-                values = "%6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f,%6.2f,%6.2f,%6.2f,%6.2f,%6.2f" % (state.OutdoorTemperature, state.OutdoorHumidity, state.IndoorTemperature, state.IndoorHumidity, state.TotalRain, state.SunlightVisible, state.SunlightUVIndex, state.WindSpeed, state.WindGust, state.WindDirection,state.BarometricPressure, state.BarometricPressureSeaLevel, state.BarometricTemperature, state.AQI, state.Hour24_AQI)
-                query = "INSERT INTO WeatherData (%s) VALUES(%s )" % (fields, values)
-                #print("query=", query)
+                # convert to values
+                Turbidity = -1;
+                TDS = -1;
+                Level = -1;
+                Ph = -1;
+                query = "INSERT INTO Hydroponics(DeviceID, Temperature, Turbidity, RawTurbidity, TDS, RawTDS, Level, RawLevel, Ph, RawPH) VALUES('%s', '%6.2f', %6.2f, '%d', '%6.2f',%d, %6.2f, %6.2f, %6.2f, %d)" % (MQTTJSON["id"], float(MQTTJSON["temperature"]), Turbidity, int(MQTTJSON["rawturbidity"]), TDS, int(MQTTJSON["rawtds"]), Level, float(MQTTJSON["rawlevel"]), Ph, int(MQTTJSON["rawph"]))
+                
+                print("query=", query)
                 cur.execute(query)
                 con.commit()
         except mdb.Error as e:
@@ -304,43 +345,4 @@ def writeWeatherRecord():
                 del cur
                 del con
 
-
-
-def writeITWeatherRecord():
-
- if (config.enable_MySQL_Logging == True):	
-	# open mysql database
-	# write log
-	# commit
-	# close
-        try:
-
-                print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
-                cur = con.cursor()
-
-
-                fields = "DeviceID, ChannelID, Temperature, Humidity, BatteryOK, TimeRead"
-                if (len(state.IndoorTH)> 0): 
-
-                    for singleChannel in state.IndoorTH:
-                        values = "%d, %d, %6.2f, %6.2f, \"%s\", \"%s\"" % (singleChannel["deviceID"], singleChannel["channelID"], singleChannel["temperature"], singleChannel["humidity"], singleChannel["batteryOK"], singleChannel["time"])
-                        query = "INSERT INTO IndoorTHSensors (%s) VALUES(%s )" % (fields, values)
-                        print("query=", query)
-                        cur.execute(query)
-                        con.commit()
-                else:
-                    return
-        except mdb.Error as e:
-                traceback.print_exc()
-                print("Error %d: %s" % (e.args[0],e.args[1]))
-                con.rollback()
-                #sys.exit(1)
-
-        finally:
-                cur.close()
-                con.close()
-
-                del cur
-                del con
 

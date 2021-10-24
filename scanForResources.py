@@ -137,8 +137,25 @@ def checkForDeviceFromIP(ip):
                 returnJSON = req.json()
 
             except Exception:
-                #traceback.print_exc()
-                return {} 
+                # check again before inactive decision
+
+                completeResponse = subprocess.run(['ping','-c1', '-w 1 ',str(ip)],stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) 
+                #response = subprocess.run(['ping','-c1', '-W 1',str(ip)],stdout=None, stderr=None) 
+                #print("completeResponse.returncode =", completeResponse.returncode)
+                #print("ipaddress=",ip)
+                returnJSON = {}
+                if completeResponse.returncode == 0:
+                    try:
+                        req = requests.get(myURL,timeout=5)
+
+               
+                        returnJSON = req.json()
+
+                    except Exception:
+
+
+                        #traceback.print_exc()
+                        return {} 
         return returnJSON
 
 

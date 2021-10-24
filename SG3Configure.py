@@ -220,7 +220,7 @@ class SGSConfigure(App):
         data = {}
         data['key'] = 'value'
         
-        data['ProgramName'] = 'SmartGardenSystem2' 
+        data['ProgramName'] = 'SmartGarden3' 
         data['ConfigVersion'] = '001'        
 
         data['SWDEBUG'] = self.F_SWDEBUG.get_value()
@@ -893,7 +893,7 @@ class SGSConfigure(App):
         
             try:
                     #print("trying database")
-                    con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                    con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                     cur = con.cursor()
                  
                     query = "UPDATE BluetoothSensors SET assignedwirelessid = '%s' WHERE pickaddress= '%s'" % ( myWirelessAddress, myPickaddress)
@@ -1358,7 +1358,7 @@ class SGSConfigure(App):
 
         try:
                 #print("trying database")
-                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGardenSystem');
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 
                 query = "SELECT * FROM BluetoothSensors" 

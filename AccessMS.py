@@ -16,20 +16,54 @@ def initMoistureSensors():
         state.moistureSensorStates =[] 
         wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
         for singleWireless in wirelessJSON:
-            
             for i in range(1,5):
                 element = {}
                 element["id"] = str(singleWireless["id"])
                 element["sensorType"] = "C1"
                 element["sensorNumber"] = str(i)
                 element["sensorValue"] = "0.0"
+                element["rawSensorValue"] = "-1"
                 element["timestamp"] = datetime.datetime.now()
                 state.moistureSensorStates.append(element) 
-            
+
             
 #            myIP = singleWireless["ipaddress"]
 #            myCommand = "enableMoistureSensors?params=admin,1,1,1,1"
 #            returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+
+def initializeOneExtender(myID):
+        # force read from wireless systems
+
+        if (config.LOCKDEBUG):
+            print("UpdateStateLock Acquire Attempt - initializeOneExtender ")
+        state.UpdateStateLock.acquire()
+        if (config.LOCKDEBUG):
+            print("UpdateStateLock Acquired - initializeOneExtender ")
+
+        #wireless extender
+        wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
+        for singleWireless in wirelessJSON:
+
+
+            if (myID == singleWireless["id"]):
+                myIP = singleWireless["ipaddress"]
+                if (singleWireless["hydroponicsmode"] == "true"):
+                    myCommand = "enableMoistureSensors?params=admin,1,1,0,0"
+                    returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+                    myCommand = "enableHydroponicsMode?params=admin,1,0"
+                    returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+                else:
+                    myCommand = "enableMoistureSensors?params=admin,1,0,0,0"
+                    returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+                    myCommand = "enableHydroponicsMode?params=admin,0,0"
+                    returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+                #print("returnJSON=", returnJSON)            
+                break
+
+        print("UpdateStateLock Releasing - initializeOneExtender")
+        state.UpdateStateLock.release()
+        if (config.LOCKDEBUG):
+            print("UpdateStateLock Released - initializeOneExtender")
 
 
 
@@ -47,8 +81,16 @@ def readAllMoistureSensors():
         for singleWireless in wirelessJSON:
 
             myIP = singleWireless["ipaddress"]
-            myCommand = "enableMoistureSensors?params=admin,1,1,1,1"
-            returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+            if (singleWireless["hydroponicsmode"] == "true"):
+                    myCommand = "enableMoistureSensors?params=admin,1,1,0,0"
+                    returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+                    myCommand = "enableHydroponicsMode?params=admin,1,0"
+                    returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+            else:
+                    myCommand = "enableMoistureSensors?params=admin,1,0,0,0"
+                    returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
+                    myCommand = "enableHydroponicsMode?params=admin,0,0"
+                    returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
             #print("returnJSON=", returnJSON)            
 
             myCommand = "readMoistureSensors?params=admin"
@@ -71,13 +113,21 @@ def readAllMoistureSensors():
             pass
 
         if (config.SWDEBUG):
-            print("-----------------")
-            print("MoistureSensorStates")
-            print(state.moistureSensorStates)
+            #print("-----------------")
+            #print("MoistureSensorStates")
+            #print(state.moistureSensorStates)
 
-            print("-----------------")
+            #print("-----------------")
+            pass
         for singleSensor in state.moistureSensorStates:
-                pclogging.sensorlog(singleSensor["id"], singleSensor["sensorNumber"], singleSensor["sensorValue"], singleSensor["sensorType"], singleSensor["timestamp"]) 
+
+                try:
+                    raw = singleSensor["rawSensorValue"]
+                except:
+                    print("missing rawSensorValue, id=%s sennum=%s", singleSensor["id"], singleSensor["sensorNumber"])
+                    print("singleSensor=", singleSensor)
+                    singleSensor["rawSensorValue"] = -1
+                pclogging.sensorlog(singleSensor["id"], singleSensor["sensorNumber"], singleSensor["sensorValue"], singleSensor["rawSensorValue"], singleSensor["sensorType"], singleSensor["timestamp"]) 
 
 
         if (config.LOCKDEBUG):
