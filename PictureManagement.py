@@ -121,9 +121,13 @@ def buildTimeLapse(source):
     
     devices = os.listdir(my_dir_path)
     print ("devices=", devices)
+    os.makedirs("static/BuildTimeLapse", exist_ok=True)
     os.makedirs("static/TimeLapses", exist_ok=True)
+    filerecords = []
     for device in devices:
 
+        print ("device=", device)
+        print ("config.=",config.enable_MySQL_Logging)
         if (config.enable_MySQL_Logging == True):
 
             # open mysql database
@@ -131,19 +135,19 @@ def buildTimeLapse(source):
             # commit
             # close
             try:
+                print("before query") 
     
                 con = mdb.connect(
                     "localhost",
                     "root",
                     config.MySQL_Password,
-                    "WeatherSenseWireless"
+                    "SmartGarden3"
                 )
 
                 cur = con.cursor()
-    
 
                 query = "SELECT timestamp, cameraID, picturename  FROM  SkyCamPictures WHERE cameraID = '%s' AND timestamp >= '%s' AND timestamp < '%s' ORDER BY timestamp" % (device, starttime, endtime)
-                #print("query=", query)
+                print("query=", query)
                 cur.execute(query)
                 filerecords = cur.fetchall()
                 cur.execute(query)

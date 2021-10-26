@@ -111,7 +111,7 @@ def processInfraredSensor(MQTTJSON):
                 print("query=", query)
                 cur.execute(query)
                 con.commit()
-                SkyCamera.processInfraredPicture(MQTTJSON["infrareddata"])
+                SkyCamera.processInfraredPicture(MQTTJSON["id"],MQTTJSON["infrareddata"])
         except mdb.Error as e:
                 traceback.print_exc()
                 print("Error %d: %s" % (e.args[0],e.args[1]))

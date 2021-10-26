@@ -45,7 +45,7 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-
+import PictureManagement
 
 import ultrasonicRanger
 
@@ -406,11 +406,11 @@ def initializeScheduler():
         # timelapse
 
         # SkyCam Management Programs
-        scheduler.add_job(PictureManagement.cleanPictures, 'cron', day='*', hour=3, minute=4, args=["Daily Picture Clean"])
+        state.scheduler.add_job(PictureManagement.cleanPictures, 'cron', day='*', hour=3, minute=4, args=["Daily Picture Clean"])
 
-        scheduler.add_job(PictureManagement.cleanTimeLapses, 'cron', day='*', hour=3, minute=10, args=["Daily Time Lapse Clean"])
+        state.scheduler.add_job(PictureManagement.cleanTimeLapses, 'cron', day='*', hour=3, minute=10, args=["Daily Time Lapse Clean"])
         
-        scheduler.add_job(PictureManagement.buildTimeLapse, 'cron', day='*', hour=5, minute=30, args=["Time Lapse Generation"])
+        state.scheduler.add_job(PictureManagement.buildTimeLapse, 'cron', day='*', hour=5, minute=30, args=["Time Lapse Generation"])
 
 
 

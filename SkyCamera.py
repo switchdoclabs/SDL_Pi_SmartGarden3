@@ -18,6 +18,8 @@ import traceback
 import util
 import datetime as dt
 
+import MySQLdb as mdb
+
 from scipy.interpolate import griddata
 
 from colour import Color
@@ -42,17 +44,17 @@ def map_value(x, in_min, in_max, out_min, out_max):
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 
-def processInfraredPicture(inputpixels):
+def processInfraredPicture(myID, inputpixels):
    
 
     inputpixels = inputpixels[0:len(inputpixels)-1]
-    print("inputpixels=", inputpixels)
+    #print("inputpixels=", inputpixels)
     mypixels = inputpixels.split(",")
     fpixels = []
     for singlepixel in mypixels:
         fpixels.append(float(singlepixel))
 
-    print("fpixels=", fpixels)
+    #print("fpixels=", fpixels)
     pixels = fpixels
     # low range of the sensor (this will be blue on the screen)
     MINTEMP = 26.0
@@ -114,7 +116,7 @@ def processInfraredPicture(inputpixels):
                     array[ixf, jxf] = colors[constrain(int(pixel), 0, COLORDEPTH - 1)]
 
 
-    cameraID = "GardenCamIR"
+    cameraID = myID+"-IR"
     currentpicturefilename = "static/CurrentPicture/"+cameraID+".jpg"
     currentpicturedashfilename = "dash_app/assets/"+cameraID+"_1.jpg"
     for name in glob.glob("dash_app/assets/"+cameraID+"_*.jpg"):
@@ -130,13 +132,50 @@ def processInfraredPicture(inputpixels):
     os.makedirs(dirpathname, exist_ok=True)
     os.makedirs("static/CurrentPicture", exist_ok=True)
     filename = dirpathname+"/"+singlefilename
-    print("filename=", filename)
+    #print("filename=", filename)
     im = Image.fromarray(array)
     im.save(currentpicturefilename)
     im.save(currentpicturedashfilename)
     im.save(filename)
 
+    FileSize =os.path.getsize(currentpicturefilename)
 
+
+    if (config.enable_MySQL_Logging == True):
+        # open mysql database
+        # write log
+        # commit
+        # close
+        try:
+
+            con = mdb.connect(
+                "localhost",
+                "root",
+                config.MySQL_Password,
+                "SmartGarden3" 
+            )
+
+            cur = con.cursor()
+
+            fields = "cameraID, picturename, picturesize, messageID, resends,resolution"
+
+            values = "\'%s\', \'%s\', %d, %d, %d, %d" % (cameraID, singlefilename, FileSize, 1, 0, 0)  
+            query = "INSERT INTO SkyCamPictures (%s) VALUES(%s )" % (fields, values)
+            #print("query=", query)
+            cur.execute(query)
+            con.commit()
+        except mdb.Error as e:
+            traceback.print_exc()
+            print("Error %d: %s" % (e.args[0], e.args[1]))
+            con.rollback()
+            # sys.exit(1)
+
+        finally:
+            cur.close()
+            con.close()
+
+            del cur
+            del con
 
 
 def takeSkyPicture():
@@ -228,6 +267,43 @@ def takeSkyPicture():
         pil_im.save(currentpicturefilename, format= 'JPEG')
         pil_im.save(currentpicturedashfilename, format= 'JPEG')
 
+        FileSize =os.path.getsize(currentpicturefilename)
+
+        if (config.enable_MySQL_Logging == True):
+            # open mysql database
+            # write log
+            # commit
+            # close
+            try:
+    
+                con = mdb.connect(
+                    "localhost",
+                    "root",
+                    config.MySQL_Password,
+                    "SmartGarden3" 
+                )
+
+                cur = con.cursor()
+    
+                fields = "cameraID, picturename, picturesize, messageID, resends,resolution"
+
+                values = "\'%s\', \'%s\', %d, %d, %d, %d" % (cameraID, singlefilename, FileSize, 1, 0, 0)  
+                query = "INSERT INTO SkyCamPictures (%s) VALUES(%s )" % (fields, values)
+                #print("query=", query)
+                cur.execute(query)
+                con.commit()
+            except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0], e.args[1]))
+                con.rollback()
+                # sys.exit(1)
+    
+            finally:
+                cur.close()
+                con.close()
+    
+                del cur
+                del con
 
 
 
