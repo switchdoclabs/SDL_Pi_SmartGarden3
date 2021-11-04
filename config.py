@@ -132,4 +132,7 @@ JSON=15
 DEBUG=10
 NOTSET=0
 
-
+######
+#JSON Default Storage
+######
+dataDefaults = {}
