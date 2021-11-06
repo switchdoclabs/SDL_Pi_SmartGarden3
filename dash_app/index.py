@@ -25,20 +25,29 @@ import valves_scheduled
 import bluetoothTM_page
 import bluetoothLC_page
 import bt_status_page
+import manual_page
 
 from non_impl import NotImplPage 
 
 from navbar import Navbar, Logo
 logo = Logo()
-print("new navbar=")
 nav = Navbar()
 
 UpdateCWJSONLock = threading.Lock()
 SGSDASHSOFTWAREVERSION = "005"
 
+import logging
+
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+
+# SGS imports
+import sys
+sys.path.append("../")
+import AccessValves
 
 
 newValveState = ""
+newValveStateMC = {} 
 # state of previous page
 previousPathname = ""
 
@@ -56,6 +65,11 @@ app.layout =  html.Div(
        dcc.Interval(
             id='main-interval-component',
             interval=10*1000, # in milliseconds - leave as 10 seconds
+            n_intervals=0
+            ) ,
+       dcc.Interval(
+            id='fast-interval-component',
+            interval=2*1000, # in milliseconds 
             n_intervals=0
             ) ,
        #dcc.Interval(
@@ -120,6 +134,9 @@ def display_page(pathname):
     if pathname == '/valve_graphs':
         myLayout = valve_graphs.ValveGraphPage()
         myLayout2 = ""
+    if pathname == '/manual_page':
+        myLayout = manual_page.ManualControlPage()
+        myLayout2 = ""
     if pathname == '/log_page':
         myLayout = log_page.LogPage()
         myLayout2 = ""
@@ -132,26 +149,12 @@ def display_page(pathname):
     
     #print("myLayout= ",myLayout)
     #print("myLayout2= ",myLayout2)
-    print("page-content= ",app.layout)
+    #print("page-content= ",app.layout)
     now = datetime.datetime.now()
     nowString =  now.strftime('%Y-%m-%d %H:%M:%S')
     print("end=",nowString)
     return (logo, nav,myLayout, myLayout2 )
 
-'''
-@app.callback(
-    Output("main-spinner", "children"), [Input("url", "pathname")]
-)
-
-def input_triggers_spinner(pathname):
-    print("spinner=", pathname)
-
-    if pathname == '/moisture_sensors':
-        time.sleep(moisture_sensors.returnNumberTanksGraphs())
-    else:
-        time.sleep(1)
-    return pathname 
-'''
 ##################
 # Moisture Sensors 
 ##################
@@ -395,13 +398,13 @@ def updatePVProgramming(n_intervals,id, value):
 
 @app.callback(
 	      [
-	      Output({'type' : 'BTGdynamic', 'index' : MATCH}, 'figure' ),
+	      Output({'type' : 'BTGdynamic', 'index' : 1}, 'figure' ),
               ],
               [
               Input('main-interval-component','n_intervals'),
-              Input({'type' : 'BTGdynamic', 'index' : MATCH}, 'id' )
+              Input({'type' : 'BTGdynamic', 'index' : 1}, 'id' )
               ],
-              [State({'type' : 'BTGdynamic', 'index' : MATCH}, 'value'  )]
+              [State({'type' : 'BTGdynamic', 'index' : 1}, 'value'  )]
               )
 
 def updatebluetoothTM(n_intervals,id, value):
@@ -425,13 +428,95 @@ def updatebluetoothTM(n_intervals,id, value):
         raise PreventUpdate
     return [fig]
 
+##########################
+# Manual Control
+##########################
+
+
+@app.callback(Output({'type' : 'WCVdynamic', 'index' : MATCH, 'DeviceID' : MATCH}, 'color' ),
+              [Input('fast-interval-component','n_intervals'),
+              Input({'type' : 'WCVdynamic', 'index' : MATCH, 'DeviceID' : MATCH}, 'id' )],
+              [State({'type' : 'WCVdynamic', 'index' : MATCH, 'DeviceID' : MATCH}, 'color'  )]
+              )
+
+def update_manualpage(n_intervals, id, color):
+   global newValveStateMC
+   if ((n_intervals % (1)) == 0): # 1 
+    
+    #print(">manual_page Indicator Update started",id['index'], id['DeviceID'])
+    #print("id=", id)
+    #print("newValveStateMC=", newValveStateMC)
+    #print("n_intervals=", n_intervals)
+    #print ('Indicator id {} / n_intervals = {}'.format(id['index'], n_intervals))
+     
+    if (id['index'] == 0) or (id['DeviceID'] not in newValveStateMC) :
+        newValveStateMC[id['DeviceID']] = status_page.returnLatestValveRecord(id['DeviceID'] )
+
+    status  = manual_page.returnIndicatorValue(newValveStateMC[id['DeviceID']], id['index'])
+    color = manual_page.updateIndicator(status)
+
+    if (id['index'] == 7):
+        newValveStateMC.pop(id['DeviceID']) 
+    #print("<Manual_page Indicator Update complete",id['index'], id['DeviceID'])
+    return color
+   else:
+    raise PreventUpdate
+
+
+@app.callback(
+	      [
+	      Output( {'type' : 'MCdynamic', 'index' : MATCH}, 'children' )
+              ],
+              [
+              #Input('main-interval-component','n_intervals'),
+              Input( {'type' : 'MCdynamic', 'index' : MATCH}, 'id' ),
+              Input( {'type' : 'MCdynamic', 'index' : MATCH}, 'n_clicks' ),
+              
+             ],
+              [ 
+                #State( {'type' : 'MCdynamic', 'index' : MATCH}, 'value' ),
+                State('input-on-submit', 'value')]
+        )
 
 
 
+#def sendValveToggle(n_intervals, id, n_clicks, value, seconds):
+def sendValveToggle( id, n_clicks, value):
+    
+    if (n_clicks == 0): # stop first update
+        raise PreventUpdate
+    print("value=", value)
+    splitIndex=id["index"].split("/")
+    myID = splitIndex[0]
+    myCurrentState = splitIndex[1]
+    myIP = splitIndex[2]
+    myValve = splitIndex[3]
+    myTime = str(value)
+    if (myTime == 0):
+        myTime = 1
+    #if (myCurrentState == "0"):
+    myToggle = "1"
+    #else:
+    #    myToggle = "0"
 
+    myCommand = 'setSingleValve?params=admin,'+myValve+","+myToggle+","+str(myTime)
+    print("button pushed")
+    print("myCommand=", myCommand)
+    print("id=", id)
+    print("value=", value)
+    print("n_clicks=", n_clicks)
+
+    AccessValves.sendCommandToWireless(myIP, myCommand)
+    single={}
+    single['id'] = myID
+    single['ValveNumber'] = myValve
+    single['OnTimeInSeconds'] = myTime
+
+    return ["TOn( %d )" % n_clicks ]
 
 ##########################
 
 if __name__ == '__main__':
+    app.run_server(host='0.0.0.0', port=8010)
+    #app.run_server(host='0.0.0.0', port=8010)
     #app.run_server(debug=True, host='0.0.0.0')
-    app.run_server(host='0.0.0.0')

@@ -45,7 +45,7 @@ def returnLatestValveRecord(myID):
                 con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "SELECT State FROM ValveRecord WHERE( DeviceID = '%s')  ORDER BY TimeStamp DESC LIMIT 1" % (myID)
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 con.commit()
                 records = cur.fetchall()

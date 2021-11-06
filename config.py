@@ -93,7 +93,8 @@ Tank_Pump_Level = 15.0
 ############
 HydroponicsMode = True 
 
-
+# irgain 0 means auto
+irgain = 0
 
 
 ############

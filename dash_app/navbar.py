@@ -28,6 +28,7 @@ def Navbar():
             dbc.NavItem(dbc.NavLink("Next Events", href="/valves_scheduled")),
             dbc.NavItem(dbc.NavLink("P/V Programming", href="/p_v_programming")),
             dbc.NavItem(dbc.NavLink("Bluetooth Sensor Status", href="/bluetooth_status_page")),
+            dbc.NavItem(dbc.NavLink("Manual Control", href="/manual_page")),
             dbc.NavItem(dbc.NavLink("Logs", href="/log_page")),
             dbc.NavItem(dbc.NavLink("Documentation", href="https://shop.switchdoc.com/collections/smart-garden-system/products/smart-garden-system-v2-raspberry-pi-based-smart-gardening-kit-no-soldering")),
                 ],

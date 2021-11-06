@@ -93,7 +93,7 @@ class SGSConfigure(App):
         self.REST_Enable = False 
         self.MQTT_Enable = False 
         self.MQTT_Server_URL = "" 
-        self.MQTT_Port_Number = 5900 
+        self.MQTT_Port_Number = 1883 
         self.MQTT_Send_Seconds = 500 
         self.UltrasonicLevel = 4
         self.Tank_Pump_Level = 15.0

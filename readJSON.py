@@ -104,7 +104,7 @@ def JSONsetDefaults():
         config.REST_Enable = False 
         config.MQTT_Enable = False 
         config.MQTT_Server_URL = "" 
-        config.MQTT_Port_Number = 5900 
+        config.MQTT_Port_Number = 1883 
         config.MQTT_Send_Seconds = 500 
         config.UltrasonicLevel = 4
         config.Tank_Pump_Level = 15.0

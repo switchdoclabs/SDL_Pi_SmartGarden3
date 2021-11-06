@@ -54,14 +54,24 @@ def processInfraredPicture(myID, inputpixels):
     for singlepixel in mypixels:
         fpixels.append(float(singlepixel))
 
-    #print("fpixels=", fpixels)
+    print("fpixels=", fpixels)
     pixels = fpixels
-    # low range of the sensor (this will be blue on the screen)
-    MINTEMP = 26.0
+    if (config.irgain == 0):
+        # auto gain
+        # find minimum in pixels
+        MINTEMP = min(pixels) 
+
+        # find maximum in pixles
+        MAXTEMP = max(pixels) 
     
-    # high range of the sensor (this will be red on the screen)
-    MAXTEMP = 32.0
+    else:
+
+        # low range of the sensor (this will be blue on the screen)
+        MINTEMP = 26.0
     
+        # high range of the sensor (this will be red on the screen)
+        MAXTEMP = 32.0
+    print ("MINTEMP=%d MAXTEMP=%d" % (MINTEMP, MAXTEMP))
     # how many color values we can have
     COLORDEPTH = 1024
     
@@ -134,6 +144,43 @@ def processInfraredPicture(myID, inputpixels):
     filename = dirpathname+"/"+singlefilename
     #print("filename=", filename)
     im = Image.fromarray(array)
+
+    # Choose a font
+    font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", 10)
+
+
+    # add timestamp
+    myText = "%s " % (dt.datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
+    myText2 = "MinTemp:%6.1fC MaxTemp:%6.1fC"%(MINTEMP, MAXTEMP)
+    # Draw the text
+    color = 'rgb(255,255,255)'
+    #draw.text((0, 0), myText,fill = color, font=font)
+
+    # get text size
+    text_size = font.getsize(myText)
+    text_size2 = font.getsize(myText2)
+
+    # set button size + 10px margins
+    button_size = (text_size[0]+20, text_size[1]+10)
+    button_size2 = (text_size2[0]+20, text_size2[1]+10)
+
+    # create image with correct size and black background
+    button_img = Image.new('RGBA', button_size, "black")
+    button_img2 = Image.new('RGBA', button_size2, "black")
+ 
+    # put text on button with 10px margins
+    button_draw = ImageDraw.Draw(button_img)
+    button_draw.text((10, 5), myText, fill = color, font=font)
+    im.paste(button_img, (0, 0))
+
+    button_draw2 = ImageDraw.Draw(button_img2)
+    button_draw2.text((10, 5), myText2, fill = color, font=font)
+    im.paste(button_img2, (0, 240))
+    bg_w, bg_h = im.size 
+
+
+
+
     im.save(currentpicturefilename)
     im.save(currentpicturedashfilename)
     im.save(filename)

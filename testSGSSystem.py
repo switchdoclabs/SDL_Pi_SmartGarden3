@@ -6,7 +6,7 @@
 
 # set SGSEXT_IP to the IP address of your connected Wireless Extender to be tested
 # Example:  SGSEXT_IP = "192.168.1.52"
-SGSEXT_IP = "192.168.1.2"
+SGSEXT_IP = "192.168.1.26"
 
 import sys, traceback
 import os
