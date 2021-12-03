@@ -3,7 +3,7 @@
 # configuration file - DO NOT MODIFY!  
 # Defaullts and Configuration are read from a JSON file.   SGS.JSON 
 # 
-SGSVERSION = "" # set in SGS2.py
+SGSVERSION = "" # set in SG3.py
 STATIONHARDWARE =""
 import uuid
 

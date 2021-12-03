@@ -51,4 +51,7 @@ def assignBluetoothSensors():
             myCommand = "assignBluetoothSensors?params=admin,"+mySendString
             print("myCommand=", myCommand)
             scanForResources.sendCommandToWireless(myIP, myCommand)
-
+        else:
+            myCommand = "assignBluetoothSensors?params=admin,NONE"
+            print("myCommand=", myCommand)
+            scanForResources.sendCommandToWireless(myIP, myCommand)

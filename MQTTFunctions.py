@@ -188,13 +188,13 @@ def on_WirelessMQTTClientlog(client, userdata, level, buf):
         print("MQTT: ",buf)
     pass
 
-def startWirelessMQTTClient():
+def startWirelessMQTTClient(ClientName):
 
 
     broker_address= "127.0.0.1"  #Broker address
     port = 1883                         #Broker port
 
-    state.WirelessMQTTClient = mqttClient.Client("SGS2")               #create new instance
+    state.WirelessMQTTClient = mqttClient.Client(ClientName)               #create new instance
     #client.username_pw_set(user, password=password)    #set username and password
     state.WirelessMQTTClient.on_connect= on_WirelessMQTTClientconnect                      #attach function to callback
     state.WirelessMQTTClient.on_message= on_WirelessMQTTClientmessage                      #attach function to callback

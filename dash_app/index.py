@@ -26,6 +26,8 @@ import bluetoothTM_page
 import bluetoothLC_page
 import bt_status_page
 import manual_page
+import camera_page
+import hydroponics_page
 
 from non_impl import NotImplPage 
 
@@ -33,7 +35,7 @@ from navbar import Navbar, Logo
 logo = Logo()
 nav = Navbar()
 
-UpdateCWJSONLock = threading.Lock()
+UpdateHPJSONLock = threading.Lock()
 SGSDASHSOFTWAREVERSION = "005"
 
 import logging
@@ -44,6 +46,12 @@ logging.getLogger('werkzeug').setLevel(logging.ERROR)
 import sys
 sys.path.append("../")
 import AccessValves
+import MQTTFunctions
+import state
+###############
+#Start MQTT
+###############
+
 
 
 newValveState = ""
@@ -62,6 +70,11 @@ app.layout =  html.Div(
 
        html.Div(id='my-output-interval'),
 
+       dcc.Interval(
+            id='minute-interval-component',
+            interval=60*1000, # in milliseconds - leave as 10 seconds
+            n_intervals=0
+            ) ,
        dcc.Interval(
             id='main-interval-component',
             interval=10*1000, # in milliseconds - leave as 10 seconds
@@ -89,6 +102,22 @@ app.layout =  html.Div(
         id="mainpage"
 
     )
+
+
+@app.server.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    #r.headers["Cache-Control"] = 'no-store'
+    #r.headers["Pragma"] = "no-store"
+    #r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'must-revalidate, max-age=10'
+    return r
+
+
+
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 
@@ -119,6 +148,9 @@ def display_page(pathname):
     if pathname == '/status_page':
         myLayout = status_page.StatusPage() 
         myLayout2 = moisture_sensors.MoistureSensorPage()
+    if pathname == '/camera_page':
+        myLayout = camera_page.CameraPage()
+        myLayout2 = ""
     if pathname == '/bluetoothTM_page':
         myLayout = bluetoothTM_page.BluetoothTMPage()
         myLayout2 = ""
@@ -136,6 +168,9 @@ def display_page(pathname):
         myLayout2 = ""
     if pathname == '/manual_page':
         myLayout = manual_page.ManualControlPage()
+        myLayout2 = ""
+    if pathname == '/hydroponics_page':
+        myLayout = hydroponics_page.HydroponicsPage()
         myLayout2 = ""
     if pathname == '/log_page':
         myLayout = log_page.LogPage()
@@ -428,6 +463,33 @@ def updatebluetoothTM(n_intervals,id, value):
         raise PreventUpdate
     return [fig]
 
+
+
+##################
+# SmartGarden3 Cams
+##################
+
+
+
+@app.callback(
+    [
+        Output({'type': 'SkyCamPic', 'index': 0}, 'children'),
+    ],
+    [Input('main-interval-component', 'n_intervals'),
+     Input({'type': 'SkyCamPic', 'index': 0}, 'id')],
+    [State({'type': 'SkyCamPic', 'index': 0}, 'value')]
+)
+def update_skypic_metrics(n_intervals, id, value):
+    print("skycampic_n_intervals=", n_intervals)
+    myIndex = id['index']
+    # build pictures
+    SkyCamList = camera_page.getSkyCamList()
+    output = camera_page.buildPics(SkyCamList)
+    print("picoutput=", output)
+    return [output]
+
+
+
 ##########################
 # Manual Control
 ##########################
@@ -500,21 +562,41 @@ def sendValveToggle( id, n_clicks, value):
     #    myToggle = "0"
 
     myCommand = 'setSingleValve?params=admin,'+myValve+","+myToggle+","+str(myTime)
+
     print("button pushed")
     print("myCommand=", myCommand)
     print("id=", id)
     print("value=", value)
     print("n_clicks=", n_clicks)
 
-    AccessValves.sendCommandToWireless(myIP, myCommand)
+    #AccessValves.sendCommandToWireless(myIP, myCommand)
     single={}
     single['id'] = myID
     single['ValveNumber'] = myValve
     single['OnTimeInSeconds'] = myTime
+    # Set up Wireless MQTT Links
+    MQTTFunctions.startWirelessMQTTClient("SG3DA")
+
+    while state.WirelessMQTTClientConnected != True:    #Wait for connection
+        time.sleep(0.1)
+
+    print (single)
+    AccessValves.turnOnTimedValve(single)
+
+    state.WirelessMQTTClient.disconnect()
+    state.WirelessMQTTClientConnected = False
 
     return ["TOn( %d )" % n_clicks ]
 
+@app.server.route('/static/<resource>')
+def serve_static(resource):
+        return flask.send_from_directory(STATIC_PATH, resource)
+
+
+
+
 ##########################
+
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', port=8010)

@@ -11,7 +11,7 @@ from __future__ import print_function
 from builtins import range
 from past.utils import old_div
 
-SGSVERSION = "031"
+SGSVERSION = "032"
 
 #imports 
 
@@ -305,7 +305,7 @@ def initializeSGSPart2():
     
    
         # Set up Wireless MQTT Links
-        MQTTFunctions.startWirelessMQTTClient()
+        MQTTFunctions.startWirelessMQTTClient("SG3")
 
         # subscribe to IDs
         if (len(wirelessJSON) == 0):

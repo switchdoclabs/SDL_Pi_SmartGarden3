@@ -23,7 +23,7 @@ import MySQLdb as mdb
 import SkyCamera
 
 import traceback
-
+import HydroConstants
 
 def systemlog(level,  message):
 
@@ -311,6 +311,83 @@ def readLastHour24AQI():
 
                 del cur
 
+def convertRawToTurbidity(rawTurbidity):
+    Turbidity = int(-4.49*float(rawTurbidity) + 6746.0)
+    if (Turbidity > 3000):
+        Turbidity = 3000
+    if (Turbidity < 0):
+        Turbidity = 0
+    return Turbidity
+
+def convertRawLevelToLevel(rawLevel):
+    Level = rawLevel
+    # piecewise linear
+    div1 = HydroConstants.UltraEmpty - HydroConstants.Ultra1Liter
+    div2 = HydroConstants.Ultra1Liter - HydroConstants.Ultra15Liter
+    div3 = HydroConstants.Ultra15Liter - HydroConstants.Ultra2Liter
+    div4 = HydroConstants.Ultra2Liter - HydroConstants.Ultra25Liter
+    if (rawLevel > HydroConstants.UltraEmpty):
+        Level = 0.0
+        return Level
+    if (rawLevel > HydroConstants.Ultra1Liter):
+        Level = ((HydroConstants.UltraEmpty- rawLevel)/div1) * 40.0
+        return Level
+    if (rawLevel > HydroConstants.Ultra15Liter):
+        Level = ((HydroConstants.Ultra1Liter-rawLevel)/div2) * 20.0+ 40.0
+        return Level
+    if (rawLevel > HydroConstants.Ultra2Liter):
+        Level = ((HydroConstants.Ultra15Liter- rawLevel)/div3) * 20.0+ 60.0
+        return Level
+    if (rawLevel > HydroConstants.Ultra25Liter):
+        Level = ((HydroConstants.Ultra2Liter - rawLevel)/div4) * 20.0+ 80.0
+        if (Level > 100):
+            Level = 100
+        return Level
+    Level = 100
+    return Level
+
+def convertRawTDSToTDS(rawTDS):
+
+    Voltage = rawTDS*0.003 #Convert analog reading to Voltage
+    TDS=(133.42/(Voltage*Voltage*Voltage) - 255.86*(Voltage*Voltage) + 857.39*Voltage)*0.5; #Convert voltage value to TDS value
+    if (TDS < 0):
+        TDS = 0
+    return TDS
+
+def convertRawPhToPh(rawPh):
+
+    voltage = rawPh *0.003
+    print("voltage=", voltage)
+    '''
+    this->_temperature    = 25.0;
+    this->_phValue        = 7.0;
+    this->_acidVoltage    = 2032.44;    //buffer solution 4.0 at 25C
+    this->_neutralVoltage = 1500.0;     //buffer solution 7.0 at 25C
+    this->_voltage        = 1500.0;
+    float slope = (7.0-4.0)/((this->_neutralVoltage-1500.0)/3.0 - (this->_acidVoltage-1500.0)/3.0);  // two point: (_neutralVoltage,7.0),(_acidVoltage,4.0)
+    float intercept =  7.0 - slope*(this->_neutralVoltage-1500.0)/3.0;
+    //Serial.print("slope:");
+    //Serial.print(slope);
+    //Serial.print(",intercept:");
+    //Serial.println(intercept);
+    this->_phValue = slope*(voltage-1500.0)/3.0+intercept;  //y = k*x + b
+    '''
+    
+    _temperature    = 25.0;
+    _phValue        = 7.0;
+    _acidVoltage    = 2032.44;    #/buffer solution 4.0 at 25C
+    _neutralVoltage = 1500.0;     #/buffer solution 7.0 at 25C
+    _voltage        = 1500.0;
+    slope = (7.0-4.0)/((_neutralVoltage-1500.0)/3.0 - (_acidVoltage-1500.0)/3.0);  #/ two point: (_neutralVoltage,7.0),(_acidVoltage,4.0)
+    intercept =  7.0 - slope*(_neutralVoltage-1500.0)/3.0;
+    print("slope:");
+    print(slope);
+    print(",intercept:");
+    print(intercept);
+    phValue = slope*(voltage-1500.0)/3.0+intercept;  #/y = k*x + b
+    return phValue;
+
+
 def writeHydroponicsRecord(MQTTJSON):
 
  if (config.enable_MySQL_Logging == True):	
@@ -323,10 +400,14 @@ def writeHydroponicsRecord(MQTTJSON):
                 con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 # convert to values
-                Turbidity = -1;
-                TDS = -1;
-                Level = -1;
-                Ph = -1;
+                rawTurbidity = float(MQTTJSON["rawturbidity"]) 
+                rawLevel = float(MQTTJSON["rawlevel"]) 
+                rawTDS = float(MQTTJSON["rawtds"]) 
+                rawPh = float(MQTTJSON["rawph"]) 
+                Turbidity = convertRawToTurbidity(rawTurbidity)
+                TDS = convertRawTDSToTDS(rawTDS) 
+                Level = convertRawLevelToLevel(rawLevel) 
+                Ph = convertRawPhToPh(rawPh) 
                 query = "INSERT INTO Hydroponics(DeviceID, Temperature, Turbidity, RawTurbidity, TDS, RawTDS, Level, RawLevel, Ph, RawPH) VALUES('%s', '%6.2f', %6.2f, '%d', '%6.2f',%d, %6.2f, %6.2f, %6.2f, %d)" % (MQTTJSON["id"], float(MQTTJSON["temperature"]), Turbidity, int(MQTTJSON["rawturbidity"]), TDS, int(MQTTJSON["rawtds"]), Level, float(MQTTJSON["rawlevel"]), Ph, int(MQTTJSON["rawph"]))
                 
                 print("query=", query)

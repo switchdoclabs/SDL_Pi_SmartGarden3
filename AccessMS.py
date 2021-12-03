@@ -48,7 +48,7 @@ def initializeOneExtender(myID):
             if (myID == singleWireless["id"]):
                 myIP = singleWireless["ipaddress"]
                 if (singleWireless["hydroponicsmode"] == "true"):
-                    myCommand = "enableMoistureSensors?params=admin,1,1,0,0"
+                    myCommand = "enableMoistureSensors?params=admin,1,1,1,0"
                     returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
                     myCommand = "enableHydroponicsMode?params=admin,1,0"
                     returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
@@ -82,7 +82,7 @@ def readAllMoistureSensors():
 
             myIP = singleWireless["ipaddress"]
             if (singleWireless["hydroponicsmode"] == "true"):
-                    myCommand = "enableMoistureSensors?params=admin,1,1,0,0"
+                    myCommand = "enableMoistureSensors?params=admin,1,1,1,0"
                     returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
                     myCommand = "enableHydroponicsMode?params=admin,1,0"
                     returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)

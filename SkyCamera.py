@@ -175,7 +175,7 @@ def processInfraredPicture(myID, inputpixels):
 
     button_draw2 = ImageDraw.Draw(button_img2)
     button_draw2.text((10, 5), myText2, fill = color, font=font)
-    im.paste(button_img2, (0, 240))
+    im.paste(button_img2, (0, 20))
     bg_w, bg_h = im.size 
 
 

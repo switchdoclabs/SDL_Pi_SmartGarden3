@@ -274,9 +274,9 @@ def updateGauges(id):
         #return (myRecord[0][1],myRecord[0][2], myRecord[0][3],myRecord[0][5])
         myValue = psutil.disk_usage('/')
         myDPercent = myValue[3]
-        print("myDPercent=", myDPercent)
+        #print("myDPercent=", myDPercent)
         myDPercent = 100.0 - myDPercent
-        print("myDPercent=", myDPercent)
+        #print("myDPercent=", myDPercent)
         return myDPercent 
 
 		
