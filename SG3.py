@@ -47,7 +47,6 @@ from PIL import ImageFont
 
 import PictureManagement
 
-import ultrasonicRanger
 
 
 
@@ -72,7 +71,6 @@ import state
 import Valves
 
 
-import AccessMS
 
 import AccessValves
 
@@ -430,12 +428,6 @@ def initializeScheduler():
         #     state.scheduler.add_job(updateBlynk.blynkStateUpdate, 'interval', seconds=60)
     
         # MS sensor Read 
-        AccessMS.initMoistureSensors() 
-        AccessMS.readAllMoistureSensors()
-        
-        # MQTT now updates the Moisture Sensor arrays 
-
-        #state.scheduler.add_job(AccessMS.readAllMoistureSensors, 'interval', minutes=15)
     
         # sensor timed water and Timed
         tNow  = datetime.datetime.now()

@@ -72,7 +72,7 @@ class SGSConfigure(App):
     
     def setDefaults(self):
         self.SWDEBUG = False
-        self.enable_MySQL_Logging = False
+        self.enable_MySQL_Logging = true
         self.English_Metric = False
         self.MySQL_Password = "password"
         self.mailUser = "yourusername"

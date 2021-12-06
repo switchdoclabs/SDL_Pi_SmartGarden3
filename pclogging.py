@@ -320,30 +320,16 @@ def convertRawToTurbidity(rawTurbidity):
     return Turbidity
 
 def convertRawLevelToLevel(rawLevel):
-    Level = rawLevel
+
     # piecewise linear
-    div1 = HydroConstants.UltraEmpty - HydroConstants.Ultra1Liter
-    div2 = HydroConstants.Ultra1Liter - HydroConstants.Ultra15Liter
-    div3 = HydroConstants.Ultra15Liter - HydroConstants.Ultra2Liter
-    div4 = HydroConstants.Ultra2Liter - HydroConstants.Ultra25Liter
-    if (rawLevel > HydroConstants.UltraEmpty):
-        Level = 0.0
-        return Level
-    if (rawLevel > HydroConstants.Ultra1Liter):
-        Level = ((HydroConstants.UltraEmpty- rawLevel)/div1) * 40.0
-        return Level
-    if (rawLevel > HydroConstants.Ultra15Liter):
-        Level = ((HydroConstants.Ultra1Liter-rawLevel)/div2) * 20.0+ 40.0
-        return Level
-    if (rawLevel > HydroConstants.Ultra2Liter):
-        Level = ((HydroConstants.Ultra15Liter- rawLevel)/div3) * 20.0+ 60.0
-        return Level
-    if (rawLevel > HydroConstants.Ultra25Liter):
-        Level = ((HydroConstants.Ultra2Liter - rawLevel)/div4) * 20.0+ 80.0
-        if (Level > 100):
-            Level = 100
-        return Level
-    Level = 100
+
+    DeltaSpread = HydroConstants.CapLevelZero - HydroConstants.CapLevelFull
+    Level = 100*(1- (rawLevel - HydroConstants.CapLevelFull)/DeltaSpread )
+
+    if (Level > 100):
+        Level = 100
+    if (Level < 0):
+        Level = 0
     return Level
 
 def convertRawTDSToTDS(rawTDS):
