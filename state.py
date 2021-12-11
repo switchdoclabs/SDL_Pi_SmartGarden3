@@ -23,16 +23,10 @@ blynkPlantNumberDisplay = 1
 
 
 ##################
-# Moisture Sensors
+# Bluetooth Moisture Sensors
 ##################
-Moisture_Humidity = 100.0
 
-Raw_Moisture_Humidity_Array = []
-for i in range(1, config.moisture_sensor_count+1):
-    Raw_Moisture_Humidity_Array.append(3400.0)
-Moisture_Humidity_Array = []
-for i in range(1, config.moisture_sensor_count+1):
-    Moisture_Humidity_Array.append(100.0)
+LatestBluetoothSensors=[]
 
 #water below this limit
 Moisture_Threshold = 60.0   
@@ -109,8 +103,6 @@ deviceStatus = {}
 valveStatus = []
 
 valveTimeStates = []
-
-moistureSensorStates =  []
 
 nextMoistureSensorCheck = None
 ######################

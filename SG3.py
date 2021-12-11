@@ -338,18 +338,15 @@ def initializeSGSPart2():
         print("----------------------")
         print("Plant / Sensor Counts")
         print("----------------------")
-        config.moisture_sensor_count = len(readJSON.getJSONValue("WirelessDeviceJSON"))*4 
         config.valve_count = len(readJSON.getJSONValue("WirelessDeviceJSON"))*8 
         config.bluetooth_count = pclogging.countBluetooth()
 
         print( "Wireless Unit Count:", len(readJSON.getJSONValue("WirelessDeviceJSON")) )
-        print("Moisture Sensor Count: ",config.moisture_sensor_count)
         print("Valve Count: ",config.valve_count)
         print("Bluetooth Sensor Count: ",config.bluetooth_count)
         print()
         if (config.USEBLYNK):
             updateBlynk.blynkTerminalUpdate( "Wireless Unit Count:%d"% len(readJSON.getJSONValue("WirelessDeviceJSON")) )
-            updateBlynk.blynkTerminalUpdate("Sensor Count: %d"%config.moisture_sensor_count)
             updateBlynk.blynkTerminalUpdate("Pump Count: %d"%config.valve_count)
             updateBlynk.blynkTerminalUpdate("Bluetooth Sensor Count: %d"%config.bluetooth_count)
             updateBlynk.updateStaticBlynk() 
@@ -359,7 +356,6 @@ def initializeSGSPart2():
         print("----------------------")
         print(returnStatusLine("GardenCam",config.GardenCam_Present))
         print(returnStatusLine("Lightning Mode",config.Lightning_Mode))
-    
         print(returnStatusLine("MySQL Logging Mode",config.enable_MySQL_Logging))
         print(returnStatusLine("UseBlynk",config.USEBLYNK))
         print()

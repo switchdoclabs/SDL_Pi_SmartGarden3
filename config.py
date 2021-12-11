@@ -15,7 +15,7 @@ SGSConfigurationJSON = {}
 #############
 # Software Debug
 ############
-SWDEBUG = False
+SWDEBUG = True
 LOCKDEBUG = False 
 ############
 #MySQL Logging and Password Information
@@ -81,8 +81,6 @@ manual_water = False
 # Moisture Sensor and Pump Count  - Do not modify
 ############
 
-moisture_sensor_count = 0
-valve_count = 0
 bluetooth_count = 0
 
 

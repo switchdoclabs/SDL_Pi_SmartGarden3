@@ -52,7 +52,7 @@ def valveCheck():
         if ((single["Control"] == "Timed") and (single["DOWCoverage"] != "NNNNNNN")):
            
             if (stateValveCheck(single["id"],single["ValveNumber"])):
-                    #print("valveState Found for",single["id"],single["ValveNumber"])
+                    print("valveState Found for",single["id"],single["ValveNumber"])
                     NextTime = stateValveFetchTime(single["id"],single["ValveNumber"])
                     nowTime = datetime.datetime.now()
                     
@@ -92,15 +92,17 @@ def valveCheck():
                 state.valveStatus.append(newValve)
                 print("newValve=", newValve) 
         ################# 
-        # check for MS Control
+        # check for BT MS Control
         ################# 
        
         myControl = single["Control"]
+        #if (config.SWDEBUG):
+        #    print("LatestBluetoothSensors=", state.LatestBluetoothSensors)
         
-        if (myControl[0:2] == "MS"):   # found Moisture sensor
-
+        if (myControl[0:2] == "BT"):   # found Moisture sensor
+            print("Found Moisture Sensor =", myControl)
             # check for 15 minute lapse
-            # never do pump turn ons because of MS control more than
+            # never do pump turn ons because of BTMS control more than
             # every 15 minutes
             
             if (state.nextMoistureSensorActivate < datetime.datetime.now()):
@@ -108,15 +110,24 @@ def valveCheck():
                     print ("READY TO CHECK FOR MS and PUMP")
                 mySplit = myControl.split("/")
 
-                MSNumber = mySplit[0][3:]
-                Name = mySplit[1]
-                myID = mySplit[2]
+                BTMSNumber = mySplit[1]
+                Name = mySplit[2]
+                myID = mySplit[3]
             
 
-                myMoistureSensor = getMoistureReading(myID, MSNumber)
-                myMoistureReading = myMoistureSensor["sensorValue"]
-                myMoistureSensorType = myMoistureSensor["sensorType"]
-           
+                myMoistureSensor = getMoistureReading(myID, BTMSNumber)
+                if (myMoistureSensor == None):
+                    if (config.SWDEBUG):
+                        print("Sensor Reading %s Not Found Yet" % (BTMSNumber))
+                    myMoistureReading = 100 
+                    myMoistureSensorType = "BT"
+                else:
+                    myMoistureReading = myMoistureSensor["moisture"]
+                    myMoistureSensorType = myMoistureSensor["sensorType"]
+                print("myMoistureSensor = ", myMoistureSensor )
+                print("myMoistureReading = ", myMoistureReading)
+                print("myMoistureSensorType =", myMoistureSensorType)
+                
                 # check for threshold
                 # less than 5% means bad sensor, do nothing
                 if (float(myMoistureReading) > 5.0):
@@ -131,7 +142,7 @@ def valveCheck():
                             print("turn ON Valve #", single["id"], single["ValveNumber"])
                         AccessValves.turnOnTimedValve(single)
                         if (config.SWDEBUG):
-                            print("Valve Turned On by MS Sensor#%s/%s/%s for %s Seconds " % (MSNumber, Name, myID, single["OnTimeInSeconds"]  ))
+                            print("Valve Turned On by BTMS Sensor#%s/%s/%s for %s Seconds " % (BTMSNumber, Name, myID, single["OnTimeInSeconds"]  ))
                         pclogging.valvelog(single["id"], single["ValveNumber"], 1, "MS Sensor "+str(myThreshold) + ">" + str(myMoistureReading), "", single["OnTimeInSeconds"])
                     else:
                         if (config.SWDEBUG):
@@ -161,11 +172,12 @@ def valveCheck():
 
 def getMoistureReading(myID, myMSNumber):
 
-    for singleSensor in state.moistureSensorStates:
+    for singleSensor in state.LatestBluetoothSensors:
         if (singleSensor["id"].replace(" ", "") == myID.replace(" ", "")):
-            if (int(singleSensor["sensorNumber"]) == int(myMSNumber)):
+            if (singleSensor["pickaddress"] == myMSNumber):
                 return singleSensor 
 
+    return None
 
         
 

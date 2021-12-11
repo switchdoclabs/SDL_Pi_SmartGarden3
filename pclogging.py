@@ -136,10 +136,32 @@ def processBluetoothSensor(MQTTJSON):
                 #print("trying database")
                 con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
-                query = "INSERT INTO BluetoothSensorData(DeviceID, MacAddress, Temperature, Brightness, Moisture, Conductivity, Battery, SensorType, TimeRead, ReadCount ) VALUES('%s', '%s', %f, %d, %d, %d, %d, '%s', '%s', %d)" % (MQTTJSON["id"], MQTTJSON["macaddress"], round(float(MQTTJSON["temperature"])/10.0,1), int(MQTTJSON["brightness"]), int(MQTTJSON["moisture"]), int(MQTTJSON["conductivity"]), int(MQTTJSON["battery"]),  MQTTJSON["sensorType"], MQTTJSON["timestamp"], int(MQTTJSON["readCount"]))
+
+                splitline = MQTTJSON["macaddress"].split(" ")
+                pickaddresslist = splitline[0].split(":")
+                pickaddress = pickaddresslist[4] + ":" + pickaddresslist[5]
+
+                query = "INSERT INTO BluetoothSensorData(DeviceID, MacAddress, PickAddress, Temperature, Brightness, Moisture, Conductivity, Battery, SensorType, TimeRead, ReadCount ) VALUES('%s', '%s', '%s',  %f, %d, %d, %d, %d, '%s', '%s', %d)" % (MQTTJSON["id"], MQTTJSON["macaddress"], pickaddress, round(float(MQTTJSON["temperature"])/10.0,1), int(MQTTJSON["brightness"]), int(MQTTJSON["moisture"]), int(MQTTJSON["conductivity"]), int(MQTTJSON["battery"]),  MQTTJSON["sensorType"], MQTTJSON["timestamp"], int(MQTTJSON["readCount"]))
                 #print("query=", query)
                 cur.execute(query)
                 con.commit()
+                # also update current sensor array
+                sensorUpdated = False
+                #print("state.LatestBluetoothSensors =", state.LatestBluetoothSensors)
+                for sensor in state.LatestBluetoothSensors:
+                    if (sensor["pickaddress"] == pickaddress):
+                        state.LatestBluetoothSensors.remove(sensor)
+                        # add new one in
+                        myDict = MQTTJSON
+                        myDict["pickaddress"] = pickaddress
+                        state.LatestBluetoothSensors.append(myDict)
+                        sensorUpdated = True
+                if (sensorUpdated == False):
+                    # new item 
+                    myDict = MQTTJSON
+                    myDict["pickaddress"] = pickaddress
+                    state.LatestBluetoothSensors.append(myDict)
+
         except mdb.Error as e:
                 traceback.print_exc()
                 print("Error %d: %s" % (e.args[0],e.args[1]))

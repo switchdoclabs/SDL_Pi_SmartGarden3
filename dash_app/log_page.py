@@ -1,5 +1,3 @@
-
-
 import dash
 import dash_bootstrap_components as dbc
 import dash_html_components as html
@@ -95,17 +93,17 @@ def buildTableFig(data, title):
                      )
         return fig
     
-    if (title=="Sensor Log"):
+    if (title=="Bluetooth Sensor Log"):
         fig = go.Figure(data=[
 		go.Table(
                    header = dict(
                      values = [
-		                   ['<b>TimeStamp</b>'], 
-				   ['<b>DeviceID</b>'],
-                                   ['<b>Sensor Number</b>'],
-                                   ['<b>Sensor Value</b>'],
-                                   ['<b>Sesnor Type On</b>'],
-                                   ['<b>TimeStamp Type</b>'],
+		                           ['<b>TimeStamp</b>'], 
+				                   ['<b>DeviceID</b>'],
+                                   ['<b>PickAddress</b>'],
+                                   ['<b>Moisture</b>'],
+                                   ['<b>Temperature</b>'],
+                                   ['<b>Sensor Type</b>'],
 				   ],
                      line_color='darkslategray',
                      fill_color='royalblue',
@@ -237,7 +235,7 @@ def fetchSensorLog():
                 #print("trying database")
                 con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
-                query = "SELECT * FROM Sensors ORDER BY ID DESC LIMIT 20" 
+                query = "SELECT * FROM BluetoothSensorData ORDER BY ID DESC LIMIT 20" 
                 #print("query=", query)
                 cur.execute(query)
                 con.commit()
@@ -248,17 +246,17 @@ def fetchSensorLog():
                 SensorNumber = []
                 SensorValue = []
                 SensorType = []
-                TimeRead = []
+                Temperature = []
 
                 for item in records:
-                     Time.append(item[6])
+                     Time.append(item[2])
                      DeviceID.append(item[1])
-                     SensorNumber.append(item[2])
-                     SensorValue.append(item[3])
-                     SensorType.append(item[4])
-                     TimeRead.append(item[5])
+                     SensorNumber.append(item[4])
+                     SensorValue.append(item[7])
+                     SensorType.append(item[10])
+                     Temperature.append(item[5])
                 
-                return Time, DeviceID,  SensorNumber, SensorValue, SensorType, TimeRead 
+                return Time, DeviceID,  SensorNumber, SensorValue, SensorType, Temperature 
         except mdb.Error as e:
                 traceback.print_exc()
                 print("Error %d: %s" % (e.args[0],e.args[1]))
@@ -286,7 +284,7 @@ def updateLogs():
       layout.append(dcc.Graph(id={"type": "LPdynamic", "index": "sensorlog"},figure=fig))	
 
       data = fetchSensorLog()
-      fig = buildTableFig(data,"Sensor Log")
+      fig = buildTableFig(data,"Bluetooth Sensor Log")
       layout.append(dcc.Graph(id={"type": "LPdynamic", "index": "valvelog"},figure=fig))	
 
 

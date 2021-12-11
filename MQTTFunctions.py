@@ -8,8 +8,8 @@ import config
 import json
 import pclogging
 import datetime
-import AccessMS
 import traceback
+import InitExtenders
 
 def on_WirelessMQTTClientconnect(client, userdata, flags, rc):
 
@@ -77,11 +77,6 @@ def on_WirelessMQTTClientmessage(client, userdata, message):
         pclogging.systemlog(config.DEBUG,temp)
         processRebootMessage(MQTTJSON)
 
-    if (str(MQTTJSON['messagetype']) == str(MQTTSENSORS)):
-        if (config.SWDEBUG):
-            print("Sensor Message Recieved")
-        processSensorMessage(MQTTJSON)
-
     if (str(MQTTJSON['messagetype']) == str(MQTTHYDROPONICS)):
         if (config.SWDEBUG):
             print("Hydroponics Message Recieved")
@@ -108,7 +103,7 @@ def processRebootMessage(MQTTJSON):
     print("Processing Reboot"); 
     print("+++++++++++++++++++++");
     myID = MQTTJSON["id"]      
-    AccessMS.initializeOneExtender(myID)
+    InitExtenders.initializeOneExtender(myID)
 
 def processHydroponicsSensorMessage(MQTTJSON):
     try:
@@ -138,43 +133,6 @@ def processInfraredSensorMessage(MQTTJSON):
     pclogging.processInfraredSensor(MQTTJSON)
 
 
-
-
-def processSensorMessage(MQTTJSON):
-    try:
-        if (config.SWDEBUG):
-            print("-----------------")
-            print("Processing MQTT Sensor Message")
-    
-        parseSensors = MQTTJSON["sensorValues"]
-        parseSensorsArray = parseSensors.split(",")
-        try:
-            parseRawSensors = MQTTJSON["rawSensorValues"]
-        except:
-            parseRawSensors = "-1,-1,-1,-1"
-        parseRawSensorsArray = parseRawSensors.split(",")
-        for i in range(0,4):
-            for singleSensor in state.moistureSensorStates:
-                
-                if (singleSensor["id"] == str(MQTTJSON["id"])):
-                    if (singleSensor["sensorNumber"] == str(i+1)):
-                       singleSensor["sensorValue"] = str(parseSensorsArray[i])
-                       singleSensor["rawSensorValue"] = str(parseRawSensorsArray[i])
-
-                       currentTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                       singleSensor["timestamp"] = currentTime
-        
-
-        if (config.SWDEBUG):
-            print("-----------------")
-            print("MoistureSensorStates")
-            print(state.moistureSensorStates)
-
-            print("-----------------")
-        for singleSensor in state.moistureSensorStates:
-                pclogging.sensorlog(singleSensor["id"], singleSensor["sensorNumber"], singleSensor["sensorValue"], singleSensor["rawSensorValue"], singleSensor["sensorType"], singleSensor["timestamp"]) 
-    except:
-       print(traceback.format_exc()) 
 
 
 ##############

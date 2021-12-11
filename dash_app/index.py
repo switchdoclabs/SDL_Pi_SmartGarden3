@@ -253,7 +253,7 @@ def logpageupdate(n_intervals, id, value):
     
     if (id['index'] == "sensorlog"):
         data = log_page.fetchSensorLog()
-        fig = log_page.buildTableFig(data,"Sensor Log")
+        fig = log_page.buildTableFig(data,"Bluetooth Sensor Log")
 
     print("<log_page table Update complete",id['index'])
     return fig

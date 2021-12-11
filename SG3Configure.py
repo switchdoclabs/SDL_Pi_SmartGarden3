@@ -72,7 +72,7 @@ class SGSConfigure(App):
     
     def setDefaults(self):
         self.SWDEBUG = False
-        self.enable_MySQL_Logging = true
+        self.enable_MySQL_Logging = True
         self.English_Metric = False
         self.MySQL_Password = "password"
         self.mailUser = "yourusername"
@@ -303,6 +303,40 @@ class SGSConfigure(App):
         vbox.append(self.menubar)
         return vbox
 
+    def getBluetoothList(self):
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                
+                query = "SELECT * FROM BluetoothSensors" 
+
+                print("query=", query)
+                cur.execute(query)
+                myRecords = cur.fetchall()
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                myRecords = []
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+
+        return myRecords
+
+
+    def returnAssignedBluetooth(self):
+
+        myRecords = self.getBluetoothList()
+        bluetoothAssignedCount = [] 
+        for record in myRecords:
+            if (len(record[4]) == 4):
+                bluetoothAssignedCount.append(record)
+        return bluetoothAssignedCount
+
     def buildScreen0(self):
         #screen 0
 
@@ -389,6 +423,11 @@ class SGSConfigure(App):
         
         items = ()
         self.ValveControlItems = ("Off","Timed")
+        btList = self.returnAssignedBluetooth()
+        for btItem in btList: 
+
+            vcitem= ("BT/" + btItem[3]+ "/" + btItem[5] +"/"+ btItem[4])
+            self.ValveControlItems = self.ValveControlItems + (vcitem, )
 
         for ext in valves:
             if (len(str(ext[0])) < 4):
@@ -396,10 +435,7 @@ class SGSConfigure(App):
 
             else:
                     item = (str(ext[1])+" / "+str(ext[0])+ " / " +str(ext[2]))
-            
-            for i in range(1,5):
-                vcitem= ("MS#" + str(i)+ "/" + str(ext[1]) +"/"+ str(ext[0]))
-                self.ValveControlItems = self.ValveControlItems + (vcitem, )
+
             items = items +  (item, )
 
         self.TimedItems = ("15 Minutes", "30 Minutes" , "1 Hour", "3 Hours", "6 Hours", "12 Hours", "Daily")
@@ -854,7 +890,7 @@ class SGSConfigure(App):
     def onValveSaveButton (self, widget, name='', surname=''):
         print("onValveSaveButton Clicked")
         myUnit = self.current_listView_key 
-        
+        print("myUnit=", myUnit)    
         myID = myUnit.split("/")[1]
         name = myUnit.split("/")[0]
         
@@ -1327,6 +1363,8 @@ class SGSConfigure(App):
 
 
         return vbox
+
+
 
     def buildScreen4(self):
         #screen 4
