@@ -40,7 +40,7 @@ import MySQLdb as mdb
 # p_v Page
 ################
 def buildTableFig(myData, title):
-    print("myData=", myData)
+    #print("myData=", myData)
     if (title=="Pump and Valve Programming"):
         fig = go.Figure(data=[
 		go.Table(
@@ -104,7 +104,7 @@ def fetchProgramming():
     myArray = []
 
     wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
-    print("wirelessJSON = ", wirelessJSON)
+    #print("wirelessJSON = ", wirelessJSON)
     myIDList = []
     myNameList = []
     myValveNumberList = []
@@ -145,7 +145,7 @@ def fetchProgramming():
                 myNameList.append(str(myName))
                 currentValve = fetchValveJSON(myID, i)
                 if len(currentValve) > 0:
-                    print ('currentValve=', currentValve)
+                    #print ('currentValve=', currentValve)
 
                     myValveNumberList.append(str(currentValve["ValveNumber"]))
                     myControlList.append(str(currentValve["Control"]))
@@ -168,7 +168,7 @@ def fetchProgramming():
     myArray.append(myOnTimeInSecondsList) 
     myArray.append(myShowGraphList) 
     # set up table display
-    print('myArray=', myArray) 
+    #print('myArray=', myArray) 
 
     return myArray
 
@@ -176,7 +176,7 @@ def updateProgramming():
       layout = [] 
       data = fetchProgramming()
       fig = buildTableFig(data,"Pump and Valve Programming")
-      print("fig=", fig)
+      #print("fig=", fig)
       layout.append(dcc.Graph(id={"type": "PVPdynamic", "index": "pvprogramming"},figure=fig, ))	
 
       return layout

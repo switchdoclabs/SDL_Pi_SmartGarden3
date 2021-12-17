@@ -86,10 +86,11 @@ def findWirelessExtenders():
     
         print ("checking IP:", str(ip))
         JSON = checkForDeviceFromIP(ip)
+
         if len(JSON) != 0:
             # check for SGS JSON
             #print("JSON[1]=", JSON[1])
-            
+            # put in Hudroponics Data
             DumpedJSON = json.dumps(JSON[1])
             DumpedJSON = json.loads(DumpedJSON)
             DumpedJSON = json.loads(DumpedJSON)

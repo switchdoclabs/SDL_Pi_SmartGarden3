@@ -273,26 +273,26 @@ class SGSConfigure(App):
     # screen builds
 
     def establishMenu(self,vbox):
-        menu = gui.Menu(width='100%', height='30px')
-        m0 = gui.MenuItem('SGS Configure', width=90, height=30)
+        menu = gui.Menu(width='100%', height='60px')
+        m0 = gui.MenuItem('SGS Configure', width=90, height=60)
         m0.onclick.do(self.menu_screen0_clicked)
-        m05 = gui.MenuItem('Valve Report', width=90, height=30)
+        m05 = gui.MenuItem('Valve Report', width=90, height=60)
         m05.onclick.do(self.menu_screen05_clicked)
-        m06 = gui.MenuItem('Name Change', width=90, height=30)
+        m06 = gui.MenuItem('Configure Extender', width=90, height=60)
         m06.onclick.do(self.menu_screen06_clicked)
-        m1 = gui.MenuItem('DM', width=70, height=30)
+        m1 = gui.MenuItem('DM', width=70, height=60)
         m1.onclick.do(self.menu_screen1_clicked)
-        m2 = gui.MenuItem('MTN', width=70, height=30)
+        m2 = gui.MenuItem('MTN', width=70, height=60)
         m2.onclick.do(self.menu_screen2_clicked)
-        m3 = gui.MenuItem('PSMax', width=70, height=30)
+        m3 = gui.MenuItem('PSMax', width=70, height=60)
         m3.onclick.do(self.menu_screen3_clicked)
-        m4 = gui.MenuItem('WS-WU', width=70, height=30)
+        m4 = gui.MenuItem('WS-WU', width=70, height=60)
         m4.onclick.do(self.menu_screen4_clicked)
-        m5 = gui.MenuItem('B-TB', width=70, height=30)
+        m5 = gui.MenuItem('B-TB', width=70, height=60)
         m5.onclick.do(self.menu_screen5_clicked)
-        m6 = gui.MenuItem('Pins', width=70, height=30)
+        m6 = gui.MenuItem('Pins', width=70, height=60)
         m6.onclick.do(self.menu_screen6_clicked)
-        m7 = gui.MenuItem('CMQTTR', width=70, height=30)
+        m7 = gui.MenuItem('CMQTTR', width=70, height=60)
         m7.onclick.do(self.menu_screen7_clicked)
 
         menu.append([m0, m05, m06, m1, m2, m3, m4, m5, m6, m7])
@@ -348,7 +348,7 @@ class SGSConfigure(App):
         vbox.style['border-color'] = 'blue'
 
         # Menu
-        menubox =  gui.Container(width=1000, height=30, style="background: LightGray")
+        menubox =  gui.Container(width=1000, height=60, style="background: LightGray")
         menubox = self.establishMenu(menubox)
         vbox.append(menubox)
 
@@ -560,7 +560,7 @@ class SGSConfigure(App):
                 "Control": "Off",
                 "MSThresholdPercent": "65",
                 "TimerSelect": "Daily",
-                "DOWCoverage": "YYYYYYYY",
+                "DOWCoverage": "YYYYYYY",
                 "StartTime": "05:00",
                 "OnTimeInSeconds": "10",
                 "ShowGraph" : False
@@ -858,6 +858,8 @@ class SGSConfigure(App):
         self.DisplaySG_CB = gui.CheckBoxLabel( 'Display Graph', False, height=30, style='margin:5px; background: LightGray ')
        
         self.ValveSaveButton = gui.Button('Save Valve',height=30, width=100, margin=10)
+        self.ValveSaveButton.set_enabled(False)
+
         self.ValveSaveButton.onclick.do(self.onValveSaveButton)
 
         
@@ -895,6 +897,8 @@ class SGSConfigure(App):
         name = myUnit.split("/")[0]
         
         self.updateValveJSON(myID, self.currentValveNumber)
+        self.ValveSaveButton.set_enabled(False)
+        self.dropDownValve.select_by_value('None' )        
 
     def drop_down_MS_changed (self, widget, selected_item_key):
         myUnit = selected_item_key
@@ -958,12 +962,14 @@ class SGSConfigure(App):
 
 
     def drop_down_valve_changed (self, widget, selected_item_key):
+        print("myUnit=", selected_item_key)
         myUnit = selected_item_key
         # parse values
         splitMyUnit = myUnit.split("/")
         # get the default values
         #print ('valveJSON=', valveJSON)
         if (myUnit != "None Selected"):
+            self.ValveSaveButton.set_enabled(True)
             values = myUnit.split("/")
             vnum = values[2].split(" ")
             self.currentValveNumber = vnum[1]
@@ -1090,7 +1096,7 @@ class SGSConfigure(App):
 
 
 
-        screen1header = gui.Label("Change Extender Names", style='margin:10px; background: LightGray')
+        screen1header = gui.Label("Configure Extender", style='margin:10px; background: LightGray')
         vbox.append(screen1header)
 
         items = ()
@@ -1102,7 +1108,7 @@ class SGSConfigure(App):
             items = items + (item,)
 
         self.listView2 = gui.ListView.new_from_list(items, width=400, height=25*len(items), margin='10px')
-        self.listView2.onselection.do(self.names_list_view_on_selected)
+        self.listView2.onselection.do(self.configext_list_view_on_selected)
         
         vbox.append(self.listView2)
        
@@ -1110,7 +1116,7 @@ class SGSConfigure(App):
 
         return vbox
 
-    def names_list_view_on_selected(self, widget, selected_item_key):
+    def configext_list_view_on_selected(self, widget, selected_item_key):
         """ The selection event of the listView, returns a key of the clicked event.
             You can retrieve the item rapidly
         """
@@ -1837,7 +1843,13 @@ class SGSConfigure(App):
             #print("JSONLength=", len(JSON))
             if len(JSON) != 0 :
                 print("JSON=", JSON)
-                # check for SGS JSON
+                JSON['hydroponics_temperature'] = 'false'
+                JSON['hydroponics_tds'] = 'false'
+                JSON['hydroponics_ph'] = 'false'
+                JSON['hydroponics_turbidity'] = 'false'
+                JSON['hydroponics_level'] = 'false'
+                print("Post_JSON=", JSON)
+# check for SGS JSON
                 #print("JSON[1]=", JSON[1])
              
                 #DumpedJSON = json.dumps(JSON)

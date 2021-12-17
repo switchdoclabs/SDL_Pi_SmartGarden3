@@ -26,6 +26,7 @@ import json
 headerColor = 'grey'
 rowEvenColor = 'lightgrey'
 rowOddColor = 'white'
+rowErrorColor = 'red'
 
 # read JSON
 
@@ -41,8 +42,23 @@ import MySQLdb as mdb
 ################
 def buildTableFig(myData, title):
     #print("myData=", myData)
-    print("title=", title)
+    #print("title=", title)
     if (title=="Current Bluetooth Sensor Status"):
+        myFillColor =  [[rowOddColor,rowEvenColor,rowOddColor, rowEvenColor]*10]
+        # check for possibly bad sensors
+        redCheck = False
+        count = 0
+        for moisture in myData[6]:
+            if (moisture < 5):
+                myFillColor[0][count] = "red"
+            count = count+1
+        # next check battery
+        count = 0
+        for battery in myData[9]:
+            if (battery < 5):
+                myFillColor[0][count] = "red"
+            count = count+1
+
         fig = go.Figure(data=[
 		go.Table(
                    columnwidth = [200,100,120,250,250,150,150,150,150,150, 150 ],
@@ -69,7 +85,7 @@ def buildTableFig(myData, title):
                      values=myData,
                      line_color='darkslategray',
                      # 2-D list of colors for alternating rows
-                     fill_color = [[rowOddColor,rowEvenColor,rowOddColor, rowEvenColor]*10],
+                     fill_color = myFillColor,
                      fill=dict(color=['paleturquoise', 'white']),
                      align=['left', 'center'],
                      font_size=10,
@@ -78,11 +94,11 @@ def buildTableFig(myData, title):
 		 ],
 		 layout= {"title" : title, "autosize" : True, "height" : 1500},
                      )
-        print ("fig=", fig)
+        #print ("fig=", fig)
         return fig
 	
 	
-    fig = html.H1(children="Error in print system log")
+    fig = html.H1(children="Error in Sensor DB")
 
 
          
@@ -219,10 +235,10 @@ def fetchProgramming():
     mySensorTypeList = []
 
     bluetoothData = getBluetoothData()
-    print("bta=", bluetoothData)
+    #print("bta=", bluetoothData)
 
     for bluetooth in bluetoothData:
-        print("bt=", bluetooth)
+        #print("bt=", bluetooth)
         myNameList.append(bluetooth[5])
         myPickAddressList.append(bluetooth[3])
         myAssignmentList.append(bluetooth[4])
@@ -239,12 +255,12 @@ def fetchProgramming():
             mySensorTypeList.append("")
         else:
             myLastReadingList.append(btreading[2])
-            myTemperatureList.append(btreading[4])
-            myMoistureList.append(btreading[6])
-            myLightList.append(btreading[5])
-            myConductivityList.append(btreading[7])
-            myBatteryList.append(btreading[8])
-            mySensorTypeList.append(btreading[9])
+            myTemperatureList.append(btreading[5])
+            myMoistureList.append(btreading[7])
+            myLightList.append(btreading[6])
+            myConductivityList.append(btreading[8])
+            myBatteryList.append(btreading[9])
+            mySensorTypeList.append(btreading[10])
 
 
     myArray.append(myNameList)
@@ -259,7 +275,7 @@ def fetchProgramming():
     myArray.append(myBatteryList) 
     myArray.append(mySensorTypeList) 
     # set up table display
-    print('myArray=', myArray) 
+    #print('myArray=', myArray) 
 
     return myArray
 
@@ -267,7 +283,7 @@ def updateProgramming():
       layout = [] 
       data = fetchProgramming()
       fig = buildTableFig(data,"Current Bluetooth Sensor Status")
-      print("fig=", fig)
+      #print("fig=", fig)
       layout.append(dcc.Graph(id={"type": "BSSdynamic", "index": "bluetoothsensorstatus"},figure=fig, ))	
 
       return layout

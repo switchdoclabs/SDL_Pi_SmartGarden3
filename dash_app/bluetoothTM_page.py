@@ -297,7 +297,7 @@ def returnNakedTimeString():
 
 def BluetoothTMPage():
 
-    print("in bluetooth page TM")
+    #print("in bluetooth page TM")
     WirelessList = getWirelessList()
     #layout = []
 
@@ -311,5 +311,5 @@ def BluetoothTMPage():
         
 
 
-    print("btlayout=", layout)
+    #print("btlayout=", layout)
     return layout

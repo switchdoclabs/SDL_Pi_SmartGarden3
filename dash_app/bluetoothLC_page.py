@@ -87,7 +87,7 @@ def fetchSLC(timeDelta, wireless, btaddress ):
                 before = before.strftime('%Y-%m-%d %H:%M:%S')
                 query = "SELECT Brightness, Conductivity, TimeStamp FROM `BluetoothSensorData` WHERE (TimeStamp > '%s') AND (DeviceID = '%s') AND (MacAddress = '%s')  ORDER BY id ASC" % (before, wireless["id"], btaddress)
 
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 con.commit()
                 records = cur.fetchall()
@@ -403,5 +403,5 @@ def BluetoothLCPage():
         
 
 
-    print("btlayout=", layout)
+    #print("btlayout=", layout)
     return layout

@@ -86,21 +86,24 @@ def buildPics(SkyCamList):
 
     output = []
     index = 0
-    
+   
     for cam in SkyCamList:
         if (cam != "GardenCamPi"):
             prefix = "Infrared "
             picwidth = 256
             picheight = 256
+            suffix = "-I"
         else:
             prefix = ""
             picwidth = 350*1.77
             picheight = 350
+            suffix = ""
         output.append( html.H3(prefix+cam))
         #output.append( html.Img( 
-            #id={'type' : 'SkyCamPic', 'index' : index},
-            #height=350, width=350*1.77, src="/assets/"+cam+".jpg"))
+        #    id={'type' : 'SkyCamPic', 'index' : index},
+        #    height=350, width=350*1.77, src="/assets/"+cam+".jpg"))
         picname = glob.glob("assets/"+cam+"*.jpg")
+        #print("index=", index)
     
         #print("picname=", picname)
         output.append( 
@@ -109,8 +112,11 @@ def buildPics(SkyCamList):
                 [
                     dbc.Col(html.Div(
                         html.Img( 
-                            id={'type' : 'SkyCamPic', 'index' : index},
-                            height=picheight, width=picwidth, src="/"+picname[0]))
+                            id={'type' : 'SkyCamPic'+suffix, 'index' : index},
+                            height=picheight, width=picwidth, src="/"+picname[0])
+                        #html.H2("Test Text")
+                        
+                            )
                         ),
                     dbc.Col(html.Div([html.H4("Time Lapses"),
                     html.Br(),
@@ -123,6 +129,7 @@ def buildPics(SkyCamList):
               ]  )
               )
         index = index+1
+    
     #print(output)    
     return output
 

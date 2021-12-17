@@ -311,6 +311,19 @@ def update_valve_graphs(n_intervals, id, value ):
 ##################
 # Status Page
 ##################
+@app.callback(Output({'type' : 'VSPdynamic', 'index' : MATCH }, 'color' ),
+              [Input('main-interval-component','n_intervals'),
+              Input({'type' : 'VSPdynamic', 'index' : MATCH }, 'id' )],
+              [State({'type' : 'VSPdynamic', 'index' : MATCH}, 'color'  )]
+              )
+
+def update_indicators(n_intervals, id, color):
+   if ((n_intervals % (1*6)) == 0): # 1 minutes -10 second timer
+   
+    return status_page.returnPiThrottledColor(id)
+   else:
+    raise PreventUpdate
+
 
 @app.callback(
 	      [
@@ -334,13 +347,15 @@ def update_gauges(n_intervals, id, value):
         myName = "Pi Memory Usage" 
      if (id['GaugeType'] == 'pi-loading'):
         myName = "Pi CPU Loading" 
+     if (id['GaugeType'] == 'pi-temp'):
+        myName = "Pi CPU Temperature(C) " 
      #print("<status_page Gauge Update complete",id['GaugeType'])
 
      return newValue, myName 
    else:
     raise PreventUpdate
 
-
+#345
 @app.callback(Output({'type' : 'SPdynamic', 'index' : MATCH, 'DeviceID' : MATCH}, 'color' ),
               [Input('main-interval-component','n_intervals'),
               Input({'type' : 'SPdynamic', 'index' : MATCH, 'DeviceID' : MATCH}, 'id' )],
@@ -358,7 +373,39 @@ def update_statuspage(n_intervals, id, color):
     #print("n_intervals=", n_intervals)
     #print ('Indicator id {} / n_intervals = {}'.format(id['index'], n_intervals))
     if (newValveState == ""):
-        newValveState = status_page.returnLatestValveRecord(id['DeviceID'] )
+         newValveState = status_page.returnLatestValveRecord(id['DeviceID'] )
+
+    status  = status_page.returnIndicatorValue(newValveState, id['index'])
+    color = status_page.updateIndicator(status)
+
+    if (id['index'] == 7):
+     if (id['GaugeType'] == 'pi-loading'):
+        myName = "Pi CPU Loading" 
+     #print("<status_page Gauge Update complete",id['GaugeType'])
+
+     return newValue, myName 
+   else:
+    raise PreventUpdate
+
+# indicators
+@app.callback(Output({'type' : 'SPVdynamic', 'index' : MATCH, 'DeviceID' : MATCH}, 'color' ),
+              [Input('main-interval-component','n_intervals'),
+              Input({'type' : 'SPVdynamic', 'index' : MATCH, 'DeviceID' : MATCH}, 'id' )],
+              [State({'type' : 'SPVdynamic', 'index' : MATCH, 'DeviceID' : MATCH}, 'color'  )]
+              )
+
+def update_statuspage(n_intervals, id, color):
+   global newValveState
+   #if (True): # 1 minutes -10 second timer
+   if ((n_intervals % (1*6)) == 0): # 1 minutes -10 second timer
+    
+    #print(">status_page Indicator Update started",id['index'], id['DeviceID'])
+    #print("id=", id)
+    #print("newValveState=", newValveState)
+    #print("n_intervals=", n_intervals)
+    #print ('Indicator id {} / n_intervals = {}'.format(id['index'], n_intervals))
+    if (newValveState == ""):
+         newValveState = status_page.returnLatestValveRecord(id['DeviceID'] )
 
     status  = status_page.returnIndicatorValue(newValveState, id['index'])
     color = status_page.updateIndicator(status)
@@ -369,8 +416,83 @@ def update_statuspage(n_intervals, id, color):
     return color
    else:
     raise PreventUpdate
+#470
+@app.callback(Output({'type' : 'SPBdynamic', 'index' : MATCH, 'DeviceID' : MATCH, 'Indicator' : MATCH}, 'color' ),
+              [Input('main-interval-component','n_intervals'),
+              Input({'type' : 'SPBdynamic', 'index' : MATCH, 'DeviceID' : MATCH, 'Indicator' : MATCH}, 'id')],
+              [State({'type' : 'SPBdynamic', 'index' : MATCH, 'DeviceID' : MATCH, 'Indicator' : MATCH}, 'color')]
+              )
 
+def bt_update_statuspage(n_intervals, id, color):
+   #if (True): # 1 minutes -10 second timer
+   if ((n_intervals % (5*6)) == 0): # 1 minutes -10 second timer
+    
+    print("-status_page Bluetooth Indicator Update started",id['index'], id['DeviceID'])
+    print("id=", id)
+
+    
+    # fetch Bluetooth Sensor Data
+    mySensorData = status_page.getLastBTReading(id['index'])
+    # green if > 10 , red if < 10
+    moistureIndicator = "gray"
+    # green if > 10, red if less
+    batteryIndicator = "gray"
+    # not active if data is older than 1 Hour 
+    activeIndicator = "gray"
+
+    print("mySensorData=", mySensorData)
+    
+
+    #check for null record
+    if (len(mySensorData) == 0):
+        # No sensor, all gray
+        moistureIndicator = "gray"
+        batteryIndicator = "gray"
+        activeIndicator = "gray"
+    else:
+        # now do the active calculations
+        sampleTimestamp =  mySensorData[2]
+        #print("sampleTimeStamp =", sampleTimestamp)
+        activeSpan = datetime.timedelta(hours=1)
+        timespan = datetime.datetime.now() - sampleTimestamp
+        #print("timespan=", timespan)
+        if (timespan > activeSpan):
+            #print("too old")
+            moistureIndicator = "gray"
+            batteryIndicator = "gray"
+            activeIndicator = "red"
+        else:
+            #print("active")
+            activeIndicator = "greenyellow"
+            # now check for other
+            myBattery = int(mySensorData[9])
+            myMoisture = int(mySensorData[7])
+            if (myBattery < 10):
+                batteryIndicator = "red"
+            else:
+                batteryIndicator = "greenyellow"
+            if (myMoisture < 10):
+                moistureIndicator = "red"
+            else:
+                moistureIndicator = "greenyellow"
+        
+    print("moistureIndicator = ", moistureIndicator )
+    print("batteryIndicator = ", batteryIndicator )
+    print("activeIndicator = ", activeIndicator )
+    
+    
+    if (id['Indicator'] == 0):
+        return [moistureIndicator]
  
+    if (id['Indicator'] == 1):
+        return [batteryIndicator]
+ 
+    if (id['Indicator'] == 2):
+        return [activeIndicator]
+
+   else:
+        raise PreventUpdate
+   return ['purple' ]
 ##################
 # p_v_programming
 ##################
@@ -480,12 +602,13 @@ def updatebluetoothTM(n_intervals,id, value):
     [State({'type': 'SkyCamPic', 'index': 0}, 'value')]
 )
 def update_skypic_metrics(n_intervals, id, value):
-    print("skycampic_n_intervals=", n_intervals)
+    #print("skycampic_n_intervals=", n_intervals)
+    print('index=', id['index'])
     myIndex = id['index']
     # build pictures
     SkyCamList = camera_page.getSkyCamList()
     output = camera_page.buildPics(SkyCamList)
-    print("picoutput=", output)
+    #print("picoutput=", output)
     return [output]
 
 
@@ -599,6 +722,6 @@ def serve_static(resource):
 
 
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=8010)
     #app.run_server(host='0.0.0.0', port=8010)
-    #app.run_server(debug=True, host='0.0.0.0')
+    app.run_server(host='0.0.0.0', port=8010)
+    #app.run_server(debug=True, host='0.0.0.0', port=8010)

@@ -10,6 +10,9 @@ import pclogging
 import datetime
 import traceback
 import InitExtenders
+import scanForResources
+
+
 
 def on_WirelessMQTTClientconnect(client, userdata, flags, rc):
 
@@ -104,6 +107,9 @@ def processRebootMessage(MQTTJSON):
     print("+++++++++++++++++++++");
     myID = MQTTJSON["id"]      
     InitExtenders.initializeOneExtender(myID)
+    scanForResources.updateDeviceStatus(True)
+
+
 
 def processHydroponicsSensorMessage(MQTTJSON):
     try:

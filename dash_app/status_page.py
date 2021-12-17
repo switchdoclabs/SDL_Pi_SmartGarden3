@@ -24,6 +24,9 @@ import config
 import readJSON
 import json
 
+
+import gpiozero
+
 # demo mode
 useRandom = False
 
@@ -92,6 +95,293 @@ def returnLowestSensorValue(SensorType, timeDelta):
 
 
 
+
+
+from vcgencmd import Vcgencmd
+
+#########################
+# vcgencmd get_throttled
+#########################
+ 
+def getPiThrottled():
+ 
+    vcgm = Vcgencmd()
+    thrott_state = vcgm.get_throttled()
+    # print("Get Throttled = ", thrott_state)
+
+    return thrott_state
+
+
+#####################
+#
+#####################
+
+GREEN = "#2bff00"
+
+def returnPiThrottledColor(id):
+     piUVDColor   = GREEN
+     piAFCColor   = GREEN
+     piCTColor    = GREEN
+     piSTLAColor  = GREEN
+     piUVHOColor  = GREEN
+     piAFCHOColor = GREEN
+     piSTLHOColor = GREEN
+     piATHOColor  = GREEN
+     piSTLHOColor = GREEN
+ 
+     throttle_states = getPiThrottled()
+     #print ("Throttle tilanne: ", throttle_states)
+
+     for bit in throttle_states['breakdown']:
+         #print("Now: ", bit)
+         if  throttle_states['breakdown'][bit]:
+             #print("State:", throttle_states['breakdown'][bit])
+             if   bit == '0':
+                  piUVDColor = "red"
+             elif bit == '1':
+                  piAFCColor = "red" 
+             elif bit == '2':
+                  piCTColor = "red"
+             elif bit == '3':
+                  piSTLAColor = "red"
+             elif bit == '16':
+                  piUVHOColor = "red"
+             elif bit == '17':
+                  piAFCHOColor = "red"
+             elif bit == '18':
+                  piATHOColor = "red"
+             elif bit == '19': 
+                  piSTLHOColor = "red"
+
+
+     if (id['index'] == 100):
+        return piUVDColor
+     if (id['index'] == 110):
+        return piAFCColor
+     if (id['index'] == 111):
+        return piCTColor
+     if (id['index'] == 112):
+        return piSTLAColor
+     if (id['index'] == 113):
+        return piUVHOColor
+     if (id['index'] == 114):
+        return piAFCHOColor
+     if (id['index'] == 115):
+        return piATHOColor
+     if (id['index'] == 116):
+        return piSTLHOColor
+     return "orange"
+
+#####################
+#
+#####################
+ 
+def returnPiThrottled():
+ 
+     totalLayout = []
+     piLabelLayout = []
+     piIndicatorLayout = []
+ 
+     piUVDColor   = GREEN
+     piAFCColor   = GREEN
+     piCTColor    = GREEN
+     piSTLAColor  = GREEN
+     piUVHOColor  = GREEN
+     piAFCHOColor = GREEN
+     piSTLHOColor = GREEN
+     piATHOColor  = GREEN
+     piSTLHOColor = GREEN
+ 
+     throttle_states = getPiThrottled()
+     #print ("Throttle tilanne: ", throttle_states)
+
+     for bit in throttle_states['breakdown']:
+         #print("Now: ", bit)
+         if  throttle_states['breakdown'][bit]:
+             #print("State:", throttle_states['breakdown'][bit])
+             if   bit == '0':
+                  piUVDColor = "red"
+             elif bit == '1':
+                  piAFCColor = "red" 
+             elif bit == '2':
+                  piCTColor = "red"
+             elif bit == '3':
+                  piSTLAColor = "red"
+             elif bit == '16':
+                  piUVHOColor = "red"
+             elif bit == '17':
+                  piAFCHOColor = "red"
+             elif bit == '18':
+                  piATHOColor = "red"
+             elif bit == '19': 
+                  piSTLHOColor = "red"
+
+     piLabelLayout.append(
+
+                     html.H6(["Pi CPU Throttled Status (Green=Good, Red=Bad)  ", html.A("Info-link", href="https://pypi.org/project/vcgencmd")])
+                     ,
+                     )
+
+     piIndicatorLayout.append(
+            daq.Indicator(
+                        id = {'type' : 'VSPdynamic', 'index': 100},
+                        color = piUVDColor,
+                        label="Under-volted",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                    )
+                    )
+
+     piIndicatorLayout.append(
+            daq.Indicator(
+                        id = {'type' : 'VSPdynamic', 'index': 110},
+                        color = piAFCColor,
+                        label="Capped",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                    )
+                    )
+
+     piIndicatorLayout.append(
+            daq.Indicator(
+                        id = {'type' : 'VSPdynamic', 'index': 111},
+                        color = piCTColor,
+                        label="Throttled",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                    )
+                    )
+
+     piIndicatorLayout.append(
+            daq.Indicator(
+                        id = {'type' : 'VSPdynamic', 'index': 112},
+                        color = piSTLAColor,
+                        label="Soft temp limit",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                    )
+                    )
+
+     piIndicatorLayout.append(
+            daq.Indicator(
+                        id = {'type' : 'VSPdynamic', 'index': 113},
+                        color = piUVHOColor,
+                        label="Has Under-volted",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                    )
+                    )
+
+     piIndicatorLayout.append(
+            daq.Indicator(
+                        id = {'type' : 'VSPdynamic', 'index': 114},
+                        color = piAFCHOColor,
+                        label="Has Capped",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                    )
+                    )
+
+     piIndicatorLayout.append(
+            daq.Indicator(
+                        id = {'type' : 'VSPdynamic', 'index': 115},
+                        color = piATHOColor,
+                        label="Has Throttled",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                    )
+                    )
+
+     piIndicatorLayout.append(
+            daq.Indicator(
+                        id = {'type' : 'VSPdynamic', 'index': 116},
+                        color = piSTLHOColor,
+                        label="Has Soft temp limit",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                    )
+                    )
+
+
+     totalLayout.append(dbc.Row(piLabelLayout))
+     totalLayout.append(dbc.Row(piIndicatorLayout))
+
+     return totalLayout
+
+
+def getBluetoothData():
+    
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                query = "SELECT * FROM `BluetoothSensors` ORDER BY id ASC" 
+
+                #print("query=", query)
+                cur.execute(query)
+                con.commit()
+                records = cur.fetchall()
+                #print ("Query records=", records)
+                bluelist = []            
+                for record in records:
+                   bluelist.append(record) 
+                return bluelist
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                con.rollback()
+                #sys.exit(1)
+
+        finally:
+                cur.close()
+                con.close()
+
+        return [] 
+
+def getLastBTReading(btaddress):
+    
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                query = "SELECT * FROM `BluetoothSensorData` WHERE (MacAddress = '%s') ORDER BY id DESC LIMIT 1" % (btaddress) 
+
+                #print("query=", query)
+                cur.execute(query)
+                con.commit()
+                records = cur.fetchall()
+                #print ("Query records=", records)
+                if (len(records) == 0):
+                    return []
+                return records[0]
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                con.rollback()
+                #sys.exit(1)
+
+        finally:
+                cur.close()
+                con.close()
+
+        return [] 
+
 def returnIndicatorValue(state, number):
     if (state[number] == "0"):
         return False
@@ -100,6 +390,9 @@ def returnIndicatorValue(state, number):
 
 def returnIndicators():
     totalLayout = []
+    PiThrottled = returnPiThrottled()
+    totalLayout.append(dbc.Row(PiThrottled))    
+    totalLayout.append(dbc.Row(html.H2("Extender Devices")))
     wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
     for singleWireless in wirelessJSON:
         myLabelLayout = [] 
@@ -120,7 +413,7 @@ def returnIndicators():
             else:
                 myColor = "red"
             myIndicatorLayout.append( daq.Indicator(
-                        id = {'type' : 'SPdynamic', 'index': valve  , 'DeviceID' : singleWireless['id'] },
+                        id = {'type' : 'SPVdynamic', 'index': valve  , 'DeviceID' : singleWireless['id'] },
                         color = myColor,
                         label="Valve "+str(valve),
                         value=True,
@@ -132,12 +425,144 @@ def returnIndicators():
             #myIndicatorCount = myIndicatorCount +1
         totalLayout.append(dbc.Row( myLabelLayout))
         totalLayout.append(dbc.Row(myIndicatorLayout))
+    
+    totalLayout.append(dbc.Row(html.H2("Bluetooth Sensors")))
+   
+    # now do Bluetooth Sensors
+    myBTSensors = getBluetoothData()
+    #print("BTSensors=", myBTSensors)
+    #shortBTSensors = []
+    #shortBTSensors.append(myBTSensors[0])
+    #myBTSensors = shortBTSensors
+    print("BTSensors=", myBTSensors)
+    for sensor in myBTSensors:
+        # fetch Bluetooth Sensor Data
+        mySensorData = getLastBTReading(sensor[2])
+        # green if > 10 , red if < 10
+        moistureIndicator = "gray"
+        # green if > 10, red if less
+        batteryIndicator = "gray"
+        # not active if data is older than 1 Hour 
+        activeIndicator = "gray"
 
+        #print("mySensorData=", mySensorData)
+
+        #check for null record
+        if (len(mySensorData) == 0):
+            # No sensor, all gray
+            moistureIndicator = "gray"
+            batteryIndicator = "gray"
+            activeIndicator = "gray"
+        else:
+            # now do the active calculations
+            sampleTimestamp =  mySensorData[2]
+            #print("sampleTimeStamp =", sampleTimestamp)
+            activeSpan = datetime.timedelta(hours=1)
+            timespan = datetime.datetime.now() - sampleTimestamp
+            #print("timespan=", timespan)
+            if (timespan > activeSpan):
+                #print("too old")
+                moistureIndicator = "gray"
+                batteryIndicator = "gray"
+                activeIndicator = "red"
+            else:
+                #print("active")
+                activeIndicator = "greenyellow"
+                # now check for other
+                myBattery = int(mySensorData[9])
+                myMoisture = int(mySensorData[7])
+                if (myBattery < 10):
+                    batteryIndicator = "red"
+                else:
+                    batteryIndicator = "greenyellow"
+                if (myMoisture < 10):
+                    moistureIndicator = "red"
+                else:
+                    moistureIndicator = "greenyellow"
+
+        mySensorLayout= []
+        mySensorLayout.append(
+                     
+                     html.H6(sensor[3] +" / "+sensor[5]+ " / "+sensor[4],
+		                    )
+                        )
+        myIndicatorLayout = [] 
+        
+        myIndicatorLayout.append( daq.Indicator(
+                        id = {'type' : 'SPBdynamic', 'index': sensor[2]  , 'DeviceID' : 'BTIndicator', 'Indicator' : 0  },
+                        color = moistureIndicator,
+                        label="Moisture Fault ",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                       )
+                     )
+       
+        
+        myIndicatorLayout.append( daq.Indicator(
+                        id = {'type' : 'SPBdynamic', 'index': sensor[2]  , 'DeviceID' : 'BTIndicator', 'Indicator' : 1 },
+                        color = batteryIndicator,
+                        label="Battery Status",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                       )
+                     )
+       
+        myIndicatorLayout.append( daq.Indicator(
+                        id = {'type' : 'SPBdynamic', 'index': sensor[2]  , 'DeviceID' : 'BTIndicator', 'Indicator' : 2 },
+                        color = activeIndicator,
+                        label="Device Reporting ",
+                        value=True,
+                        style={
+                            'margin': '10px'
+                        }
+                       )
+                     )
+       
+       
+        totalLayout.append(dbc.Row(mySensorLayout))
+        totalLayout.append(dbc.Row(myIndicatorLayout))
+    # fetch latest value
+   
+    # setup each indicator appropriately
     return totalLayout
 
 ################
 # Page Functions
 ################
+
+def countBluetooth():
+
+ if (config.enable_MySQL_Logging == True):	
+	# open mysql database
+	# write log
+	# commit
+	# close
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                query = "SELECT * From BluetoothSensors " 
+                #print("query=", query)
+                cur.execute(query)
+                myRecords = cur.fetchall()
+                #print ('myRecords=',myRecords)
+                return len(myRecords) 
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                #sys.exit(1)
+
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+        return 0  
 
 
 def StatusPage():
@@ -146,7 +571,7 @@ def StatusPage():
     wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
     numberOfWireless = len(wirelessJSON)
     numberOfValves = numberOfWireless * 8
-    numberOfSensors = numberOfWireless * 4
+    numberOfSensors = countBluetooth()
     f = open("/proc/device-tree/model")
     piType = f.read()
     boottime =datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S") 
@@ -160,7 +585,10 @@ def StatusPage():
                         ["Number of Valves", dbc.Badge(numberOfValves, color="light", className="ml-1")],
                         color="primary",),
                     dbc.Button(
-                        ["Number of Sensors", dbc.Badge(numberOfSensors, color="light", className="ml-1")],
+                        ["Number of BluetoothSensors", dbc.Badge(numberOfSensors, color="light", className="ml-1")],
+                        color="primary",),
+                    dbc.Button(
+                        ["Number of Hydroponic Units", dbc.Badge("1", color="light", className="ml-1")],
                         color="primary",),
                     dbc.Button(
                         ["Raspberry Pi", dbc.Badge(piType, color="light", className="ml-1")],
@@ -210,6 +638,18 @@ def StatusPage():
                         min = 0,
                         ),
 
+
+                    daq.Gauge(
+                        id = {'type' : 'SPGdynamic', 'GaugeType' :'pi-temp'},
+                        label="Pi CPU Temperature(C)",
+                        value=0,
+                        color={"gradient":True,"ranges":{"green":[0,50],"yellow":[50,85],"red":[85,130]}},
+                        showCurrentValue=True,
+                        units="C",
+                        size=190,
+                        max = 130,
+                        min = 0,
+                    ),
 
                 ],
 		no_gutters=True,
@@ -290,6 +730,13 @@ def updateGauges(id):
     if (id['GaugeType'] == "pi-memory"):
     	myValue = psutil.virtual_memory().percent
     	return myValue
+
+    # update Pi Memory usage
+    if (id['GaugeType'] == "pi-temp"):
+        cpu = gpiozero.CPUTemperature()
+        CPUTemperature = cpu.temperature
+        myValue = CPUTemperature
+        return myValue
 
 
 

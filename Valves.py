@@ -129,8 +129,8 @@ def valveCheck():
                 print("myMoistureSensorType =", myMoistureSensorType)
                 
                 # check for threshold
-                # less than 5% means bad sensor, do nothing
-                if (float(myMoistureReading) > 5.0):
+                
+                if (float(myMoistureReading) >= 0.0):
 
                     # check for over Moisture threshold
                     if (config.SWDEBUG):
