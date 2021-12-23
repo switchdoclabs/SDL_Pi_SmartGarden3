@@ -23,7 +23,8 @@ import MySQLdb as mdb
 import SkyCamera
 
 import traceback
-import HydroConstants
+
+import readJSON
 
 def systemlog(level,  message):
 
@@ -104,11 +105,11 @@ def processInfraredSensor(MQTTJSON):
 	# commit
 	# close
         try:
-                print("trying database")
+                #print("trying database")
                 con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "INSERT INTO InfraredSensorData (DeviceID, PixelData ) VALUES('%s', '%s' )" % (MQTTJSON["id"], MQTTJSON["infrareddata"])
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 con.commit()
                 SkyCamera.processInfraredPicture(MQTTJSON["id"],MQTTJSON["infrareddata"])
@@ -345,9 +346,22 @@ def convertRawLevelToLevel(rawLevel):
 
     # piecewise linear
 
-    DeltaSpread = HydroConstants.CapLevelZero - HydroConstants.CapLevelFull
-    Level = 100*(1- (rawLevel - HydroConstants.CapLevelFull)/DeltaSpread )
-
+    DeltaSpread = int(config.Tank_Pump_Level_Empty)- int(config.Tank_Pump_Level_Full) 
+    #Level = 100*(1- (rawLevel -  int(config.Tank_Pump_Level_Full))/DeltaSpread )
+    myScale = float(rawLevel)/float(config.Tank_Pump_Level_Empty)
+    if (myScale >= 0.85): 
+        Level = 41*(1-myScale)/0.15
+    else:    
+        if (myScale >= 0.69): 
+            Level =62*(1-myScale)/0.31
+        else: 
+            if (myScale >= 0.64): 
+                Level =83*(1-myScale)/0.36
+            else: 
+                if (myScale >= 0.61): 
+                    Level =100*(1-myScale)/0.39
+                else:
+                    Level = 100
     if (Level > 100):
         Level = 100
     if (Level < 0):
@@ -356,8 +370,16 @@ def convertRawLevelToLevel(rawLevel):
 
 def convertRawTDSToTDS(rawTDS):
 
-    Voltage = rawTDS*0.003 #Convert analog reading to Voltage
-    TDS=(133.42/(Voltage*Voltage*Voltage) - 255.86*(Voltage*Voltage) + 857.39*Voltage)*0.5; #Convert voltage value to TDS value
+    Voltage = rawTDS*0.003 #Convert analog reading to Voltage(0.29 from 3V 5V difference)
+    #print("precale voltage=", Voltage)
+    #Voltage = rawTDS*0.003*0.60 #Convert analog reading to Voltage(0.29 from 3V 5V difference)
+    #print("postscale voltage=", Voltage)
+    TDS=(133.42/Voltage*Voltage*Voltage - 255.86*(Voltage*Voltage) + 857.39*Voltage)*0.5; #Convert voltage value to TDS value
+    #print("presccale TDS=", TDS)
+    #TDS=TDS*0.141 # calibration
+    #print("postscale TDS=", TDS)
+    
+
     if (TDS < 0):
         TDS = 0
     return TDS
@@ -416,7 +438,29 @@ def writeHydroponicsRecord(MQTTJSON):
                 TDS = convertRawTDSToTDS(rawTDS) 
                 Level = convertRawLevelToLevel(rawLevel) 
                 Ph = convertRawPhToPh(rawPh) 
-                query = "INSERT INTO Hydroponics(DeviceID, Temperature, Turbidity, RawTurbidity, TDS, RawTDS, Level, RawLevel, Ph, RawPH) VALUES('%s', '%6.2f', %6.2f, '%d', '%6.2f',%d, %6.2f, %6.2f, %6.2f, %d)" % (MQTTJSON["id"], float(MQTTJSON["temperature"]), Turbidity, int(MQTTJSON["rawturbidity"]), TDS, int(MQTTJSON["rawtds"]), Level, float(MQTTJSON["rawlevel"]), Ph, int(MQTTJSON["rawph"]))
+                Temperature = MQTTJSON["temperature"]
+                # now adjust for enabled
+                # scan for wireless match to get constants
+                myID = MQTTJSON["id"]
+                wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
+                myWireless = []
+                for wireless in wirelessJSON:
+                    if (myID == wireless["id"]):
+                        myWireless = wireless
+                        if (myWireless['hydroponics_temperature'] == "false"):
+                                Temperature = -1
+                        if (myWireless['hydroponics_tds'] == "false"):
+                                TDS = -1
+                        if (myWireless['hydroponics_ph'] == "false"):
+                                Ph = -1
+                        if (myWireless['hydroponics_turbidity'] == "false"):
+                                Turbidity = -1
+                        if (myWireless['hydroponics_level'] == "false"):
+                                Level = -1
+                        break;
+                
+                    
+                query = "INSERT INTO Hydroponics(DeviceID, Temperature, Turbidity, RawTurbidity, TDS, RawTDS, Level, RawLevel, Ph, RawPH) VALUES('%s', '%6.2f', %6.2f, '%d', '%6.2f',%d, %6.2f, %6.2f, %6.2f, %d)" % (MQTTJSON["id"], float(Temperature), Turbidity, int(MQTTJSON["rawturbidity"]), TDS, int(MQTTJSON["rawtds"]), Level, float(MQTTJSON["rawlevel"]), Ph, int(MQTTJSON["rawph"]))
                 
                 print("query=", query)
                 cur.execute(query)

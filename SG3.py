@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# Smart Garden System 2
+# Smart Garden 3
 #
 # SwitchDoc Labs
 #
@@ -11,7 +11,7 @@ from __future__ import print_function
 from builtins import range
 from past.utils import old_div
 
-SGSVERSION = "032"
+SGSVERSION = "033"
 
 #imports 
 
@@ -38,7 +38,6 @@ import bluetoothSensor
 
 from neopixel import *
 
-import pixelDriver
 
 
 from PIL import Image
@@ -86,42 +85,6 @@ GPIO.setmode(GPIO.BCM)
 ################
 state.UpdateStateLock = threading.Lock()
 
-###############
-# Pixel Strip  LED
-###############
-
-# Create NeoPixel object with appropriate configuration.
-if (config.enablePixel == True):
-    strip = Adafruit_NeoPixel(pixelDriver.LED_COUNT, pixelDriver.LED_PIN, pixelDriver.LED_FREQ_HZ, pixelDriver.LED_DMA, pixelDriver.LED_INVERT, pixelDriver.LED_BRIGHTNESS, pixelDriver.LED_CHANNEL, pixelDriver.LED_STRIP)
-    # Intialize the library (must be called once before other functions).
-    strip.begin()
-    PixelLock = threading.Lock()
-
-
-###############
-# Flash LED
-###############
-
-def blinkLED(pixel, color, times, length):
-  if (config.enablePixel == True):
-    if (state.runLEDs == True):
-        PixelLock.acquire()
-
-        #if (config.SWDEBUG):
-        #    print("N--->Blink LED:%i/%i/%i/%6.2f" % (pixel, color, times, length))
-
-        for x in range(0, times):
-            strip.setPixelColor(0, color)
-            strip.show()
-            time.sleep(length)
-	
-        strip.setPixelColor(0, Color(0,0,0))
-        strip.show()
-
-        PixelLock.release()
-
-
-    
 
 
 import util
@@ -375,14 +338,6 @@ def initializeScheduler():
         
         # read wireless sensor package
         #print("Before Adding readSensors Job")
-    
-        # blink optional life light
-        state.scheduler.add_job(blinkLED, 'interval', seconds=5, args=[0,Color(0,0,255),1,0.250])
-        
-        # blink life light
-        if (config.enablePixel == True):
-            state.scheduler.add_job(pixelDriver.statusLEDs, 'interval', seconds=15, args=[strip, PixelLock])
-    
     
     
         # check device state

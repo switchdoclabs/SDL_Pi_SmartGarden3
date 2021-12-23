@@ -53,10 +53,6 @@ def readJSON(addPath):
                 config.fromAddress = getJSONValue('fromAddress')
                 config.enableText = getJSONValue('enableText')
                 config.textnotifyAddress = getJSONValue('textnotifyAddress')
-                config.enablePixel = getJSONValue('enablePixel')
-                config.pixelPin = getJSONValue('pixelPin')
-                config.SolarMAX_Present = getJSONValue('SolarMAX_Present')
-                config.SolarMAX_Type = getJSONValue('SolarMAX_Type')
                 config.INTERVAL_CAM_PICS__SECONDS = getJSONValue('INTERVAL_CAM_PICS__SECONDS')
                 config.USEBLYNK = getJSONValue('USEBLYNK')
                 config.BLYNK_AUTH = getJSONValue('BLYNK_AUTH')
@@ -67,9 +63,14 @@ def readJSON(addPath):
                 config.MQTT_Server_URL = getJSONValue('MQTT_Server_URL')
                 config.MQTT_Port_Number = getJSONValue('MQTT_Port_Number')
                 config.MQTT_Send_Seconds = getJSONValue('MQTT_Send_Seconds')
-                config.UltrasonicLevel = getJSONValue('UltrasonicLevel') 
-                config.Tank_Pump_Level = getJSONValue('Tank_Pump_Level') 
-                config.manual_water = getJSONValue('manual_water') 
+                config.Tank_Pump_Level_Empty = getJSONValue('Tank_Pump_Level_Empty') 
+                config.Tank_Pump_Level_Full = getJSONValue('Tank_Pump_Level_Full') 
+                config.manual_water = getJSONValue('manual_water')
+
+                config.Infrared_High_Auto_Gain = getJSONValue('Infrared_High_Auto_Gain')  
+                config.Infrared_Low_Auto_Gain =  getJSONValue('Infrared_Low_Auto_Gain')  
+                config.Infrared_High_Temp = getJSONValue('Infrared_High_Temp')  
+                config.Infrared_Low_Temp = getJSONValue('Infrared_Low_Temp')  
                 config.WirelessDeviceJSON = getJSONValue('WirelessDeviceJSON') 
                 #print("WirelessDeviceJSON Read from file", config.WirelessDeviceJSON)
                 return True
@@ -92,10 +93,6 @@ def JSONsetDefaults():
         config.fromAddress = "yourfromaddress@example.com"
         config.enableText = False
         config.textnotifyAddress = "yournumber@yourprovider"
-        config.enablePixel = False
-        config.pixelPin = 21
-        config.SolarMAX_Present = False
-        config.SolarMAX_Type = "LEAD"
         config.INTERVAL_CAM_PICS__SECONDS = 60
         config.USEBLYNK = False
         config.BLYNK_AUTH = ""
@@ -106,9 +103,13 @@ def JSONsetDefaults():
         config.MQTT_Server_URL = "" 
         config.MQTT_Port_Number = 1883 
         config.MQTT_Send_Seconds = 500 
-        config.UltrasonicLevel = 4
-        config.Tank_Pump_Level = 15.0
+        config.Tank_Pump_Level_Full = 500 
+        config.Tank_Pump_Level_Empty = 900
         config.manual_water = True
+        config.Infrared_High_Auto_Gain = False
+        config.Infrared_Low_Auto_Gain = False
+        config.Infrared_High_Temp = 22.0
+        config.Infrared_Low_Temp = 17.0
         config.WirelessDeviceJSON = ""
 
        
@@ -124,10 +125,6 @@ def JSONsetDefaults():
         config.dataDefaults['fromAddress'] = config.fromAddress 
         config.dataDefaults['enableText'] = config.enableText 
         config.dataDefaults['textnotifyAddress'] = config.textnotifyAddress 
-        config.dataDefaults['enablePixel'] = config.enablePixel 
-        config.dataDefaults['pixelPin'] = config.pixelPin 
-        config.dataDefaults['SolarMAX_Present'] = config.SolarMAX_Present 
-        config.dataDefaults['SolarMAX_Type'] = config.SolarMAX_Type 
         config.dataDefaults['INTERVAL_CAM_PICS__SECONDS'] = config.INTERVAL_CAM_PICS__SECONDS 
         config.dataDefaults['USEBLYNK'] = config.USEBLYNK 
         config.dataDefaults['BLYNK_AUTH'] = config.BLYNK_AUTH 
@@ -137,9 +134,13 @@ def JSONsetDefaults():
         config.dataDefaults['MQTT_Server_URL'] = config.MQTT_Server_URL 
         config.dataDefaults['MQTT_Port_Number'] = config.MQTT_Port_Number 
         config.dataDefaults['MQTT_Send_Seconds'] = config.MQTT_Send_Seconds 
-        config.dataDefaults['UltrasonicLevel'] = config.UltrasonicLevel
-        config.dataDefaults['Tank_Pump_Level'] = config.Tank_Pump_Level 
+        config.dataDefaults['Tank_Pump_Level_Empty'] = config.Tank_Pump_Level_Empty 
+        config.dataDefaults['Tank_Pump_Level_Full'] = config.Tank_Pump_Level_Full 
         config.dataDefaults['manual_water'] = config.manual_water 
+        config.dataDefaults['Infrared_High_Auto_Gain'] = config.Infrared_High_Auto_Gain 
+        config.dataDefaults['Infrared_Low_Auto_Gain'] = config.Infrared_Low_Auto_Gain 
+        config.dataDefaults['Infrared_High_Temp'] = config.Infrared_High_Temp 
+        config.dataDefaults['Infrared_Low_Temp'] = config.Infrared_Low_Temp 
         config.dataDefaults['WirelessDeviceJSON'] = config.WirelessDeviceJSON 
         
 

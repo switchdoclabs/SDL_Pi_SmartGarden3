@@ -81,23 +81,27 @@ class SGSConfigure(App):
         self.fromAddress = "yourfromaddress@example.com"
         self.enableText = False
         self.textnotifyAddress = "yournumber@yourprovider"
-        self.enablePixel = False
-        self.pixelPin = 21
-        self.SolarMAX_Present = False
-        self.SolarMAX_Type = "LEAD"
         self.INTERVAL_CAM_PICS__SECONDS = 60
         self.USEBLYNK = False
         self.BLYNK_AUTH = ""
-        self.AS3935_Lightning_Config = "[2,1,3,0,3,3]"
+        #self.AS3935_Lightning_Config = "[2,1,3,0,3,3]"
         self.Camera_Night_Enable =  False
         self.REST_Enable = False 
         self.MQTT_Enable = False 
         self.MQTT_Server_URL = "" 
         self.MQTT_Port_Number = 1883 
         self.MQTT_Send_Seconds = 500 
-        self.UltrasonicLevel = 4
-        self.Tank_Pump_Level = 15.0
+        self.Tank_Pump_Level_Full = 500
+        self.Tank_Pump_Level_Empty = 900
+        self.Infrared_High_Auto_Gain = False
+        self.Infrared_Low_Auto_Gain = False
+        self.Infrared_Low_Temp = 17.0
+        self.Infrared_High_Temp = 22.0
         self.manual_water = True
+        self.Send_Status_Email = False
+        self.Status_Send_Email_Minutes = 300
+        self.Send_Status_Text = False
+        self.Status_Send_Text_Minutes = 300
         self.WirelessDeviceJSON = ""
 
        
@@ -114,22 +118,26 @@ class SGSConfigure(App):
         self.dataDefaults['fromAddress'] = self.fromAddress 
         self.dataDefaults['enableText'] = self.enableText 
         self.dataDefaults['textnotifyAddress'] = self.textnotifyAddress 
-        self.dataDefaults['enablePixel'] = self.enablePixel 
-        self.dataDefaults['pixelPin'] = self.pixelPin 
-        self.dataDefaults['SolarMAX_Present'] = self.SolarMAX_Present 
-        self.dataDefaults['SolarMAX_Type'] = self.SolarMAX_Type 
         self.dataDefaults['INTERVAL_CAM_PICS__SECONDS'] = self.INTERVAL_CAM_PICS__SECONDS 
         self.dataDefaults['USEBLYNK'] = self.USEBLYNK 
         self.dataDefaults['BLYNK_AUTH'] = self.BLYNK_AUTH 
-        self.dataDefaults['AS3935_Lightning_Config'] = self.AS3935_Lightning_Config 
+        #self.dataDefaults['AS3935_Lightning_Config'] = self.AS3935_Lightning_Config 
         self.dataDefaults['REST_Enable'] = self.REST_Enable 
         self.dataDefaults['MQTT_Enable'] = self.MQTT_Enable 
         self.dataDefaults['MQTT_Server_URL'] = self.MQTT_Server_URL 
         self.dataDefaults['MQTT_Port_Number'] = self.MQTT_Port_Number 
         self.dataDefaults['MQTT_Send_Seconds'] = self.MQTT_Send_Seconds 
-        self.dataDefaults['UltrasonicLevel'] = self.UltrasonicLevel
-        self.dataDefaults['Tank_Pump_Level'] = self.Tank_Pump_Level 
+        self.dataDefaults['Tank_Pump_Level_Full'] = self.Tank_Pump_Level_Full 
+        self.dataDefaults['Tank_Pump_Level_Empty'] = self.Tank_Pump_Level_Empty 
+        self.dataDefaults['Infrared_Low_Auto_Gain'] = self.Infrared_Low_Auto_Gain 
+        self.dataDefaults['Infrared_High_Auto_Gain'] = self.Infrared_High_Auto_Gain 
+        self.dataDefaults['Infrared_Low_Temp'] = self.Infrared_Low_Temp 
+        self.dataDefaults['Infrared_High_Temp'] = self.Infrared_High_Temp 
         self.dataDefaults['manual_water'] = self.manual_water 
+        self.dataDefaults['Send_Status_Email'] = self.Send_Status_Email 
+        self.dataDefaults['Status_Send_Email_Minutes'] = self.Status_Send_Email_Minutes 
+        self.dataDefaults['Send_Status_Text'] = self.Send_Status_Text 
+        self.dataDefaults['Status_Send_Text_Minutes'] = self.Status_Send_Text_Minutes 
         self.dataDefaults['WirelessDeviceJSON'] = self.WirelessDeviceJSON 
         
 
@@ -181,22 +189,22 @@ class SGSConfigure(App):
                 self.fromAddress = self.getJSONValue('fromAddress')
                 self.enableText = self.getJSONValue('enableText')
                 self.textnotifyAddress = self.getJSONValue('textnotifyAddress')
-                self.enablePixel = self.getJSONValue('enablePixel')
-                self.pixelPin = self.getJSONValue('pixelPin')
-                self.SolarMAX_Present = self.getJSONValue('SolarMAX_Present')
-                self.SolarMAX_Type = self.getJSONValue('SolarMAX_Type')
                 self.INTERVAL_CAM_PICS__SECONDS = self.getJSONValue('INTERVAL_CAM_PICS__SECONDS')
                 self.USEBLYNK = self.getJSONValue('USEBLYNK')
                 self.BLYNK_AUTH = self.getJSONValue('BLYNK_AUTH')
-                self.AS3935_Lightning_Config = self.getJSONValue('AS3935_Lightning_Config')
+                #self.AS3935_Lightning_Config = self.getJSONValue('AS3935_Lightning_Config')
                 self.Camera_Night_Enable = self.getJSONValue('Camera_Night_Enable')
                 self.REST_Enable = self.getJSONValue('REST_Enable')
                 self.MQTT_Enable = self.getJSONValue('MQTT_Enable')
                 self.MQTT_Server_URL = self.getJSONValue('MQTT_Server_URL')
                 self.MQTT_Port_Number = self.getJSONValue('MQTT_Port_Number')
                 self.MQTT_Send_Seconds = self.getJSONValue('MQTT_Send_Seconds')
-                self.UltrasonicLevel = self.getJSONValue('UltrasonicLevel') 
-                self.Tank_Pump_Level = self.getJSONValue('Tank_Pump_Level') 
+                self.Tank_Pump_Level_Full = self.getJSONValue('Tank_Pump_Level_Full') 
+                self.Tank_Pump_Level_Empty = self.getJSONValue('Tank_Pump_Level_Empty') 
+                self.Infrared_High_Auto_Gain = self.getJSONValue('Infrared_High_Auto_Gain') 
+                self.Infrared_Low_Auto_Gain = self.getJSONValue('Infrared_Low_Auto_Gain') 
+                self.Infrared_Low_Temp = self.getJSONValue('Infrared_Low_Temp') 
+                self.Infrared_High_Temp = self.getJSONValue('Infrared_High_Temp') 
                 self.WirelessDeviceJSON = self.getJSONValue('WirelessDeviceJSON') 
         else:
             print ("SGS.JSON File does not exist")
@@ -236,14 +244,10 @@ class SGSConfigure(App):
 
         data['enableText'] = self.F_enableText.get_value()
         data['textnotifyAddress'] = self.F_textnotifyAddress.get_value()
-        data['enablePixel'] = self.F_enablePixel.get_value()
-        data['pixelPin'] = self.F_pixelPin.get_value()
-        data['SolarMAX_Present'] = self.F_SolarMAX_Present.get_value()
-        data['SolarMAX_Type'] = self.F_SolarMAX_Type.get_value()
         data['INTERVAL_CAM_PICS__SECONDS'] = self.F_INTERVAL_CAM_PICS__SECONDS.get_value()
         data['USEBLYNK'] = self.F_USEBLYNK.get_value()
         data['BLYNK_AUTH'] = self.F_BLYNK_AUTH.get_value()
-        data['AS3935_Lightning_Config'] = self.F_AS3935_Lightning_Config.get_value()
+        #data['AS3935_Lightning_Config'] = self.F_AS3935_Lightning_Config.get_value()
         data['REST_Enable'] = self.F_REST_Enable.get_value()
         data['Camera_Night_Enable'] = self.F_Camera_Night_Enable.get_value()
         data['MQTT_Enable'] = self.F_MQTT_Enable.get_value()
@@ -252,14 +256,20 @@ class SGSConfigure(App):
         data['MQTT_Send_Seconds'] = self.F_MQTT_Send_Seconds.get_value()
 
         data['manual_water'] = self.F_manual_water.get_value()
-        data['Tank_Pump_Level'] = self.F_Tank_Pump_Level.get_value()
+        data['Send_Status_Email'] = self.F_Send_Status_Email.get_value()
+        data['Status_Send_Email_Minutes'] = self.F_Status_Send_Email_Minutes.get_value()
+        data['Send_Status_Text'] = self.F_Send_Status_Text.get_value()
+        data['Status_Send_Text_Minutes'] = self.F_Status_Send_Text_Minutes.get_value()
+        data['Tank_Pump_Level_Full'] = self.F_Tank_Pump_Level_Full.get_value()
+        data['Tank_Pump_Level_Empty'] = self.F_Tank_Pump_Level_Empty.get_value()
+        data['Infrared_High_Auto_Gain'] = self.F_Infrared_High_Auto.get_value()
+        data['Infrared_Low_Auto_Gain'] = self.F_Infrared_Low_Auto.get_value()
+        data['Infrared_Low_Temp'] = self.F_Infrared_Low_Temp.get_value()
+        data['Infrared_High_Temp'] = self.F_Infrared_High_Temp.get_value()
 
         data['WirelessDeviceJSON'] = self.WirelessDeviceJSON
 
 
-        # pins
-        data['UltrasonicLevel'] = self.F_UltrasonicLevel.get_value()
-        data['pixelPin'] = self.F_pixelPin.get_value()
 
 
         #print(data)
@@ -280,22 +290,24 @@ class SGSConfigure(App):
         m05.onclick.do(self.menu_screen05_clicked)
         m06 = gui.MenuItem('Configure Extender', width=90, height=60)
         m06.onclick.do(self.menu_screen06_clicked)
-        m1 = gui.MenuItem('DM', width=70, height=60)
+        m1 = gui.MenuItem('Debug Calibration', width=70, height=60)
         m1.onclick.do(self.menu_screen1_clicked)
-        m2 = gui.MenuItem('MTN', width=70, height=60)
+        m2 = gui.MenuItem('Mail and Text', width=70, height=60)
         m2.onclick.do(self.menu_screen2_clicked)
-        m3 = gui.MenuItem('PSMax', width=70, height=60)
-        m3.onclick.do(self.menu_screen3_clicked)
-        m4 = gui.MenuItem('WS-WU', width=70, height=60)
+        #m3 = gui.MenuItem('PSMax', width=70, height=60)
+        #m3.onclick.do(self.menu_screen3_clicked)
+        m4 = gui.MenuItem('Cameras Bluetooth', width=70, height=60)
         m4.onclick.do(self.menu_screen4_clicked)
-        m5 = gui.MenuItem('B-TB', width=70, height=60)
+        m5 = gui.MenuItem('Blynk', width=70, height=60)
         m5.onclick.do(self.menu_screen5_clicked)
-        m6 = gui.MenuItem('Pins', width=70, height=60)
-        m6.onclick.do(self.menu_screen6_clicked)
+        #m6 = gui.MenuItem('Pins', width=70, height=60)
+        #m6.onclick.do(self.menu_screen6_clicked)
         m7 = gui.MenuItem('CMQTTR', width=70, height=60)
         m7.onclick.do(self.menu_screen7_clicked)
+        m8 = gui.MenuItem('Alarm/Status Configuration', width=70, height=60)
+        m8.onclick.do(self.menu_screen8_clicked)
 
-        menu.append([m0, m05, m06, m1, m2, m3, m4, m5, m6, m7])
+        menu.append([m0, m05, m06, m1, m2, m4, m5,  m7, m8])
     
     
         self.menubar = gui.MenuBar(width='100%', height='30px')
@@ -370,6 +382,9 @@ class SGSConfigure(App):
 
         self.Display_WEXT.set_text('Found Wireless Extenders: ' )
         self.Display_IP.set_text('Scanning IP: N/A ' )
+        
+        self.Display_WEXT2 = gui.Label('', width=130, height=30, margin='5px', style=' color: red')
+        self.Display_WEXT2.set_text("Click 'Save and Exit' After Scan" )
 
 
         #print("WirelessDeviceJSON=", self.WirelessDeviceJSON)
@@ -392,6 +407,7 @@ class SGSConfigure(App):
         statusbox.append(self.Display_IP, 'DIP')
         statusbox.append(self.Display_WEXT, 'DWEXT')
         statusbox.append(self.Display_EXT, 'DEXT')
+        statusbox.append(self.Display_WEXT2, 'DEXT2')
 
         vbox.append(statusbox)
 
@@ -1082,8 +1098,8 @@ class SGSConfigure(App):
 
         #screen 06
 
-        vbox = VBox(width=1000, height=510, style="background: LightGray")
 
+        vbox = gui.Container(width=1000, height=510, layout_orientation=gui.Container.LAYOUT_HORIZONTAL,  style="background: LightBlue")
         vbox.style['justify-content'] = 'flex-start'
         vbox.style['align-items'] = 'flex-start'
         vbox.style['border'] = '2px'
@@ -1091,45 +1107,275 @@ class SGSConfigure(App):
 
 
         #screen 06
+        # Menu
+        menubox =  gui.Container(width=1000, height=60, style="background: LightGray")
+        menubox = self.establishMenu(menubox)
+        vbox.append(menubox)
 
-        vbox = self.establishMenu(vbox)
+
+
+        # Top Status block
+
+        statusbox = gui.Container(width=1000, height=50, layout_orientation=gui.Container.LAYOUT_HORIZONTAL, style="background: LightBlue")
+        #statusbox.style['justify-content'] = 'right'
+        statusbox.style['align-items'] = 'flex-start'
+        statusbox.style['border'] = '2px'
+        statusbox.style['border-color'] = 'blue'
+        statusbox.style['flex-direction'] = 'row'
+
+        # elements
+        self.Display_WEXT.set_text('Configure Wireless Extenders' )
+
+        statusbox.append(self.Display_WEXT, 'DWEXT')
+
+
+        vbox.append(statusbox)
 
 
 
-        screen1header = gui.Label("Configure Extender", style='margin:10px; background: LightGray')
-        vbox.append(screen1header)
+        #screen6header = gui.Label("Configure Extender", style='margin:10px; background: LightGray')
+        #vbox.append(screen6header)
 
-        items = ()
+        # now set up new block
+        self.ExtenderConfig = gui.Container(width=1000, height=700, layout_orientation=gui.Container.LAYOUT_HORIZONTAL)
+        self.ExtenderConfig.style['background'] = "LightGray"
+
+        self.ExtenderConfig.style['align-items'] = 'flex-start'
+        self.ExtenderConfig.style['border'] = '2px'
+        self.ExtenderConfig.style['border-color'] = 'blue'
+        self.ExtenderConfig.style['flex-direction'] = 'row'
+        
+        # now setup wireless units for configuration
+        wirelessitems = () 
         for wireless in self.WirelessDeviceJSON:
             myID = wireless["id"]
             myName = wireless["name"]
             item = "wireless:/"+ str(myID) + "/" + str(myName)
 
-            items = items + (item,)
+            wirelessitems = wirelessitems + (item,)
+        #print("wirelessitems=", wirelessitems)
 
-        self.listView2 = gui.ListView.new_from_list(items, width=400, height=25*len(items), margin='10px')
-        self.listView2.onselection.do(self.configext_list_view_on_selected)
-        
-        vbox.append(self.listView2)
+        self.listView4 = gui.ListView.new_from_list(wirelessitems, width=400, height=25*len(wirelessitems), margin='10px')
+        self.listView4.onselection.do(self.configext_list_view_on_selected)
+        vbox.append(self.listView4)
        
+
+        vbox.append(self.ExtenderConfig)
 
 
         return vbox
+
+
+    def buildAnExtender(self, myUnit):
+        myExtender = gui.Container(width=300, height=700, layout_orientation=gui.Container.LAYOUT_VERTICAL)
+        print("buildAnExtender=", myUnit)
+        myExtender.style['position'] = "absolute"
+        myExtender.style['background'] = "LightBlue"
+        myExtender.style['align-items'] = 'flex-start'
+        myExtender.style['border'] = '2px'
+        myExtender.style['border-color'] = 'blue'
+        myExtender.style['flex-direction'] = 'row'
+
+        myExtenderTop1 = gui.Container(width=300, height=50)
+        myExtenderTop1.style['position'] = "relative"
+        myExtenderTop1.style['background'] = "LightBlue"
+        myExtenderTop1.style['border'] = '2px'
+        myExtenderTop1.style['border-color'] = 'blue'
+
+        myExtenderTop2 = gui.Container(width=300, height=30)
+        myExtenderTop2.style['position'] = "relative"
+        myExtenderTop2.style['background'] = "LightBlue"
+        myExtenderTop2.style['border'] = '2px'
+        myExtenderTop2.style['border-color'] = 'blue'
+
+        myExtenderTop3 = gui.Container(width=300, height=300)
+        myExtenderTop3.style['position'] = "relative"
+        myExtenderTop3.style['background'] = "LightBlue"
+        myExtenderTop3.style['border'] = '2px'
+        myExtenderTop3.style['border-color'] = 'blue'
+
+        #self.valvelist = ('None Selected',)
+        ext = myUnit.split("/")
+        myID = ext[1]
+
+        self.Display_ExWEXT = gui.Label('', width=130, height=30, margin='5px')
+        self.Display_ExWEXT.set_text('Configuring '+myUnit )
+        self.Display_ExWEXT.style['position'] = "absolute"
+        self.Display_ExWEXT.style['left'] = "10px"
+
+        self.Display_Hydro =     gui.CheckBoxLabel( 'Assign to Hydroponics', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px' )
+        self.Display_Hydro.style['position'] = "absolute"
+        self.Display_Hydro.style['left'] = "10px"
+        self.Display_Hydro.onclick.do(self.onBoxChange)
+
+        self.Display_Level = gui.CheckBoxLabel( 'Level Sensor', False, height=30, style='margin:5px; background: LightBlue; padding-left: 15px; text-indent: 15px')
+        self.Display_Level.style['position'] = "absolute"
+        self.Display_Level.style['left'] = "10px"
+        self.Display_Level.style['top'] = "10px"
+        self.Display_Level.onclick.do(self.onBoxChange)
+
+        self.Display_Temp =      gui.CheckBoxLabel( 'Temperature Sensor', False, height=30, style='margin:5px; background: LightBlue; padding-left: 15px; text-indent: 15px')
+        self.Display_Temp.style['position'] = "absolute"
+        self.Display_Temp.style['left'] = "10px"
+        self.Display_Temp.style['top'] = "40px"
+        self.Display_Temp.onclick.do(self.onBoxChange)
+        self.Display_TDS =       gui.CheckBoxLabel( 'TDS Sensor', False, height=30, style='margin:5px; background: LightBlue; padding-left: 15px; text-indent: 15px')
+        self.Display_TDS.style['position'] = "absolute"
+        self.Display_TDS.style['left'] = "10px"
+        self.Display_TDS.style['top'] = "70px"
+        self.Display_TDS.onclick.do(self.onBoxChange)
+        self.Display_Ph =        gui.CheckBoxLabel( 'Ph Sensor', False, height=30, style='margin:5px; background: LightBlue; padding-left: 15px; text-indent: 15px')
+        self.Display_Ph.style['position'] = "absolute"
+        self.Display_Ph.style['left'] = "10px"
+        self.Display_Ph.style['top'] = "100px"
+        self.Display_Ph.onclick.do(self.onBoxChange)
+        self.Display_Turbidity = gui.CheckBoxLabel( 'Turbidity Sensor', False, height=30, style='margin:5px; background: LightBlue; padding-left: 15px; text-indent: 15px')
+        self.Display_Turbidity.style['position'] = "absolute"
+        self.Display_Turbidity.style['left'] = "10px"
+        self.Display_Turbidity.style['top'] = "130px"
+        self.Display_Turbidity.onclick.do(self.onBoxChange)
+
+
+
+        self.DisplayExtName = gui.Label('Name for Extender ',width=200, height=30,  style='margin:5px; background: LightBlue ')
+        self.DisplayExtName.style['position'] = "absolute"
+        self.DisplayExtName.style['left'] = "10px"
+        self.DisplayExtName.style['top'] = "170px"
+
+        self.Display_ExtName = gui.TextInput(width=100, height=30, style='margin:5px; background: white; padding-left: 15px' )
+        self.Display_ExtName.style['position'] = "absolute"
+        self.Display_ExtName.style['left'] = "10px"
+        self.Display_ExtName.style['top'] = "190px"
+        self.Display_ExtName.onclick.do(self.onBoxChange)
+
+        self.ExtSaveButton = gui.Button('Save Configuration',height=30, width=100, margin=10)
+        self.ExtSaveButton.style['position'] = "absolute"
+        self.ExtSaveButton.style['left'] = "30px"
+        self.ExtSaveButton.style['top'] = "240px"
+
+        self.ExtSaveButton.set_enabled(False)
+        self.ExtSaveButton.onclick.do(self.onExtSaveButton)
+
+        self.current_listView_key = myUnit
+        # set values
+        print ("myID---->=",myID)
+        for wireless in self.WirelessDeviceJSON:
+            
+            myName = wireless["name"]
+            if (myID == wireless["id"]):
+                # now set the fields
+                print("wireless=", wireless)
+                self.Display_ExtName.set_value(wireless["name"]) 
+
+                if (wireless["hydroponicsmode"] == 'false'):
+                    self.Display_Hydro.set_value(False)
+                else:
+                    self.Display_Hydro.set_value(True)
+                if (wireless["hydroponics_level"] == 'false'):
+                    self.Display_Level.set_value(False)
+                else:
+                    self.Display_Level.set_value(True)
+                if (wireless["hydroponics_temperature"] == 'false'):
+                    self.Display_Temp.set_value(False)
+                else:
+                    self.Display_Temp.set_value(True)
+                if (wireless["hydroponics_tds"] == 'false'):
+                    self.Display_TDS.set_value(False)
+                else:
+                    self.Display_TDS.set_value(True)
+                if (wireless["hydroponics_ph"] == 'false'):
+                    self.Display_Ph.set_value(False)
+                else:
+                    self.Display_Ph.set_value(True)
+                if (wireless["hydroponics_turbidity"] == 'false'):
+                    self.Display_Turbidity.set_value(False)
+                else:
+                    self.Display_Turbidity.set_value(True)
+                    
+                    
+
+        # add to container
+
+        myExtenderTop1.append(self.Display_ExWEXT)
+        myExtenderTop2.append(self.Display_Hydro)
+
+        myExtenderTop3.append(self.Display_Level)
+        myExtenderTop3.append(self.Display_Temp)
+        myExtenderTop3.append(self.Display_TDS)
+        myExtenderTop3.append(self.Display_Ph)
+        myExtenderTop3.append(self.Display_Turbidity)
+        myExtenderTop3.append(self.DisplayExtName)
+        myExtenderTop3.append(self.Display_ExtName)
+        myExtenderTop3.append(self.ExtSaveButton)
+
+        myExtender.append(myExtenderTop1)
+        myExtender.append(myExtenderTop2)
+        myExtender.append(myExtenderTop3)
+
+        return myExtender
+
+    def onBoxChange(self, widget, name='', surname=''):
+        print("onBoxChange")
+        self.ExtSaveButton.set_enabled(True)
+
+
+    def onExtSaveButton (self, widget, name='', surname=''):
+        print("onExtSaveButton Clicked")
+        myUnit = self.current_listView_key 
+        print("myUnit=", myUnit)    
+        myID = myUnit.split("/")[1]
+        name = myUnit.split("/")[0]
+        # updater the check boxes and name
+        print ("myID---->=",myID)
+        newWireless = []
+        for wireless in self.WirelessDeviceJSON:
+            if (myID == wireless["id"]):
+                wireless["name"] = self.Display_ExtName.get_value()
+
+                if (self.Display_Hydro.get_value() == True):
+                    wireless["hydroponicsmode"] = 'true'
+                else:
+                    wireless["hydroponicsmode"] = 'false'
+                if (self.Display_Level.get_value() == True):
+                    wireless["hydroponics_level"] = 'true'
+                else:
+                    wireless["hydroponics_level"] = 'false'
+                if (self.Display_Temp.get_value() == True):
+                    wireless["hydroponics_temperature"] = 'true'
+                else:
+                    wireless["hydroponics_temperature"] = 'false'
+                if (self.Display_TDS.get_value() == True):
+                    wireless["hydroponics_tds"] = 'true'
+                else:
+                    wireless["hydroponics_tds"] = 'false'
+                if (self.Display_Ph.get_value() == True):
+                    wireless["hydroponics_ph"] = 'true'
+                else:
+                    wireless["hydroponics_ph"] = 'false'
+                if (self.Display_Turbidity.get_value() == True):
+                    wireless["hydroponics_turbidity"] = 'true'
+                else:
+                    wireless["hydroponics_turbidity"] = 'false'
+                print("wirelessC=", wireless)
+            newWireless.append(wireless)
+        self.WirelessDeviceJSON = newWireless
+        print("wirelessJSON=", self.WirelessDeviceJSON)
+        
+        self.ExtSaveButton.set_enabled(False)
 
     def configext_list_view_on_selected(self, widget, selected_item_key):
         """ The selection event of the listView, returns a key of the clicked event.
             You can retrieve the item rapidly
         """
         print("select_item_key=", selected_item_key)
-        myUnit =  self.listView2.children[selected_item_key].get_text()
-
+        myUnit =  self.listView4.children[selected_item_key].get_text()
         print("myUnit =", myUnit)
-        self.open_input_dialog(widget, myUnit)
-        # for on save
-        self.current_listView_key = myUnit
+        
+        self.myExtender = self.buildAnExtender(myUnit)
+        print(self.myExtender)
 
-        id = myUnit.split("/")[1]
-        name = myUnit.split("/")[2]
+        self.ExtenderConfig.append(self.myExtender, "currentExtender") 
+
        
     def wireless_names_list_view_on_selected(self, widget, selected_item_key):
         """ The selection event of the listView, returns a key of the clicked event.
@@ -1196,7 +1442,7 @@ class SGSConfigure(App):
 
         #screen 1
 
-        vbox = VBox(width=1000, height=510, style="background: LightGray")
+        vbox = VBox(width=1000, height=600, style="background: LightGray")
 
         vbox.style['justify-content'] = 'flex-start'
         vbox.style['align-items'] = 'flex-start'
@@ -1240,13 +1486,23 @@ class SGSConfigure(App):
         self.F_manual_water = gui.CheckBoxLabel( 'enable Manual Watering', self.manual_water, height=30, style='margin:5px; background: LightGray ')
         vbox.append(self.F_manual_water,'self.F_manual_water') 
         
-        plabel = gui.Label("Tank Pump Level", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        plabel = gui.Label("Hydroponics Tank Calibration", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
         vbox.append(plabel,'plabel') 
         
-        self.F_Tank_Pump_Level = gui.TextInput(width=300, height=30, style="margin:5px")
-        self.F_Tank_Pump_Level.set_value(str(self.Tank_Pump_Level))
-        vbox.append(self.F_Tank_Pump_Level,'Tank_Pump_Level') 
+        plabel10 = gui.Label("Full Tank", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(plabel10,'plabelF') 
+        self.F_Tank_Pump_Level_Full = gui.TextInput(width=300, height=30, style="margin:10px")
+        self.F_Tank_Pump_Level_Full.set_value(str(self.Tank_Pump_Level_Full))
+        vbox.append(self.F_Tank_Pump_Level_Full,'Tank_Pump_LevelH') 
 
+        plabelE = gui.Label("Empty Tank", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(plabelE,'plabelE') 
+        self.F_Tank_Pump_Level_Empty = gui.TextInput(width=300, height=30, style="margin:10px")
+        self.F_Tank_Pump_Level_Empty.set_value(str(self.Tank_Pump_Level_Empty))
+        vbox.append(self.F_Tank_Pump_Level_Empty,'Tank_Pump_LevelL') 
+
+        plabel1 = gui.Label("English Or Metric Units ", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(plabel1) 
         self.F_English_Metric = gui.CheckBoxLabel('Use Metric Units (default English)', False , height=30, style='margin:5px; background:LightGray')
         vbox.append(self.F_English_Metric,'english_metric') 
 
@@ -1338,31 +1594,25 @@ class SGSConfigure(App):
         vbox.append(screen1header)
 
 
-        PNheader = gui.Label("Pixel/NeoPixel LED Support", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
-        vbox.append(PNheader,'PNheader') 
+        #P1Nheader = gui.Label("Solar Max Configuration", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
+        #vbox.append(P1Nheader,'P1Nheader') 
 
-        self.F_enablePixel = gui.CheckBoxLabel( 'Enable Pixel/NeoPixel', self.enablePixel, height=30, style='margin:5px; background: LightGray ')
-        vbox.append(self.F_enablePixel,'self.F_enablePixel') 
-
-        P1Nheader = gui.Label("Solar Max Configuration", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
-        vbox.append(P1Nheader,'P1Nheader') 
-
-        self.F_SolarMAX_Present = gui.CheckBoxLabel( 'SolarMAX Present', self.SolarMAX_Present, height=30, style='margin:5px; background: LightGray ')
-        vbox.append(self.F_SolarMAX_Present,'self.F_SolarMAX_Present') 
+        #self.F_SolarMAX_Present = gui.CheckBoxLabel( 'SolarMAX Present', self.SolarMAX_Present, height=30, style='margin:5px; background: LightGray ')
+        #vbox.append(self.F_SolarMAX_Present,'self.F_SolarMAX_Present') 
 
 
-        self.F_SolarMAX_Type = gui.DropDown(width='200px')
-        self.F_SolarMAX_Type.style.update({'font-size':'large'})
-        self.F_SolarMAX_Type.add_class("form-control dropdown")
-        item1 = gui.DropDownItem("LEAD")
-        item2 = gui.DropDownItem("LIPO")
-        self.F_SolarMAX_Type.append(item1,'item1')
-        self.F_SolarMAX_Type.append(item2,'item2')
-        self.F_SolarMAX_Type.select_by_value(self.SolarMAX_Type)
-        vbox.append(self.F_SolarMAX_Type, 'self.F_SolarMAX_Type')
+        #self.F_SolarMAX_Type = gui.DropDown(width='200px')
+        #self.F_SolarMAX_Type.style.update({'font-size':'large'})
+        #self.F_SolarMAX_Type.add_class("form-control dropdown")
+        #item1 = gui.DropDownItem("LEAD")
+        #item2 = gui.DropDownItem("LIPO")
+        #self.F_SolarMAX_Type.append(item1,'item1')
+        #self.F_SolarMAX_Type.append(item2,'item2')
+        #self.F_SolarMAX_Type.select_by_value(self.SolarMAX_Type)
+        #vbox.append(self.F_SolarMAX_Type, 'self.F_SolarMAX_Type')
 
-        P2Nheader = gui.Label("Station Height in Meters", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
-        vbox.append(P2Nheader,'P2Nheader') 
+        #P2Nheader = gui.Label("Station Height in Meters", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
+        #vbox.append(P2Nheader,'P2Nheader') 
 
 
 
@@ -1375,7 +1625,7 @@ class SGSConfigure(App):
     def buildScreen4(self):
         #screen 4
 
-        vbox = VBox(width=1000, height=510, style="background: LightGray; border: 5px solid red")
+        vbox = VBox(width=1000, height=800, style="background: LightGray; border: 5px solid red")
 
         vbox.style['justify-content'] = 'flex-start'
         vbox.style['align-items'] = 'flex-start'
@@ -1389,12 +1639,37 @@ class SGSConfigure(App):
         vbox.append(screen1header)
 
 
-        p5label = gui.Label("Garden Cam Interval between pictures (seconds)", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
-        vbox.append(p5label,'p5label') 
+        p5label1 = gui.Label("Garden Cam Interval between pictures (seconds)", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(p5label1,'p5label1') 
         
         self.F_INTERVAL_CAM_PICS__SECONDS = gui.TextInput(width=300, height=30, style="margin:5px")
         self.F_INTERVAL_CAM_PICS__SECONDS.set_value(str(self.INTERVAL_CAM_PICS__SECONDS))
         vbox.append(self.F_INTERVAL_CAM_PICS__SECONDS,'INTERVAL_CAM_PICS__SECONDS') 
+        p5label2 = gui.Label("Infrared Camera Gain Configuration", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(p5label2,'p5label2') 
+        
+        self.F_Infrared_High_Auto = gui.CheckBoxLabel( 'High Auto Gain', self.Infrared_High_Auto_Gain, height=30, style='margin:5px; background: LightGray ')
+        vbox.append(self.F_Infrared_High_Auto,'self.F_Infrared_High_Auto') 
+        
+        p5label3 = gui.Label("Infrared High Temp Set (degrees C) ", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(p5label3,'p5label3') 
+        self.F_Infrared_High_Temp = gui.TextInput(width=300, height=30, style="margin:5px")
+        self.F_Infrared_High_Temp.set_value(str(self.Infrared_High_Temp))
+        vbox.append(self.F_Infrared_High_Temp,'Infrared_High_Temp') 
+        
+        self.F_Infrared_Low_Auto = gui.CheckBoxLabel( 'Low Auto Gain', self.Infrared_Low_Auto_Gain, height=30, style='margin:5px; background: LightGray ')
+        vbox.append(self.F_Infrared_Low_Auto,'self.F_Infrared_Low_Auto') 
+
+        p5label4 = gui.Label("Infrared Low Temp Set  (degrees C)", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(p5label4,'p5label4') 
+
+
+        self.F_Infrared_Low_Temp = gui.TextInput(width=300, height=30, style="margin:5px")
+        self.F_Infrared_Low_Temp.set_value(str(self.Infrared_Low_Temp))
+        vbox.append(self.F_Infrared_Low_Temp,'Infrared_Low_Temp') 
+        
+        
+
         p5label = gui.Label("Bluetooth Sensor Assignment (select one) ", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
         vbox.append(p5label,'p5label') 
        
@@ -1495,7 +1770,7 @@ class SGSConfigure(App):
    
 
         #screen 1
-        screen1header = gui.Label("Blynk / ThunderBoard AS3935 Tab", style='margin:10px')
+        screen1header = gui.Label("Blynk", style='margin:10px')
         vbox.append(screen1header)
 
 
@@ -1513,19 +1788,19 @@ class SGSConfigure(App):
         self.F_BLYNK_AUTH.set_value(self.BLYNK_AUTH)
         vbox.append(self.F_BLYNK_AUTH,'BLYNK_AUTH') 
         #
-        P1Nheader = gui.Label("ThunderBoard AS3935 Configuration", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
-        vbox.append(P1Nheader,'P1Nheader') 
+        #P1Nheader = gui.Label("ThunderBoard AS3935 Configuration", style='position:absolute; left:5px; top:30px;'+self.headerstyle)
+        #vbox.append(P1Nheader,'P1Nheader') 
 
-        P2Nheader = gui.Label("Format:[NoiseFloor, Indoor, TuneCap, DisturberDetection, WatchDogThreshold, SpikeDetection] ", style='position:absolute; left:5px; top:30px;'+self.labelstyle)
-        vbox.append(P2Nheader,'P2Nheader') 
+        #P2Nheader = gui.Label("Format:[NoiseFloor, Indoor, TuneCap, DisturberDetection, WatchDogThreshold, SpikeDetection] ", style='position:absolute; left:5px; top:30px;'+self.labelstyle)
+        #vbox.append(P2Nheader,'P2Nheader') 
         
 
-        p9label = gui.Label("Thunderboard Configuration", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
-        vbox.append(p9label,'p9label') 
+        #p9label = gui.Label("Thunderboard Configuration", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        #vbox.append(p9label,'p9label') 
         
-        self.F_AS3935_Lightning_Config  = gui.TextInput(width=300, height=30, style="margin:5px")
-        self.F_AS3935_Lightning_Config .set_value(self.AS3935_Lightning_Config )
-        vbox.append(self.F_AS3935_Lightning_Config ,'AS3935_Lightning_Config ') 
+        #self.F_AS3935_Lightning_Config  = gui.TextInput(width=300, height=30, style="margin:5px")
+        #self.F_AS3935_Lightning_Config .set_value(self.AS3935_Lightning_Config )
+        #vbox.append(self.F_AS3935_Lightning_Config ,'AS3935_Lightning_Config ') 
 
 
         return vbox
@@ -1559,9 +1834,6 @@ class SGSConfigure(App):
         p8label = gui.Label("Ultrasonic Pin ", style='position:absolute; left:5px; top:40px;'+shortlabelstyle)
         vbox.append(p8label,'p8label') 
         
-        self.F_UltrasonicLevel = gui.TextInput(width=200, height=30, style="margin:5px")
-        self.F_UltrasonicLevel.set_value(str(self.UltrasonicLevel))
-        vbox.append(self.F_UltrasonicLevel,'UltrasonicLevel') 
 
         p1label = gui.Label("Pixel Pin", style='position:absolute; left:5px; top:40px;'+shortlabelstyle)
         vbox.append(p1label,'p1label') 
@@ -1641,6 +1913,175 @@ class SGSConfigure(App):
 
 
 
+    def buildScreen8(self):
+        #screen 8
+
+        vbox = VBox(width=1000, height=800, style="background: LightGray; border: 5px solid red")
+
+        vbox.style['justify-content'] = 'flex-start'
+        vbox.style['align-items'] = 'flex-start'
+        vbox.style['border'] = '2px'
+        vbox.style['border-color'] = 'blue'
+       
+        vbox = self.establishMenu(vbox)
+   
+        #screen 
+        screen1header = gui.Label("Alarm and Status Tab", style='margin:10px')
+        vbox.append(screen1header)
+        
+        self.F_Send_Status_Email = gui.CheckBoxLabel( 'Send Status Email', self.Send_Status_Email, height=30, style='margin:5px; background: LightGray ')
+        vbox.append(self.F_Send_Status_Email,'self.F_Send_Status_Email') 
+        p8label1 = gui.Label("Send 3very how many minutes", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(p8label1,'p8label1') 
+        self.F_Status_Send_Email_Minutes = gui.TextInput(width=100, height=30, style="margin:5px")
+        self.F_Status_Send_Email_Minutes.set_value(str(self.Status_Send_Email_Minutes))
+        vbox.append(self.F_Status_Send_Email_Minutes,'Status_Send_Email_Minutes') 
+        
+        self.F_Send_Status_Text = gui.CheckBoxLabel( 'Send Status Text', self.Send_Status_Text, height=30, style='margin:5px; background: LightGray ')
+        vbox.append(self.F_Send_Status_Text,'self.F_Send_Status_Text') 
+
+        p8label2 = gui.Label("Send every how many minutes", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(p8label2,'p8label2') 
+        self.F_Status_Send_Text_Minutes = gui.TextInput(width=100, height=30, style="margin:5px")
+        self.F_Status_Send_Text_Minutes.set_value(str(self.Status_Send_Text_Minutes))
+        vbox.append(self.F_Status_Send_Text_Minutes,'Status_Send_Text_Minutes') 
+       
+        p5label = gui.Label("Sensor Alarm Assignment", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        vbox.append(p5label,'p5label') 
+       
+        # get list of bluetooth sensors
+
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                
+                query = "SELECT * FROM BluetoothSensors" 
+
+                print("query=", query)
+                cur.execute(query)
+                myRecords = cur.fetchall()
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                myRecords = [];
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+
+
+
+
+        btitems = ()
+        for record in myRecords: 
+            myID = record[3]
+            myName = record[5]
+            if (myName == None):
+                myName = "No Name"
+            if (record[4] == ""):
+                myAssign = "Not Assigned"
+            else:
+                myAssign = record[4]
+
+            btitem = "bluetooth sensor:/"+ str(myID) + "/" + str(myName) + "/ Assigned To: %s" % (myAssign) 
+
+            btitems = btitems + (btitem,)
+        
+        myHydroID = "" 
+        for wireless in self.WirelessDeviceJSON:
+            print("wireless=", wireless)
+
+            if (wireless['hydroponicsmode'] == "true"):
+                myHydroID = wireless['id']
+                break
+
+        if (myHydroID != ""): 
+            btitem = "hydroponics sensors / "+ myHydroID 
+            btitems = btitems + (btitem,)
+        print("btitem count=", len(btitems))
+       
+
+        # list out wireless units
+       
+        wirelessList = ('Not Assigned',)
+        for wireless in self.WirelessDeviceJSON:
+            myID = wireless["id"]
+            myName = wireless["name"]
+            wirelessItem = "wireless:/"+ str(myID) + "/" + str(myName)
+
+            wirelessList = wirelessList + (wirelessItem,)
+
+
+        items = ()
+        for ext in wirelessList:
+            item = (str(ext[1])+" / "+str(ext[0])+ " / " +str(ext[2]))
+            
+            items = items +  (item, )
+
+        
+        # now set up new block
+        self.AlarmBlock1 = gui.Container(width=1000, height=700, layout_orientation=gui.Container.LAYOUT_HORIZONTAL)
+        self.AlarmBlock1.style['background'] = "LightGray"
+
+        self.AlarmBlock1.style['align-items'] = 'right'
+        self.AlarmBlock1.style['border'] = '2px'
+        self.AlarmBlock1.style['border-color'] = 'blue'
+        self.AlarmBlock1.style['flex-direction'] = 'row'
+
+
+
+        self.listView1 = gui.ListView.new_from_list(btitems, width=500, height=25*len(btitems), margin='10px')
+        self.listView1.onselection.do(self.alarm_wireless_list_view_on_selected)
+        self.AlarmBlock1.append(self.listView1)
+        
+        vbox.append(self.AlarmBlock1)
+
+        return vbox
+
+    def alarm_wireless_list_view_on_selected(self, widget, selected_item_key):
+        """ The selection event of the listView, returns a key of the clicked event.
+            You can retrieve the item rapidly
+        """
+        myUnit =  self.listView1.children[selected_item_key].get_text()
+        print("list_view: myUnit=", myUnit)
+        # for on save
+        self.current_listView_key = myUnit
+
+        id = myUnit.split("/")[1]
+        name = myUnit.split("/")[0]
+
+        mySplit = myUnit.split(":")
+        assignedAddress = mySplit[3]
+        assignedAddress = assignedAddress.replace(" ", "")
+        print("assignedAddress=", assignedAddress)
+
+        self.DisplaySelect1 = gui.Label('Set Alarms ',width=100, height=15, margin='5px')
+        
+        self.Display_ExWEXT1 = gui.Label('', width=130, height=30, margin='5px')
+        self.Display_ExWEXT1.set_text('Configuring '+myUnit )
+        self.Display_ExWEXT1.style['position'] = "absolute"
+        self.Display_ExWEXT1.style['left'] = "10px"
+
+        self.Display_Moisture =     gui.CheckBoxLabel( 'Moisture Alarm', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px' )
+        self.Display_Moisture.style['position'] = "absolute"
+        self.Display_Moisture.style['left'] = "10px"
+        self.Display_Moisture.onclick.do(self.onBoxChange)
+
+        self.Display_Temperature =     gui.CheckBoxLabel( 'Moisture Alarm', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px' )
+        self.Display_Temperature.style['position'] = "absolute"
+        self.Display_Temperature.style['left'] = "10px"
+        self.Display_Temperature.onclick.do(self.onBoxChange)
+
+        self.AlarmBlock1.append(self.DisplaySelect1, "DS1") 
+        self.AlarmBlock1.append(self.Display_Moisture, "DM1") 
+        self.AlarmBlock1.append(self.Display_Temperature, "DT1") 
+  
+        
+
+
     def main(self):
 
         self.readJSON()
@@ -1672,7 +2113,7 @@ class SGSConfigure(App):
 
 
         logo = SuperImage("./static/SGfulllogocolor.png", width=400, height =142)
-        header = gui.Label("SmartGarden3 Configuration Tool V005", style='position:absolute; left:150px; top:120px')
+        header = gui.Label("SmartGarden3 Configuration Tool V010", style='position:absolute; left:150px; top:120px')
         # bottom buttons
 
         cancel = gui.Button('Cancel',style='position:absolute; left:550px; height: 30px; width:100px; margin:10px; top:5px')
@@ -1709,11 +2150,12 @@ class SGSConfigure(App):
         self.screen06 = self.buildScreen06()
         self.screen1 = self.buildScreen1()
         self.screen2 = self.buildScreen2()
-        self.screen3 = self.buildScreen3()
+        #self.screen3 = self.buildScreen3()
         self.screen4 = self.buildScreen4()
         self.screen5 = self.buildScreen5()
-        self.screen6 = self.buildScreen6()
+        #self.screen6 = self.buildScreen6()
         self.screen7 = self.buildScreen7()
+        self.screen8 = self.buildScreen8()
 
 
         self.mainContainer.append(self.screen0,'screen0')
@@ -1736,11 +2178,12 @@ class SGSConfigure(App):
         self.mainContainer.remove_child(self.screen06)
         self.mainContainer.remove_child(self.screen1)
         self.mainContainer.remove_child(self.screen2)
-        self.mainContainer.remove_child(self.screen3)
+        #self.mainContainer.remove_child(self.screen3)
         self.mainContainer.remove_child(self.screen4)
         self.mainContainer.remove_child(self.screen5)
-        self.mainContainer.remove_child(self.screen6)
+        #self.mainContainer.remove_child(self.screen6)
         self.mainContainer.remove_child(self.screen7)
+        self.mainContainer.remove_child(self.screen8)
         
     # listener functions
 
@@ -1797,6 +2240,11 @@ class SGSConfigure(App):
         self.mainContainer.append(self.screen7,'screen7')
         print("menu screen7 clicked")
 
+    def menu_screen8_clicked(self, widget):
+        self.removeAllScreens()
+        self.mainContainer.append(self.screen8,'screen8')
+        print("menu screen8 clicked")
+
     # scanning sofrware
 
     def ScanForHardware(self, widget, name='', surname=''):
@@ -1843,6 +2291,7 @@ class SGSConfigure(App):
             #print("JSONLength=", len(JSON))
             if len(JSON) != 0 :
                 print("JSON=", JSON)
+                JSON['hydroponicsmode'] = 'false'
                 JSON['hydroponics_temperature'] = 'false'
                 JSON['hydroponics_tds'] = 'false'
                 JSON['hydroponics_ph'] = 'false'
@@ -1880,6 +2329,7 @@ class SGSConfigure(App):
         self.progress.set_value(100)
         self.menubar.set_enabled(True)
         self.SFHWorking = False
+        
     # Buttons
 
     def onCancel(self, widget, name='', surname=''):
@@ -1899,6 +2349,7 @@ class SGSConfigure(App):
         print("server stopped") 
         os._exit(os.EX_OK)
 
+
     def onReset(self, widget, name='', surname=''):
         print("Reset clicked")
         self.removeAllScreens()
@@ -1910,11 +2361,12 @@ class SGSConfigure(App):
         self.screen06 = self.buildScreen06()
         self.screen1 = self.buildScreen1()
         self.screen2 = self.buildScreen2()
-        self.screen3 = self.buildScreen3()
+        #self.screen3 = self.buildScreen3()
         self.screen4 = self.buildScreen4()
         self.screen5 = self.buildScreen5()
-        self.screen6 = self.buildScreen6()
+        #self.screen6 = self.buildScreen6()
         self.screen7 = self.buildScreen7()
+        self.screen8 = self.buildScreen8()
 
 
         self.mainContainer.append(self.screen1,'screen1')

@@ -46,7 +46,7 @@ def map_value(x, in_min, in_max, out_min, out_max):
 
 def processInfraredPicture(myID, inputpixels):
    
-
+  try:
     inputpixels = inputpixels[0:len(inputpixels)-1]
     #print("inputpixels=", inputpixels)
     mypixels = inputpixels.split(",")
@@ -54,24 +54,25 @@ def processInfraredPicture(myID, inputpixels):
     for singlepixel in mypixels:
         fpixels.append(float(singlepixel))
 
-    print("fpixels=", fpixels)
+    #print("fpixels=", fpixels)
     pixels = fpixels
-    if (config.irgain == 0):
+    if (config.Infrared_Low_Auto_Gain == True):
         # auto gain
         # find minimum in pixels
         MINTEMP = min(pixels) 
-
-        # find maximum in pixles
-        MAXTEMP = max(pixels) 
-    
     else:
 
         # low range of the sensor (this will be blue on the screen)
-        MINTEMP = 26.0
+        MINTEMP = float(config.Infrared_Low_Temp )
     
+    if (config.Infrared_High_Auto_Gain == True):
+        # find maximum in pixles
+        MAXTEMP = max(pixels) 
+    else: 
         # high range of the sensor (this will be red on the screen)
-        MAXTEMP = 32.0
-    print ("MINTEMP=%d MAXTEMP=%d" % (MINTEMP, MAXTEMP))
+        MAXTEMP = float(config.Infrared_High_Temp)
+
+    #print ("MINTEMP=%d MAXTEMP=%d" % (MINTEMP, MAXTEMP))
     # how many color values we can have
     COLORDEPTH = 1024
     
@@ -223,7 +224,8 @@ def processInfraredPicture(myID, inputpixels):
 
             del cur
             del con
-
+  except:
+            traceback.print_exc()
 
 def takeSkyPicture():
 

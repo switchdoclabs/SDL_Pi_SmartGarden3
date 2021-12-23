@@ -611,8 +611,83 @@ def update_skypic_metrics(n_intervals, id, value):
     #print("picoutput=", output)
     return [output]
 
+##########################
+# Hydroponics 
+##########################
 
 
+@app.callback(
+          [
+          Output({'type' : 'HPdynamic', 'index' : MATCH}, 'children' ),
+              ],
+              [Input('main-interval-component','n_intervals'),
+              Input({'type' : 'HPdynamic', 'index' : MATCH}, 'id' )],
+              [State({'type' : 'HPdynamic', 'index' : MATCH}, 'value'  )]
+              )
+def updateHydroponicsUpdate(n_intervals,id, value):
+
+
+    if ((n_intervals % (5*6)) == 0) or (n_intervals ==0): # 5 minutes -10 second timer
+        #print("UpdateHydroponics n_intervals =", n_intervals, id['index'])
+
+        if (id['index'] == "StringTime"):
+            myID = hydroponics_page.getFirstWireless()
+            hydroponics_page.CHJSON = hydroponics_page.generateCurrentHydroJSON(myID)
+            value = str(hydroponics_page.CHJSON[id['index']]) +" "+ hydroponics_page.CHJSON[id['index']+'Units']
+            value = "Extender: "+myID+" Updated at:" + value
+            return [value]
+
+        else:
+            # OK.  Now we update the blocks
+
+            if (id['index'] == "Temperature"):
+                value = str(round(hydroponics_page.CTUnits(hydroponics_page.CHJSON[id['index']]),1)) +" "+ hydroponics_page.CHJSON[id['index']+'Units']
+            else:
+                value = str(hydroponics_page.CHJSON[id['index']]) +" "+ hydroponics_page.CHJSON[id['index']+'Units']
+            if (hydroponics_page.CHJSON[id['index']] < 0):
+                value = "N/A"
+            #print ("value=", value)
+            return [value]
+    else:
+        raise PreventUpdate
+
+# now do graphs
+@app.callback(Output({'type' : 'HPGdynamic', 'index' : MATCH}, 'figure' ),
+              [Input('main-interval-component','n_intervals'),
+                  Input({'type' : 'HPGdynamic', 'index' : MATCH}, 'id' )],
+              [State({'type' : 'HPGdynamic', 'index' : MATCH}, 'value'  )]
+              )
+
+def hydrographupdate(n_intervals, id, value):
+    
+   #if (True): # 1 minutes -10 second timer
+   if (n_intervals != 0) and ((n_intervals % (10*6)) == 0): # 1 minutes -10 second timer
+    print ("---->inputs:",dash.callback_context.inputs) 
+    print(">hydrograph table Update started",id['index'])
+    print("HPG-n_intervals=", n_intervals) 
+    myID = hydroponics_page.getFirstWireless()
+    if (id['index'] == "graph-Level"):
+        fig = hydroponics_page.buildGraphFigure("Level", "%",hydroponics_page.getActiveSensorWireless(myID, "Level"))
+        return fig
+    
+    if (id['index'] == "graph-Temperature"):
+        fig = hydroponics_page.buildGraphFigure("Temperature", "Degrees ("+hydroponics_page.TUnits()+")",hydroponics_page.getActiveSensorWireless(myID, "Temperature"))
+        return fig
+    
+    if (id['index'] == "graph-TDS"):
+        fig = hydroponics_page.buildGraphFigure("TDS", "ppm",hydroponics_page.getActiveSensorWireless(myID, "TDS"))
+        return fig
+    
+    if (id['index'] == "graph-Turbidity"):
+        fig = hydroponics_page.buildGraphFigure("Turbidity", "NTU",hydroponics_page.getActiveSensorWireless(myID, "Turbidity"))
+        return fig
+    
+    if (id['index'] == "graph-Ph"):
+        fig = hydroponics_page.buildGraphFigure("Ph", "",hydroponics_page.getActiveSensorWireless(myID, "Ph"))
+        return fig
+    
+   else:
+    raise PreventUpdate
 ##########################
 # Manual Control
 ##########################

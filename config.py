@@ -84,23 +84,27 @@ manual_water = False
 bluetooth_count = 0
 
 
-# if your pumps stick up too high, adjust this value so tank will still ready empty
-Tank_Pump_Level = 15.0
+Tank_Pump_Level_Full = 500
+Tank_Pump_Level_Empty = 900
 ############
 #Hydroponics 
 ############
 HydroponicsMode = True 
 
-# irgain 0 means auto
-irgain = 0
 
+############
+#Infrared
+############
+
+Infrared_High_Auto_Gain = False
+Infrared_Low_Auto_Gain = False
+Infrared_High_Temp = 22.0
+Infrared_Low_Temp = 17.0
 
 ############
 #pin defines
 ############
 
-UltrasonicLevel = 4
-pixelPin = 21
 
 DustSensorSCL = 20
 DustSensorSDA = 21
@@ -114,10 +118,6 @@ DustSensorPowerPin = 12
 
 Lightning_Mode = False
 GardenCam_Present = False
-SolarMAX_Present = False
-DustSensor_Present = False
-
-UltrasonicLevel_Present = True
 
 ########
 #Logging

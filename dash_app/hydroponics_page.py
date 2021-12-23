@@ -60,11 +60,12 @@ def TUnits():
 
 def generateCurrentHydroJSON(DeviceID):
         print("generating current HydroJSON")
+        print("DeviceID=",DeviceID)
         try:
                 con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
                 cur = con.cursor()
                 query = "SELECT * FROM `Hydroponics` WHERE DeviceID = '%s' ORDER BY id DESC LIMIT 1" % DeviceID
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 records = cur.fetchall()
                 weatherRecordCount = len(records)
@@ -75,7 +76,7 @@ def generateCurrentHydroJSON(DeviceID):
                 cur.execute(query)
                 names = cur.fetchall()
                 fieldcount = len (names)
-                print ("names=", names)
+                #print ("names=", names)
                 CHJSON = {}
                 for i in range(1,fieldcount):
                     if (names[i][0] == "TimeStamp"):
@@ -95,12 +96,19 @@ def generateCurrentHydroJSON(DeviceID):
                             else:
                               CHJSON[names[i][0]] = float(records[0][i])
 
+                #print("records=", records)
                 if (weatherRecordCount == 0):
                     CHJSON["StringTime"] = ""
                 else:
-                    CHJSON["StringTime"] = records[0][1]
+                    CHJSON["StringTime"] = records[0][2]
                 CHJSON["StringTimeUnits"] = ""
-
+                
+                #Units
+                CHJSON["LevelUnits"] = "%"
+                CHJSON["TemperatureUnits"] = TUnits()
+                CHJSON["TDSUnits"] = "ppm"
+                CHJSON["PhUnits"] = ""
+                CHJSON["TurbidityUnits"] = "NTU"
 
 
         except:
@@ -110,7 +118,7 @@ def generateCurrentHydroJSON(DeviceID):
         finally:
                 cur.close()
                 con.close()
-        print("done generating CHJSON=", CHJSON)
+        #print("done generating CHJSON=", CHJSON)
         return CHJSON
 
 
@@ -131,7 +139,7 @@ def fetchData(Value, DeviceID, timeDelta):
                 before = now - timeDelta
                 before = before.strftime('%Y-%m-%d %H:%M:%S')
                 query = "SELECT %s, timestamp FROM `Hydroponics` WHERE (timestamp > '%s') AND (DeviceID = '%s') ORDER BY id ASC" % (Value, before, DeviceID)
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 con.commit()
                 records = cur.fetchall()
@@ -149,10 +157,9 @@ def fetchData(Value, DeviceID, timeDelta):
 
 
 
-def buildGraph(Value, Units):
+def buildGraph(Value, Units, Enable):
 
-    fig = buildGraphFigure(Value, Units)
-
+    fig = buildGraphFigure(Value, Units, Enable)
     graph =  dcc.Graph(
                     id = {'type' : 'HPGdynamic', 'index': 'graph-%s' % Value },
                     figure=fig,
@@ -160,8 +167,17 @@ def buildGraph(Value, Units):
                     )
     return graph
 
-def buildGraphFigure(Value, Units):
-    
+def buildGraphFigure(Value, Units, Enable):
+    #print("Value=%s, Units=%s, Enable=%s" % (Value, Units, Enable)) 
+    if (Enable == "false"):
+        fig = go.Figure()
+        fig.update_layout(
+            height=200,
+            title_text='No %s Data Available'% Value)
+        return fig
+
+
+
     timeDelta = datetime.timedelta(days=7)
     records = fetchData(Value,CHJSON['DeviceID'],timeDelta)
 
@@ -170,15 +186,19 @@ def buildGraphFigure(Value, Units):
     data = []
     for record in records:
         Time.append(record[1])
-        data.append(record[0])
+        if (Value == "Temperature"):
+            data.append(CTUnits(record[0]))
+        else:
+            data.append(record[0])
 
+    #print("BGF Records=", records)
     units = ""
     
     # Create figure with secondary y-axis
     if (len(records) == 0):
         fig = go.Figure()
         fig.update_layout(
-            height=800,
+            height=200,
             title_text='No %s Data Available'% Value)
         return fig
 
@@ -199,12 +219,20 @@ def buildGraphFigure(Value, Units):
     # Set x-axis title
     fig.update_xaxes(title_text="Time")
     fig.update_yaxes(title_text=Units)
-   
-    minTemp = min(data)*0.9
-    maxTemp = max(data)*1.10
+  
+    # set max and min
+
+    if (Value=="Level"):
+        minTemp = 0 
+        maxTemp = 110
+    else:
+        minTemp = min(data)*0.9
+        maxTemp = max(data)*1.10
+
     # Set y-axes titles
-    #fig.update_yaxes(title_text="<b>Turbidity</b>", range = (minTemp, maxTemp), secondary_y=False, side='left')
-    
+    #fig.update_yaxes(range = (minTemp, maxTemp), secondary_y=False, side='left')
+
+    fig.update(layout_yaxis_range = [minTemp,maxTemp])  
     return fig
 
 
@@ -223,7 +251,7 @@ def HydroponicsPage():
     print("HP-CHJSON=", CHJSON)
     Row1 = html.Div(
         [ 
-        dbc.Row( dbc.Col(html.Div(html.H6(id={'type' : 'HPdynamic', 'index': "StringTime"},children="Hydrponics Instruments")))),
+        dbc.Row( dbc.Col(html.Div(html.H6(id={'type' : 'HPdynamic', 'index': "StringTime"},children="Hydroponics Instruments")))),
             
             dbc.Row(
                 [ 
@@ -243,7 +271,7 @@ def HydroponicsPage():
                      html.Div(
                          [html.H1(id={'type' : 'HPdynamic', 'index' : "TDS"},
                             children=str(CHJSON["TDS"]), style={"font-size": maintextsize,"color":maintextcolor}), 
-                         html.P("Total Disolved Solids", style={"color":subtextcolor})
+                         html.P("Total Dissolved Solids", style={"color":subtextcolor})
                          ], id="ht1", className="mini_container",),
                      html.Div(
                          [html.H1(id={'type' : 'HPdynamic', 'index' : "Turbidity"},
@@ -261,10 +289,16 @@ def HydroponicsPage():
                     ),
                      dbc.Col( html.Div(html.Figure(
                      [
-                     html.Div(id={'type' : 'WPIdynamic', 'index' : "SkyCamImage"},
+                     html.Div(id={'type' : 'WPIdynamic', 'index' : "GardenCamImage"},
                           children = [
                             html.Img( height=350, width=350*1.77, src="/assets/skycamera.jpg"),
-                            html.Figcaption("SkyWeather Cam"),
+                            html.Figcaption("Garden Cam"),
+                            ]),
+
+                     html.Div(id={'type' : 'WPIdynamic', 'index' : "IRImage"},
+                          children = [
+                            html.Img( height=350, width=350, src="/assets/149D-IR_1.jpg"),
+                            html.Figcaption("Infrared Cam"),
                             ]),
 
                      ]
@@ -278,7 +312,7 @@ def HydroponicsPage():
         ]
 	    ) # end of Rwo1
 
-
+    myID = getFirstWireless()
 
 # graphs
     Row3 = html.Div(
@@ -287,11 +321,11 @@ def HydroponicsPage():
             [
                 dbc.Col(
                 [
-                    buildGraph("RawLevel", "%"),
-                    buildGraph("Temperature", "Degrees"),
-                    buildGraph("TDS", "ppm"),
-                    buildGraph("Turbidity", "NTU"),
-                    buildGraph("Ph", ""),
+                    buildGraph("Level", "%", getActiveSensorWireless(myID, "Level")),
+                    buildGraph("Temperature", "Degrees ("+TUnits()+")",getActiveSensorWireless(myID, "Temperature")),
+                    buildGraph("TDS", "ppm",getActiveSensorWireless(myID, "TDS")),
+                    buildGraph("Turbidity", "NTU",getActiveSensorWireless(myID, "Turbidity")),
+                    buildGraph("Ph", "",getActiveSensorWireless(myID, "Ph")),
                 ],
                 width = 12,
                 )
@@ -314,7 +348,33 @@ def HydroponicsPage():
     )
     return layout
 
+def getActiveSensorWireless(myID, Value):
 
-CHJSON = generateCurrentHydroJSON('149D')
+     wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
+     #print("WirelessJSON=", wirelessJSON)
+     returnValue = "false"
+     for wireless in wirelessJSON:
+        if (wireless["id"] == myID):
+            returnValue= wireless["hydroponics_"+ Value.lower()]
+            return returnValue
+     return returnValue 
+
+
+def getFirstWireless():
+
+     wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
+     #print("WirelessJSON=", wirelessJSON)
+     myID = "None"
+     for wireless in wirelessJSON:
+        if (wireless["hydroponicsmode"] == "true"):
+            myID = wireless["id"]
+            return myID
+     return myID 
+
+myID = getFirstWireless()
+
+
+
+CHJSON = generateCurrentHydroJSON(myID)
 
 
