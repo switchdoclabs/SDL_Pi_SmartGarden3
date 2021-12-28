@@ -434,7 +434,7 @@ def returnIndicators():
     #shortBTSensors = []
     #shortBTSensors.append(myBTSensors[0])
     #myBTSensors = shortBTSensors
-    print("BTSensors=", myBTSensors)
+    #print("BTSensors=", myBTSensors)
     for sensor in myBTSensors:
         # fetch Bluetooth Sensor Data
         mySensorData = getLastBTReading(sensor[2])
@@ -564,7 +564,84 @@ def countBluetooth():
                 del con
         return 0  
 
+def generateMyTypeOfAlarm(alarm):
+        myMoisture = alarm[16]
+        myTemperature = alarm[17]
+        myType = ""
+        AlarmFired = False
+            
+        if ((alarm[16] != None) and (alarm[5] == "True")):
+                
+            if (myMoisture < int(alarm[6])):
+                print(">>>>Low moisture alarm!")
+                myType = myType + "/ Low Moisture: %d < %d" % (myMoisture, int(alarm[6]))
+                AlarmFired = True
+            else:
+                if (myMoisture > int (alarm[7])):
+                    print(">>>>High moisture alarm!")
+                    myType = myType + "/ High Moisture: %d > %d" % (myMoisture, int(alarm[6]))
+                    AlarmFired = True
 
+            
+        # temperature alarm
+        if ((alarm[17] != None) and (alarm[8] == "True")):
+            print("temperature check")
+            if (myTemperature < int(alarm[9])):
+                print(">>>>Low Temperature alarm!")
+                myType = myType + "/ Low Temperature: %d < %d" % (myTemperature, int(alarm[9]))
+                AlarmFired = True
+            else:
+                if (myTemperature > int (alarm[10])):
+                    print(">>>>High Temperature alarm!")
+                    myType = myType + "/ High Temperature: %d > %d" % (myTemperature, int(alarm[9]))
+                    AlarmFired = True
+        
+
+            
+        if (AlarmFired == False):
+         myType = "No Alarm" 
+            
+        return myType 
+
+def  generateCurrentAlarms():
+
+    myCurrentAlarmLayout = []
+    try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+
+                query = "SELECT * FROM Alarms"
+
+                print("query=", query)
+                cur.execute(query)
+                myRecords = cur.fetchall()
+    except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                myRecords = []
+    finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+
+    AlarmFound = False
+    for alarm in myRecords:
+        if (alarm[12] != None):
+            myType = generateMyTypeOfAlarm(alarm)
+            if (myType != ""):
+                if (myType != "No Alarm"):
+                    myAlarm = "Alarm Address: %s %s"  % (alarm[4], myType)
+                    myCurrentAlarmLayout.append(dbc.Alert(myAlarm, color="danger"))
+                    AlarmFound = True
+            
+    if (AlarmFound == False):
+           myCurrentAlarmLayout.append(dbc.Alert("No Alarms"))
+
+                
+    return myCurrentAlarmLayout 
 def StatusPage():
 
 
@@ -659,26 +736,30 @@ def StatusPage():
     Layouts = returnIndicators()
     Row3 = html.Div(
                    Layouts ,
-
-
          )
 
+    Row5 = html.Div(html.H2("Active Alarms"))
+
+    myAlarmLayout = html.Div(
+                        dbc.Container(
+                        id={'type' : 'SPAdynamic', 'index' :"activealarms"},
+                        children=generateCurrentAlarms() 
+                        ))
+
+
+
+    print("myAlarmLayout=", myAlarmLayout)
     Row4 = html.Div(
             [
     html.Div(id='log')
             ]
             )
-
-    Row5 = html.Div(
-                [
-                    dbc.Alert("No Alarm", color="primary"),
-        ],
-		   style={'margin-top' : "-90px"}
-
-    )
-    #layout = dbc.Container([
+    #print("SPRow2=", Row2)
+    #print("SPRow5=", Row5)
+    
     layout = dbc.Container([
-        Row1, Row2, Row5, Row3, Row4],
+        Row1, Row2, Row5, myAlarmLayout, Row3, Row4],
+        #Row1, Row2, Row5, Row3, Row4],
         className="status-1",
     )
     return layout

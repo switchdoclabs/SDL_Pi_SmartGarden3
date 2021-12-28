@@ -304,7 +304,7 @@ class SGSConfigure(App):
         #m6.onclick.do(self.menu_screen6_clicked)
         m7 = gui.MenuItem('CMQTTR', width=70, height=60)
         m7.onclick.do(self.menu_screen7_clicked)
-        m8 = gui.MenuItem('Alarm/Status Configuration', width=70, height=60)
+        m8 = gui.MenuItem('Alarm/Status Configuration', width=90, height=60)
         m8.onclick.do(self.menu_screen8_clicked)
 
         menu.append([m0, m05, m06, m1, m2, m4, m5,  m7, m8])
@@ -1911,7 +1911,30 @@ class SGSConfigure(App):
 
         return vbox
 
+    def StoreC(self, temperature):
+        EorM = self.F_English_Metric.get_value()
 
+        if (EorM == False):  # english units
+            temperature = 5.0/9.0*(temperature - 32.0) 
+        return int(round(temperature,0))
+
+
+
+    def CTUnits(self, temperature):
+
+        EorM = self.F_English_Metric.get_value()
+
+        if (EorM == False):  # english units
+            temperature = (9.0/5.0 * temperature) +32.0
+        return int(round(temperature,0))
+
+
+    def TUnit(self):
+        EorM = self.F_English_Metric.get_value()
+        if (EorM == False):
+            return "F"
+        else:
+            return "C"
 
     def buildScreen8(self):
         #screen 8
@@ -1931,7 +1954,7 @@ class SGSConfigure(App):
         
         self.F_Send_Status_Email = gui.CheckBoxLabel( 'Send Status Email', self.Send_Status_Email, height=30, style='margin:5px; background: LightGray ')
         vbox.append(self.F_Send_Status_Email,'self.F_Send_Status_Email') 
-        p8label1 = gui.Label("Send 3very how many minutes", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
+        p8label1 = gui.Label("Send every how many minutes", style='position:absolute; left:5px; top:40px;'+self.labelstyle)
         vbox.append(p8label1,'p8label1') 
         self.F_Status_Send_Email_Minutes = gui.TextInput(width=100, height=30, style="margin:5px")
         self.F_Status_Send_Email_Minutes.set_value(str(self.Status_Send_Email_Minutes))
@@ -1999,7 +2022,7 @@ class SGSConfigure(App):
                 break
 
         if (myHydroID != ""): 
-            btitem = "hydroponics sensors / "+ myHydroID 
+            btitem = "hydroponics sensors/"+ myHydroID 
             btitems = btitems + (btitem,)
         print("btitem count=", len(btitems))
        
@@ -2024,12 +2047,14 @@ class SGSConfigure(App):
         
         # now set up new block
         self.AlarmBlock1 = gui.Container(width=1000, height=700, layout_orientation=gui.Container.LAYOUT_HORIZONTAL)
-        self.AlarmBlock1.style['background'] = "LightGray"
-
+        #self.AlarmBlock1.style['position'] = "absolute"
+        #self.AlarmBlock1.style['left'] = '400px'
+        self.AlarmBlock1.style['background'] = "lightgray"
         self.AlarmBlock1.style['align-items'] = 'right'
-        self.AlarmBlock1.style['border'] = '2px'
-        self.AlarmBlock1.style['border-color'] = 'blue'
+        self.AlarmBlock1.style['border'] = '6px'
+        self.AlarmBlock1.style['border-color'] = 'black'
         self.AlarmBlock1.style['flex-direction'] = 'row'
+
 
 
 
@@ -2050,35 +2075,343 @@ class SGSConfigure(App):
         # for on save
         self.current_listView_key = myUnit
 
-        id = myUnit.split("/")[1]
+        myID = myUnit.split("/")[1]
         name = myUnit.split("/")[0]
 
-        mySplit = myUnit.split(":")
-        assignedAddress = mySplit[3]
-        assignedAddress = assignedAddress.replace(" ", "")
-        print("assignedAddress=", assignedAddress)
+        #mySplit = myUnit.split(":")
+        #assignedAddress = mySplit[3]
+        #assignedAddress = assignedAddress.replace(" ", "")
+        #print("assignedAddress=", assignedAddress)
+        myOffsetX = 510
+        myOffsetY = 445
+        self.SelectedAlarmID = myID
+        self.SelectedAlarmName = name 
 
-        self.DisplaySelect1 = gui.Label('Set Alarms ',width=100, height=15, margin='5px')
+
+        self.BackBlock = gui.Container(width=445, height=445, layout_orientation=gui.Container.LAYOUT_HORIZONTAL)
+        self.BackBlock.style['background'] = "lightblue"
+        self.BackBlock.style['border'] = '6px'
+        self.BackBlock.style['border-color'] = 'black'
+        self.BackBlock.style['flex-direction'] = 'row'
+        self.BackBlock.style['position'] = "absolute"
+        self.BackBlock.style['left'] = str(myOffsetX + 0)+"px" 
+        self.BackBlock.style['top'] = str(myOffsetY + 0 )+"px"
+
+
+
+
+        self.DisplaySelect1 = gui.Label('Set Alarms ',width=100, height=20, margin='5px')
+        self.DisplaySelect1.style['font-size'] = "20px"
+        self.DisplaySelect1.style['position'] = "absolute"
+        self.DisplaySelect1.style['left'] = str(myOffsetX + 0)+"px" 
+        self.DisplaySelect1.style['top'] = str(myOffsetY + 0 )+"px"
         
-        self.Display_ExWEXT1 = gui.Label('', width=130, height=30, margin='5px')
+        self.Display_ExWEXT1 = gui.Label('', width=400, height=60, margin='5px')
         self.Display_ExWEXT1.set_text('Configuring '+myUnit )
         self.Display_ExWEXT1.style['position'] = "absolute"
-        self.Display_ExWEXT1.style['left'] = "10px"
+        self.Display_ExWEXT1.style['left'] = str(myOffsetX + 0)+"px" 
+        self.Display_ExWEXT1.style['top'] = str(myOffsetY + 30 )+"px"
 
-        self.Display_Moisture =     gui.CheckBoxLabel( 'Moisture Alarm', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px' )
+        self.Display_Moisture =     gui.CheckBoxLabel( 'Moisture Alarm', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px ' )
         self.Display_Moisture.style['position'] = "absolute"
-        self.Display_Moisture.style['left'] = "10px"
-        self.Display_Moisture.onclick.do(self.onBoxChange)
+        self.Display_Moisture.style['left'] = str(myOffsetX + 0)+"px" 
+        self.Display_Moisture.style['top'] = str(myOffsetY + 60 )+"px"
+        self.Display_Moisture.onclick.do(self.onAlarmBoxChange)
 
-        self.Display_Temperature =     gui.CheckBoxLabel( 'Moisture Alarm', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px' )
+        self.Display_MoistureMinLabel = gui.Label('less than',width=70, height=30,  style='margin:5px; background: LightBlue ')
+        self.Display_MoistureMinLabel.style['position'] = "absolute"
+        self.Display_MoistureMinLabel.style['left'] = str(myOffsetX + 0)+"px" 
+        self.Display_MoistureMinLabel.style['top'] = str(myOffsetY + 90 )+"px"
+
+        self.Display_MoistureMin = gui.TextInput(width=50, height=15, style='margin:5px; background: white; padding-left: 15px' )
+        self.Display_MoistureMin.set_text("65")
+        self.Display_MoistureMin.style['position'] = "absolute"
+        self.Display_MoistureMin.style['left'] = str(myOffsetX + 75)+"px" 
+        self.Display_MoistureMin.style['top'] = str(myOffsetY + 90 )+"px"
+        self.Display_MoistureMin.onchange.do(self.onAlarmBoxChange)
+
+        self.Display_MoistureLabel2 = gui.Label(' %   or greater than',width=150, height=30,  style='margin:5px; background: LightBlue ')
+        self.Display_MoistureLabel2.style['position'] = "absolute"
+        self.Display_MoistureLabel2.style['left'] = str(myOffsetX + 147)+"px" 
+        self.Display_MoistureLabel2.style['top'] = str(myOffsetY + 90 )+"px"
+
+        self.Display_MoistureMax = gui.TextInput(width=50, height=15, style='margin:5px; background: white; padding-left: 15px' )
+        self.Display_MoistureMax.set_text("100")
+        self.Display_MoistureMax.style['position'] = "absolute"
+        self.Display_MoistureMax.style['left'] = str(myOffsetX + 295)+"px" 
+        self.Display_MoistureMax.style['top'] = str(myOffsetY + 90 )+"px"
+        self.Display_MoistureMax.onchange.do(self.onAlarmBoxChange)
+
+        self.Display_MoistureLabel3 = gui.Label(' %',width=30, height=30,  style='margin:5px; background: LightBlue ')
+        self.Display_MoistureLabel3.style['position'] = "absolute"
+        self.Display_MoistureLabel3.style['left'] = str(myOffsetX + 360)+"px" 
+        self.Display_MoistureLabel3.style['top'] = str(myOffsetY + 90 )+"px"
+
+
+
+        self.Display_Temperature =     gui.CheckBoxLabel( 'Temperature Alarm', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px' )
         self.Display_Temperature.style['position'] = "absolute"
-        self.Display_Temperature.style['left'] = "10px"
-        self.Display_Temperature.onclick.do(self.onBoxChange)
+        self.Display_Temperature.style['left'] = str(myOffsetX + 0)+"px" 
+        self.Display_Temperature.style['top'] = str(myOffsetY + 130 )+"px"
+        self.Display_Temperature.onclick.do(self.onAlarmBoxChange)
 
+        self.Display_TemperatureLabel = gui.Label('less than',width=70, height=30,  style='margin:5px; background: LightBlue ')
+        self.Display_TemperatureLabel.style['position'] = "absolute"
+        self.Display_TemperatureLabel.style['left'] = str(myOffsetX + 0)+"px" 
+        self.Display_TemperatureLabel.style['top'] = str(myOffsetY + 160 )+"px"
+
+        self.Display_TemperatureMin = gui.TextInput(width=50, height=15, style='margin:5px; background: white; padding-left: 15px' )
+        self.Display_TemperatureMin.set_text("-100")
+        self.Display_TemperatureMin.style['position'] = "absolute"
+        self.Display_TemperatureMin.style['left'] = str(myOffsetX + 75)+"px" 
+        self.Display_TemperatureMin.style['top'] = str(myOffsetY + 160 )+"px"
+        self.Display_TemperatureMin.onchange.do(self.onAlarmBoxChange)
+
+        self.Display_TemperatureLabel2 = gui.Label(" "+self.TUnit()+'   or greater than',width=150, height=30,  style='margin:5px; background: LightBlue ')
+        self.Display_TemperatureLabel2.style['position'] = "absolute"
+        self.Display_TemperatureLabel2.style['left'] = str(myOffsetX + 145)+"px" 
+        self.Display_TemperatureLabel2.style['top'] = str(myOffsetY + 160 )+"px"
+
+        self.Display_TemperatureMax = gui.TextInput(width=50, height=15, style='margin:5px; background: white; padding-left: 15px' )
+        self.Display_TemperatureMax.set_text("200")
+        self.Display_TemperatureMax.style['position'] = "absolute"
+        self.Display_TemperatureMax.style['left'] = str(myOffsetX + 295)+"px" 
+        self.Display_TemperatureMax.style['top'] = str(myOffsetY + 160 )+"px"
+        self.Display_TemperatureMax.onchange.do(self.onAlarmBoxChange)
+
+        self.Display_TemperatureLabel3 = gui.Label(" "+self.TUnit(),width=30, height=30,  style='margin:5px; background: LightBlue ')
+        self.Display_TemperatureLabel3.style['position'] = "absolute"
+        self.Display_TemperatureLabel3.style['left'] = str(myOffsetX + 360)+"px" 
+        self.Display_TemperatureLabel3.style['top'] = str(myOffsetY + 160 )+"px"
+
+
+        self.DisplaySelect2 = gui.Label('Trigger Count',width=150, height=20, margin='5px')
+        self.DisplaySelect2.style['font-size'] = "20px"
+        self.DisplaySelect2.style['position'] = "absolute"
+        self.DisplaySelect2.style['left'] = str(myOffsetX + 0)+"px" 
+        self.DisplaySelect2.style['top'] = str(myOffsetY + 190 )+"px"
+        
+        self.Display_TriggerMaxL = gui.Label('Trigger Max',width=120, height=30,  style='margin:5px; background: LightBlue ')
+        self.Display_TriggerMaxL.style['position'] = "absolute"
+        self.Display_TriggerMaxL.style['left'] = str(myOffsetX + 0)+"px" 
+        self.Display_TriggerMaxL.style['top'] = str(myOffsetY + 220 )+"px"
+
+        self.Display_TriggerMax = gui.TextInput(width=50, height=15, style='margin:5px; background: white; padding-left: 15px' )
+        self.Display_TriggerMax.set_text("0")
+        self.Display_TriggerMax.style['position'] = "absolute"
+        self.Display_TriggerMax.style['left'] = str(myOffsetX + 120)+"px" 
+        self.Display_TriggerMax.style['top'] = str(myOffsetY + 220 )+"px"
+        self.Display_TriggerMax.onchange.do(self.onAlarmBoxChange)
+
+        self.DisplaySelect3 = gui.Label('Notifications',width=150, height=20, margin='5px')
+        self.DisplaySelect3.style['font-size'] = "20px"
+        self.DisplaySelect3.style['position'] = "absolute"
+        self.DisplaySelect3.style['left'] = str(myOffsetX + 0)+"px" 
+        self.DisplaySelect3.style['top'] = str(myOffsetY + 250 )+"px"
+        
+        self.Display_AEmail =     gui.CheckBoxLabel( 'Email Notification of Alarm', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px' )
+        self.Display_AEmail.style['position'] = "absolute"
+        self.Display_AEmail.style['left'] = str(myOffsetX + 0)+"px" 
+        self.Display_AEmail.style['top'] = str(myOffsetY + 280 )+"px"
+
+        self.Display_AText =     gui.CheckBoxLabel( 'Text Notification of Alarm', False, height=30, style='margin:5px; background: LightBlue; padding-left: 0px; text-indent: 15px' )
+        self.Display_AText.style['position'] = "absolute"
+        self.Display_AText.style['left'] = str(myOffsetX + 0)+"px" 
+        self.Display_AText.style['top'] = str(myOffsetY + 310 )+"px"
+
+        self.SaveAlarm = gui.Button('Save Alarm',height=50, width=100, margin=10)
+        self.SaveAlarm.style['font-size'] = "20px"
+        self.SaveAlarm.style['position'] = "absolute"
+        self.SaveAlarm.style['left'] = str(myOffsetX + 10)+"px" 
+        self.SaveAlarm.style['top'] = str(myOffsetY + 360 )+"px"
+        self.SaveAlarm.set_enabled(False)
+        self.SaveAlarm.onclick.do(self.onAlarmSaveButton)
+
+
+        self.AlarmBlock1.append(self.BackBlock, "BB1")
         self.AlarmBlock1.append(self.DisplaySelect1, "DS1") 
+        self.AlarmBlock1.append(self.Display_ExWEXT1, "EX1") 
+
         self.AlarmBlock1.append(self.Display_Moisture, "DM1") 
+        self.AlarmBlock1.append(self.Display_MoistureMinLabel, "DM2") 
+        self.AlarmBlock1.append(self.Display_MoistureMin, "DM3") 
+        self.AlarmBlock1.append(self.Display_MoistureLabel2, "DM4") 
+        self.AlarmBlock1.append(self.Display_MoistureMax, "DM5") 
+        self.AlarmBlock1.append(self.Display_MoistureLabel3, "DM6") 
+
         self.AlarmBlock1.append(self.Display_Temperature, "DT1") 
-  
+        self.AlarmBlock1.append(self.Display_TemperatureLabel, "DT2") 
+        self.AlarmBlock1.append(self.Display_TemperatureMin, "DT3") 
+        self.AlarmBlock1.append(self.Display_TemperatureLabel2, "DT4") 
+        self.AlarmBlock1.append(self.Display_TemperatureMax, "DT5") 
+        self.AlarmBlock1.append(self.Display_TemperatureLabel3, "DT6") 
+
+        self.AlarmBlock1.append(self.DisplaySelect2, "BB2") 
+        self.AlarmBlock1.append(self.Display_TriggerMaxL, "TM1") 
+        self.AlarmBlock1.append(self.Display_TriggerMax, "TM2") 
+
+        self.AlarmBlock1.append(self.DisplaySelect3, "N1") 
+        self.AlarmBlock1.append(self.Display_AEmail, "N2") 
+        self.AlarmBlock1.append(self.Display_AText, "N3") 
+
+        self.AlarmBlock1.append(self.SaveAlarm, "SA1") 
+ 
+
+        # now set up values right
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                
+                query = "SELECT * FROM Alarms WHERE address = '%s'" % (myID)
+
+                print("query=", query)
+                cur.execute(query)
+                myRecords = cur.fetchall()
+                
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                myRecords = []
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+        if (len(myRecords) > 0):
+
+            # deal with C to F conversion
+            temperatureminimum = self.CTUnits(float(myRecords[0][9]))
+            temperaturemaximum = self.CTUnits(float(myRecords[0][10]))
+            triggerlimit = myRecords[0][12] 
+            emailnotification = myRecords[0][14] 
+            textnotification = myRecords[0][15] 
+      
+        
+            if (moisturealarm == "True"):
+                self.Display_Moisture.set_value(True)
+            else:
+                self.Display_Moisture.set_value(False)
+            self.Display_MoistureMin.set_value(str(moistureminimum))
+            self.Display_MoistureMax.set_value(str(moisturemaximum))
+         
+            if (temperaturealarm == "True"):
+                self.Display_Temperature.set_value(True)
+            else:
+                self.Display_Temperature.set_value(False)
+            self.Display_TemperatureMin.set_value(str(temperatureminimum))
+            self.Display_TemperatureMax.set_value(str(temperaturemaximum))
+         
+            self.Display_TriggerMax.set_value(str(triggerlimit))
+
+            if (emailnotification == "True"):
+                self.Display_AEmail.set_value(True)
+            else:
+                self.Display_AEmail.set_value(False)
+
+            if (textnotification == "True"):
+                self.Display_AText.set_value(True)
+            else:
+                self.Display_AText.set_value(False)
+
+       
+ 
+        
+    def onAlarmBoxChange(self, widget, name='', surname=''):
+        print("onAlarmBoxChange")
+        self.SaveAlarm.set_enabled(True)
+
+    def onAlarmSaveButton (self, widget, name='', surname=''):
+        print("On Alarm Save Button Push")
+        self.SaveAlarm.set_enabled(False)
+        myName = self.SelectedAlarmName.strip() 
+        myID = self.SelectedAlarmID.strip()
+        print("id=", myID) 
+        print("name=", myName)
+        if (myName == "bluetooth sensor:"):
+            bluetooth = "True"
+            hydroponics = "False"
+        else:
+            bluetooth = "False"
+            hydroponics = "True"
+
+        address = myID
+        moisturealarm = self.Display_Moisture.get_value()
+        moistureminimum = self.Display_MoistureMin.get_value()
+        moisturemaximum = self.Display_MoistureMax.get_value()
+        temperaturealarm = self.Display_Temperature.get_value()
+        temperatureminimum = self.StoreC( float(self.Display_TemperatureMin.get_value()))
+        temperaturemaximum = self.StoreC(float(self.Display_TemperatureMax.get_value()))
+        triggerlimit = self.Display_TriggerMax.get_value()
+        emailnotification = self.Display_AEmail.get_value()
+        textnotification = self.Display_AText.get_value()
+
+        triggercount = 0
+
+        '''
+        print("bluetooth=", bluetooth)
+        print("hydroponics=", hydroponics)
+        print("MA=", moisturealarm)
+        print("MM=", moistureminimum)
+        print("MX=", moisturemaximum)
+        print("TA=", temperaturealarm)
+        print("TM=", temperatureminimum)
+        print("TX=", temperaturemaximum)
+        print("TL=", triggerlimit)
+        print("TC=", triggercount)
+        '''
+        # deal with list of Alarms
+        
+
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                
+                query = "DELETE FROM Alarms WHERE address = '%s'" % (address)
+
+                #print("query=", query)
+                cur.execute(query)
+                con.commit()
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                myRecords = [];
+        finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
+        # put in new record
+        
+        if ((moisturealarm== True) or (temperaturealarm== True)): 
+        # ignore if alarms are not asked for (record deleted)
+
+            try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+               
+                myFields = "bluetooth, hydroponics, address, moisturealarm, moistureminimum, moisturemaximum, temperaturealarm, temperatureminimum, temperaturemaximum, triggerlimit, triggercount, emailnotification, textnotification"
+
+                myValues = "'%s', '%s', '%s', '%s',  %d, %d, '%s', %d, %d, %d, %d, '%s', '%s' " % (bluetooth, hydroponics, address, moisturealarm, int(moistureminimum), int(moisturemaximum), temperaturealarm, int(temperatureminimum), int(temperaturemaximum), int(triggerlimit), int(triggercount), emailnotification, textnotification)
+
+                query = "INSERT INTO Alarms(%s) VALUES (%s) " % (myFields, myValues)
+
+                #print("query=", query)
+                cur.execute(query)
+                con.commit()
+            except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+            finally:
+                cur.close()
+                con.close()
+
+                del cur
+                del con
         
 
 

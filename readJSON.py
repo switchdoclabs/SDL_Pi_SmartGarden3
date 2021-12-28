@@ -56,7 +56,6 @@ def readJSON(addPath):
                 config.INTERVAL_CAM_PICS__SECONDS = getJSONValue('INTERVAL_CAM_PICS__SECONDS')
                 config.USEBLYNK = getJSONValue('USEBLYNK')
                 config.BLYNK_AUTH = getJSONValue('BLYNK_AUTH')
-                config.AS3935_Lightning_Config = getJSONValue('AS3935_Lightning_Config')
                 config.Camera_Night_Enable = getJSONValue('Camera_Night_Enable')
                 config.REST_Enable = getJSONValue('REST_Enable')
                 config.MQTT_Enable = getJSONValue('MQTT_Enable')
@@ -96,7 +95,6 @@ def JSONsetDefaults():
         config.INTERVAL_CAM_PICS__SECONDS = 60
         config.USEBLYNK = False
         config.BLYNK_AUTH = ""
-        config.AS3935_Lightning_Config = "[2,1,3,0,3,3]"
         config.Camera_Night_Enable =  False
         config.REST_Enable = False 
         config.MQTT_Enable = False 
@@ -128,7 +126,6 @@ def JSONsetDefaults():
         config.dataDefaults['INTERVAL_CAM_PICS__SECONDS'] = config.INTERVAL_CAM_PICS__SECONDS 
         config.dataDefaults['USEBLYNK'] = config.USEBLYNK 
         config.dataDefaults['BLYNK_AUTH'] = config.BLYNK_AUTH 
-        config.dataDefaults['AS3935_Lightning_Config'] = config.AS3935_Lightning_Config 
         config.dataDefaults['REST_Enable'] = config.REST_Enable 
         config.dataDefaults['MQTT_Enable'] = config.MQTT_Enable 
         config.dataDefaults['MQTT_Server_URL'] = config.MQTT_Server_URL 

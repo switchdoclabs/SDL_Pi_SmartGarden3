@@ -138,6 +138,9 @@ def convertLevelToName(level):
        if (level == 30):
        	return "WARNING"
        
+       if (level == 35):
+       	return "ALARM"
+       
        if (level == 20):
        	return "INFO"
 

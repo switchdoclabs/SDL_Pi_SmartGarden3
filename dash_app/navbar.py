@@ -28,6 +28,7 @@ def Navbar():
             #dbc.NavItem(dbc.NavLink("Wired Moisture Sensors", href="/wired_page")),
             dbc.NavItem(dbc.NavLink("Next Events", href="/valves_scheduled")),
             dbc.NavItem(dbc.NavLink("P/V Programming", href="/p_v_programming")),
+            dbc.NavItem(dbc.NavLink("Alarm Programming", href="/alarm_page")),
             dbc.NavItem(dbc.NavLink("Bluetooth Sensor Status", href="/bluetooth_status_page")),
             dbc.NavItem(dbc.NavLink("Manual Control", href="/manual_page")),
             dbc.NavItem(dbc.NavLink("Logs", href="/log_page")),

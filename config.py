@@ -37,11 +37,6 @@ enableText = False
 #########
 enablePixel = False
 
-#########
-# Solar Configuration
-#########
-SolarMAX_Present = None
-SolarMAX_Type = None
 
 INTERVAL_CAM_PICS__SECONDS = None
 Camera_Night_Enable = False
@@ -78,7 +73,7 @@ manual_water = False
 
 
 ############
-# Moisture Sensor and Pump Count  - Do not modify
+# Bluetooth Sensor - Do not modify
 ############
 
 bluetooth_count = 0
@@ -106,10 +101,6 @@ Infrared_Low_Temp = 17.0
 ############
 
 
-DustSensorSCL = 20
-DustSensorSDA = 21
-DustSensorPowerPin = 12
-
 
 ############
 # device present global variables - DO Not Modify
@@ -125,6 +116,7 @@ GardenCam_Present = False
 
 CRITICAL=50
 ERROR=40
+ALARM=35
 WARNING=30
 INFO=20
 JSON=15

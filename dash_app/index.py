@@ -28,6 +28,8 @@ import bt_status_page
 import manual_page
 import camera_page
 import hydroponics_page
+import alarm_page
+
 
 from non_impl import NotImplPage 
 
@@ -147,7 +149,7 @@ def display_page(pathname):
     myLayout2 = ""
     if pathname == '/status_page':
         myLayout = status_page.StatusPage() 
-        myLayout2 = moisture_sensors.MoistureSensorPage()
+        myLayout2 = ""
     if pathname == '/camera_page':
         myLayout = camera_page.CameraPage()
         myLayout2 = ""
@@ -177,6 +179,9 @@ def display_page(pathname):
         myLayout2 = ""
     if pathname == '/p_v_programming':
         myLayout = p_v_programming.PVProgrammingPage()
+        myLayout2 = ""
+    if pathname == '/alarm_page':
+        myLayout = alarm_page.AlarmPage()
         myLayout2 = ""
     if pathname == '/valves_scheduled':
         myLayout = valves_scheduled.ValvesScheduledPage()
@@ -311,6 +316,21 @@ def update_valve_graphs(n_intervals, id, value ):
 ##################
 # Status Page
 ##################
+@app.callback(Output({'type' : 'SPAdynamic', 'index' : MATCH }, 'children' ),
+              [Input('main-interval-component','n_intervals'),
+              Input({'type' : 'SPAdynmaic', 'index' : MATCH }, 'id' )],
+              [State({'type' : 'SPAdynmaic', 'index' : MATCH}, 'children'  )]
+              )
+
+def update_alarms(n_intervals, id, children):
+   print("generate Current Alarms") 
+   if ((n_intervals % (1*6)) == 0): # 1 minutes -10 second timer
+    print("generate Current Alarms") 
+    return status_page.generateCurrentAlarms()
+   else:
+    raise PreventUpdate
+
+
 @app.callback(Output({'type' : 'VSPdynamic', 'index' : MATCH }, 'color' ),
               [Input('main-interval-component','n_intervals'),
               Input({'type' : 'VSPdynamic', 'index' : MATCH }, 'id' )],
@@ -318,6 +338,7 @@ def update_valve_graphs(n_intervals, id, value ):
               )
 
 def update_indicators(n_intervals, id, color):
+   print("up_indicator_n_intervals=", n_intervals) 
    if ((n_intervals % (1*6)) == 0): # 1 minutes -10 second timer
    
     return status_page.returnPiThrottledColor(id)
@@ -427,8 +448,8 @@ def bt_update_statuspage(n_intervals, id, color):
    #if (True): # 1 minutes -10 second timer
    if ((n_intervals % (5*6)) == 0): # 1 minutes -10 second timer
     
-    print("-status_page Bluetooth Indicator Update started",id['index'], id['DeviceID'])
-    print("id=", id)
+    #print("-status_page Bluetooth Indicator Update started",id['index'], id['DeviceID'])
+    #print("id=", id)
 
     
     # fetch Bluetooth Sensor Data
@@ -440,7 +461,7 @@ def bt_update_statuspage(n_intervals, id, color):
     # not active if data is older than 1 Hour 
     activeIndicator = "gray"
 
-    print("mySensorData=", mySensorData)
+    #print("mySensorData=", mySensorData)
     
 
     #check for null record
@@ -476,9 +497,9 @@ def bt_update_statuspage(n_intervals, id, color):
             else:
                 moistureIndicator = "greenyellow"
         
-    print("moistureIndicator = ", moistureIndicator )
-    print("batteryIndicator = ", batteryIndicator )
-    print("activeIndicator = ", activeIndicator )
+    #print("moistureIndicator = ", moistureIndicator )
+    #print("batteryIndicator = ", batteryIndicator )
+    #print("activeIndicator = ", activeIndicator )
     
     
     if (id['Indicator'] == 0):

@@ -28,43 +28,12 @@ blynkPlantNumberDisplay = 1
 
 LatestBluetoothSensors=[]
 
-#water below this limit
-Moisture_Threshold = 60.0   
-##################
-# Pump State
-##################
-
-Pump_Running = False
-Pump_Water_Full = False
-
-##################
-# Tank State
-##################
-
-Tank_Level = 5.0
-Tank_Empty_Level = 10.0
-Tank_Full_Level = 2.0
-Tank_Percentage_Full = 30.0
-
 
 ##################
 # Alarm States
 ##################
-Alarm_Temperature = 5.0  
-Alarm_Moisture = 60.0
-Alarm_Water = False
-Alarm_Air_Quality = 10000 
-Alarm_Moisture_Sensor_Fault = 15.0
 
-Alarm_Active = True
-Alarm_Cancel = False
-
-Alarm_Last_State = False
-Is_Alarm_Temperature = False
-Is_Alarm_Moisture = False
-Is_Alarm_MoistureFault = False
-Is_Alarm_AirQuality = False
-Is_Alarm_WaterEmpty = False
+alarms = []
 
 ##################
 # Internal States

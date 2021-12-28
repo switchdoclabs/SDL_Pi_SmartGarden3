@@ -11,7 +11,7 @@ from __future__ import print_function
 from builtins import range
 from past.utils import old_div
 
-SGSVERSION = "033"
+SGSVERSION = "034"
 
 #imports 
 
@@ -69,7 +69,7 @@ import state
 
 import Valves
 
-
+import alarms
 
 import AccessValves
 
@@ -178,12 +178,6 @@ def checkForButtons():
 
     
 
-#############################
-# Alarm Displays 
-#############################
-def checkForAlarms():
-
-    pass
 
 def centerText(text,sizeofline):
         textlength = len(text)
@@ -233,6 +227,9 @@ def initializeSGSPart1():
         
     # scan and check for resources
 
+    alarms.readAlarmConfiguration()
+    alarms.clearAllAlarms()
+    alarms.readAlarmConfiguration()
 
     pass
 
@@ -243,7 +240,6 @@ def initializeSGSPart2():
         print("----------------------")
         print("Local Devices")
         print("----------------------")
-        print(returnStatusLine("DustSensor",config.DustSensor_Present))
         #print(returnStatusLine("Sunlight Sensor",config.Sunlight_Present))
         #print(returnStatusLine("hdc1000 Sensor",config.hdc1000_Present))
         #print(returnStatusLine("Ultrasonic Level Sensor",config.UltrasonicLevel_Present))
@@ -324,6 +320,8 @@ def initializeSGSPart2():
         print()
         print("----------------------")
 
+        # Read in alarm data from mySQL
+
     
 def initializeScheduler():
 
@@ -371,8 +369,8 @@ def initializeScheduler():
  
     
         # check for alarms
-        state.scheduler.add_job(checkForAlarms, 'interval', seconds=15)
-        #state.scheduler.add_job(checkForAlarms, 'interval', seconds=300)
+        state.scheduler.add_job(alarms.checkForAlarms, 'interval', seconds=15)
+        #state.scheduler.add_job(alarms.checkForAlarms, 'interval', seconds=300)
     
     
         #if (config.USEBLYNK):
@@ -392,9 +390,6 @@ def initializeScheduler():
         # sensor manual water
         state.scheduler.add_job(Valves.manualCheck, 'interval', seconds=15)
     
-        if (config.DustSensor_Present):
-            #scheduler.add_job(DustSensor.read_AQI, 'interval', seconds=60*5)
-            state.scheduler.add_job(DustSensor.read_AQI, 'interval', seconds=60*11)
     
     	
     	
@@ -425,14 +420,8 @@ def initializeSGSPart3():
         
          
         
-        # initialize variables
-        #
-        state.Pump_Water_Full = False
-        
-                
     
-        checkAndWater()
-        checkForAlarms()
+        alarms.checkForAlarms()
 
 
 def pauseScheduler():
@@ -495,24 +484,7 @@ if __name__ == '__main__':
     cmd = [ '/usr/bin/pigpiod' ]
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     print(output)
-################
-# Dust Sensor Setup 
-################
-    import DustSensor
-
-    try:
-        DustSensor.powerOnDustSensor()
-        myData = DustSensor.get_data()
-        #print ("data=",myData)
-        #myAQI = DustSensor.get_aqi()
-        #DustSensor.print_data()
-        #print ("AQI=", myAQI)
-        DustSensor.powerOffDustSensor()
-        config.DustSensor_Present = True
-    except:
-        DustSensor.powerOffDustSensor()
-        config.DustSensor_Present = False
-    pclogging.readLastHour24AQI()
+    
     initializeSGSPart1()
     
     # this is the big exception clause that will turn all pumps off if there is a problem
