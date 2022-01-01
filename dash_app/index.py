@@ -54,6 +54,9 @@ import state
 #Start MQTT
 ###############
 
+### set up directory
+os.makedirs("static/SkyCam", exist_ok=True)
+
 
 
 newValveState = ""

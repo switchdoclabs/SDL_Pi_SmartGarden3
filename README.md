@@ -1,13 +1,13 @@
-SmartGardenSystem 3 - Version May 2020 and on<BR>
+SmartGarden3<BR>
 SwitchDoc Labs<BR>
-May 2020<BR>
+January 2021<BR>
 
-Version 013 - July 13, 2020 - Release Candidate One <BR>
+Version 036 - January 2, 2021 - Release Candidate One <BR>
 
 To see what is happening on the MQTT channels:<BR>
 mosquitto_sub -d -t SGS/#
 
-To Install Yourself: (Note:  This is a complicated install.   For beginners and advanced beginners, you are better of buying a configured SD Card from shop.switchdoc.com)<BR>
+To Install Yourself: (Note:  This is a complicated install.   For beginners and advanced beginners, you are better off buying a configured SD Card from shop.switchdoc.com)<BR>
 This is a Python3 program.  All libraries need to be in python3.<BR>
 
 

@@ -56,7 +56,7 @@ def buildTableFig(myData, title):
         count = 0
         for battery in myData[9]:
             if (battery < 5):
-                myFillColor[0][count] = "red"
+                myFillColor[0][count] = "pink"
             count = count+1
 
         fig = go.Figure(data=[

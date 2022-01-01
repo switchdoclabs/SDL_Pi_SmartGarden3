@@ -42,12 +42,38 @@ def readAlarmConfiguration():
         state.alarms = myRecords
 
 def getMoistureFromSensor(address):
+    
+    #print("GMFSaddress=", address)
+    returnMoisture = None
+    if (len(address) == 5):
+        # bluetooth address 
+        #print("state.lbd=", state.LatestBluetoothSensors)
+        for sensor in state.LatestBluetoothSensors:
+            if (sensor['pickaddress'] == address):
+                print("selectedSensor=", sensor)
+                returnMoisture = int(sensor['moisture'])
+                print("returnMoisture=", returnMoisture)
+                return returnMoisture 
+    return returnMoisture
 
-    return 70
+
+
 
 def getTemperatureFromSensor(address):
+    
+    #print("GMFSaddress=", address)
+    returnTemperature = None
+    if (len(address) == 5):
+        # bluetooth address 
+        #print("state.lbd=", state.LatestBluetoothSensors)
+        for sensor in state.LatestBluetoothSensors:
+            if (sensor['pickaddress'] == address):
+                print("selectedSensor=", sensor)
+                returnTemperature = int(sensor['temperature'])
+                print("returnTemperature=", returnTemperature)
+                return returnTemperature 
+    return returnTemperature
 
-    return 21
 
 
 def clearAlarm(myAlarm):
@@ -98,7 +124,7 @@ def updateActiveAlarm(myAlarm, myMoisture, myTemperature):
 
 def processAlarm(myType, myAlarm, myMoisture, myTemperature):
 
-    print("Processing alarm: %s %s", myType, myAlarm[4])
+    print("Processing alarm: %s %s" % (myType, myAlarm[4]))
     if ((myAlarm[12] == 0) or (myAlarm[13] < myAlarm[12])):
         # process alarm
         updateActiveAlarm(myAlarm, myMoisture, myTemperature)
@@ -164,6 +190,7 @@ def checkForAlarms():
     for alarm in state.alarms:
         print("checking alarm %s"  %( alarm[4]))
         myMoisture = getMoistureFromSensor(alarm[4])
+        
         myTemperature = getTemperatureFromSensor(alarm[4])
 
         #split hydroponics and bluetooth
@@ -177,31 +204,34 @@ def checkForAlarms():
 
         # moisture alarm
         if (alarm[5] == "True"):
-            print("moisture check")
-
-            if (myMoisture < int(alarm[6])):
-                print(">>>>Low moisture alarm!")
-                processAlarm("Low Moisture: %d < %d" % (myMoisture, int(alarm[6])), alarm, myMoisture, myTemperature)
-                AlarmFired = True
-            else:
-                if (myMoisture > int (alarm[7])):
-                    print(">>>>High moisture alarm!")
-                    processAlarm("High Moisture: %d > %d" % (myMoisture, int(alarm[6])), alarm, myMoisture, myTemperature)
+            print("moisture check, myMosture=", myMoisture)
+            if (myMoisture != None):
+                if (myMoisture < int(alarm[6])):
+                    print(">>>>Low moisture alarm!")
+                    processAlarm("Low Moisture: %d < %d" % (myMoisture, int(alarm[6])), alarm, myMoisture, myTemperature)
                     AlarmFired = True
+                else:
+                    if (myMoisture > int (alarm[7])):
+                        print(">>>>High moisture alarm!")
+                        processAlarm("High Moisture: %d > %d" % (myMoisture, int(alarm[6])), alarm, myMoisture, myTemperature)
+                        AlarmFired = True
 
             
         # temperature alarm
         if (alarm[8] == "True"):
-            print("temperature check")
-            if (myTemperature < int(alarm[9])):
-                print(">>>>Low Temperature alarm!")
-                processAlarm("Low Temperature: %d < %d" % (myTemperature, int(alarm[9])), alarm, myMoisture, myTemperature)
-                AlarmFired = True
-            else:
-                if (myTemperature > int (alarm[10])):
-                    print(">>>>High Temperature alarm!")
-                    processAlarm("High Temperature: %d > %d" % (myTemperature, int(alarm[10])), alarm, myMoisture, myTemperature)
+            print("temperature check myTemperature=", myTemperature)
+            print("check against mlarm[9,10]", alarm[9], alarm[10])
+        
+            if (myTemperature != None):
+                if (myTemperature < int(alarm[9])):
+                    print(">>>>Low Temperature alarm!")
+                    processAlarm("Low Temperature: %d < %d" % (myTemperature, int(alarm[9])), alarm, myMoisture, myTemperature)
                     AlarmFired = True
+                else:
+                    if (myTemperature > int (alarm[10])):
+                        print(">>>>High Temperature alarm!")
+                        processAlarm("High Temperature: %d > %d" % (myTemperature, int(alarm[10])), alarm, myMoisture, myTemperature)
+                        AlarmFired = True
         
 
             

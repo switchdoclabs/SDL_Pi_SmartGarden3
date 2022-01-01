@@ -28,6 +28,19 @@ blynkPlantNumberDisplay = 1
 
 LatestBluetoothSensors=[]
 
+##################
+# Hydroponics Current Values
+#################
+
+LatestHydroponicsValues = {} 
+LatestHydroponicsValues.update({"ID" :"" })
+LatestHydroponicsValues.update({"Temperature" : -1})
+LatestHydroponicsValues.update({"TDS" : -1})
+LatestHydroponicsValues.update({"Ph" : -1})
+LatestHydroponicsValues.update({"Turbidity" : -1})
+LatestHydroponicsValues.update({"Level" : -1})
+#LatestHydroponicsValues.update({"Timestamp" : datetime.now()})
+                    
 
 ##################
 # Alarm States

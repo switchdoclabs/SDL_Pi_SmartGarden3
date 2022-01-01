@@ -38,6 +38,25 @@ readJSON.readJSONSGSConfiguration("../")
 import MySQLdb as mdb
 
 
+#Conversion functions
+
+def CTUnits(temperature):
+
+    English_Metric = readJSON.getJSONValue("English_Metric")
+
+    if (English_Metric == False):  # english units
+        temperature = (9.0/5.0 * temperature) +32.0
+    return temperature
+
+def TUnits():
+    English_Metric = readJSON.getJSONValue("English_Metric")
+    if (English_Metric == False):  # english units
+        units = "F"
+    else:
+        units = "C"
+
+    return units
+
 
 ################
 # Status Page
@@ -76,11 +95,11 @@ def returnLowestSensorValue(SensorType, timeDelta):
                 before = now - timeDelta
                 before = before.strftime('%Y-%m-%d %H:%M:%S')
                 query = "SELECT * FROM Sensors WHERE( SensorValue = ( SELECT MIN(SensorValue) FROM Sensors WHERE (TimeStamp > '%s') ) AND (SensorType = '%s') AND (TimeStamp > '%s')) ORDER BY TimeStamp DESC LIMIT 1" % (before,SensorType, before)
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 con.commit()
                 records = cur.fetchall()
-                print ("Query records=", records)
+                #print ("Query records=", records)
                 
                 return records
         except mdb.Error as e:
@@ -574,12 +593,12 @@ def generateMyTypeOfAlarm(alarm):
                 
             if (myMoisture < int(alarm[6])):
                 print(">>>>Low moisture alarm!")
-                myType = myType + "/ Low Moisture: %d < %d" % (myMoisture, int(alarm[6]))
+                myType = myType + "/ Low Moisture: %d%% < %d%%" % (myMoisture, int(alarm[6]))
                 AlarmFired = True
             else:
                 if (myMoisture > int (alarm[7])):
                     print(">>>>High moisture alarm!")
-                    myType = myType + "/ High Moisture: %d > %d" % (myMoisture, int(alarm[6]))
+                    myType = myType + "/ High Moisture: %d%% > %d%%" % (myMoisture, int(alarm[6]))
                     AlarmFired = True
 
             
@@ -588,12 +607,12 @@ def generateMyTypeOfAlarm(alarm):
             print("temperature check")
             if (myTemperature < int(alarm[9])):
                 print(">>>>Low Temperature alarm!")
-                myType = myType + "/ Low Temperature: %d < %d" % (myTemperature, int(alarm[9]))
+                myType = myType + " / Low Temperature: %d%s < %d%s" % (CTUnits(myTemperature), TUnits(), CTUnits(int(alarm[9])), TUnits())
                 AlarmFired = True
             else:
                 if (myTemperature > int (alarm[10])):
                     print(">>>>High Temperature alarm!")
-                    myType = myType + "/ High Temperature: %d > %d" % (myTemperature, int(alarm[9]))
+                    myType = myType + " / High Temperature: %d%s > %d%s" % (CTUnits(myTemperature), TUnits(), CTUnits(int(alarm[10])), TUnits())
                     AlarmFired = True
         
 
@@ -602,6 +621,40 @@ def generateMyTypeOfAlarm(alarm):
          myType = "No Alarm" 
             
         return myType 
+
+
+def getBluetoothName(myPickAddress):
+
+        try:
+                #print("trying database")
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                query = "SELECT name FROM `BluetoothSensors` WHERE (pickaddress = '%s') ORDER BY id ASC" % (myPickAddress)
+
+                #print("query=", query)
+                cur.execute(query)
+                records = cur.fetchall()
+                #print ("Query records=", records)
+                return records[0][0]
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                con.rollback()
+                #sys.exit(1)
+
+        finally:
+                cur.close()
+                con.close()
+
+        return "" 
+
+def getNameFromAddress(address):
+    myName = "no Name"
+    if (len(address) == 5):
+       myName = "Bluetooth: " + getBluetoothName(address)
+    else:
+        myName = "Hydroponics"
+    return myName 
 
 def  generateCurrentAlarms():
 
@@ -613,7 +666,7 @@ def  generateCurrentAlarms():
 
                 query = "SELECT * FROM Alarms"
 
-                print("query=", query)
+                #uprint("query=", query)
                 cur.execute(query)
                 myRecords = cur.fetchall()
     except mdb.Error as e:
@@ -633,7 +686,8 @@ def  generateCurrentAlarms():
             myType = generateMyTypeOfAlarm(alarm)
             if (myType != ""):
                 if (myType != "No Alarm"):
-                    myAlarm = "Alarm Address: %s %s"  % (alarm[4], myType)
+                    myName = getNameFromAddress(alarm[4])
+                    myAlarm = "Alarm %s / %s  %s (Last Triggered: %s)"  % (myName, alarm[4], myType, alarm[11])
                     myCurrentAlarmLayout.append(dbc.Alert(myAlarm, color="danger"))
                     AlarmFound = True
             
@@ -642,6 +696,7 @@ def  generateCurrentAlarms():
 
                 
     return myCurrentAlarmLayout 
+
 def StatusPage():
 
 

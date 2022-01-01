@@ -343,10 +343,13 @@ class SGSConfigure(App):
     def returnAssignedBluetooth(self):
 
         myRecords = self.getBluetoothList()
+        print ("Myrecords=", myRecords)
         bluetoothAssignedCount = [] 
         for record in myRecords:
-            if (len(record[4]) == 4):
-                bluetoothAssignedCount.append(record)
+            print("record=", record)
+            if (record[4] != None):
+                if (len(record[4]) == 4):
+                    bluetoothAssignedCount.append(record)
         return bluetoothAssignedCount
 
     def buildScreen0(self):
@@ -384,7 +387,7 @@ class SGSConfigure(App):
         self.Display_IP.set_text('Scanning IP: N/A ' )
         
         self.Display_WEXT2 = gui.Label('', width=130, height=30, margin='5px', style=' color: red')
-        self.Display_WEXT2.set_text("Click 'Save and Exit' After Scan" )
+        self.Display_WEXT2.set_text("Click 'Save and Exit' After Scan and Restart")
 
 
         #print("WirelessDeviceJSON=", self.WirelessDeviceJSON)
@@ -502,13 +505,14 @@ class SGSConfigure(App):
         """ The selection event of the listView, returns a key of the clicked event.
             You can retrieve the item rapidly
         """
-        myUnit =  self.listView1.children[selected_item_key].get_text()
+        myUnit =  self.listView8.children[selected_item_key].get_text()
         print("list_view: myUnit=", myUnit)
         # for on save
         self.current_listView_key = myUnit
 
         id = myUnit.split("/")[1]
         name = myUnit.split("/")[0]
+        myBTName = myUnit.split("/")[2]
 
         mySplit = myUnit.split(":")
         assignedAddress = mySplit[3]
@@ -538,11 +542,50 @@ class SGSConfigure(App):
         self.dropDownWireless.select_by_value(selectAddress )
  
 
-
+        self.BTNameLabel = gui.Label('Bluetooth Sensor Name',width=200, height=15, margin='10px')
+        self.BTNameInput = gui.TextInput(width=100, height=15, style="margin:10px")
+        self.BTNameInput.set_value( myBTName)
+        self.BTNameSaveButton = gui.Button('Save Name',height=30, width=100, margin=10)
+        self.BTNameSaveButton.onclick.do(self.onBTNameSaveButton)
 
         #self.myValve = self.buildAValve(id, name,myUnit)
         #self.ValveBlock.append(self.DisplaySelect, "currentwireless") 
         self.ValveBlock1.append(self.dropDownWireless, "currentwireless") 
+        self.ValveBlock1.append(self.BTNameLabel, "1jcurrentwireless") 
+        self.ValveBlock1.append(self.BTNameInput, "2jcurrentwireless") 
+        self.ValveBlock1.append(self.BTNameSaveButton, "3jcurrentwireless") 
+
+    def onBTNameSaveButton (self, widget, name='', surname=''):
+        print("onBTNameSaveButton Clicked")
+        myUnit = self.current_listView_key 
+        print("myUnit=", myUnit)    
+        myID = myUnit.split("/")[1]
+        name = myUnit.split("/")[0]
+        newName = self.BTNameInput.get_value()
+        
+        try:
+                    #print("trying database")
+                    con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                    cur = con.cursor()
+                 
+                    query = "UPDATE BluetoothSensors SET name = '%s' WHERE pickaddress= '%s'" % ( newName, myID)
+    
+                    print("query=", query)
+                    cur.execute(query)
+                    con.commit()
+        except mdb.Error as e:
+                    traceback.print_exc()
+                    print("Error %d: %s" % (e.args[0],e.args[1]))
+        finally:
+                    cur.close()
+                    con.close()
+    
+                    del cur
+                    del con
+        # refresh
+        self.removeAllScreens()
+        self.screen4 = self.buildScreen4()
+        self.mainContainer.append(self.screen4,'screen4')
 
 
 ######################
@@ -937,6 +980,7 @@ class SGSConfigure(App):
             print("listView key=",self.current_listView_key)
             
             mySplit = self.current_listView_key.split('/')
+
             print("mySplit=", mySplit)
             if (selected_item_key  == "Not Assigned"):
                 myPickaddress = mySplit[1]
@@ -945,6 +989,9 @@ class SGSConfigure(App):
                 myPickaddress = mySplit[1]
                 mySplit = selected_item_key.split("/")
                 myWirelessAddress = mySplit[0]
+
+            self.CurrentBTAddress = myPickAddreess
+
             # open the sql file and update
         
             try:
@@ -1746,9 +1793,9 @@ class SGSConfigure(App):
 
 
 
-        self.listView1 = gui.ListView.new_from_list(btitems, width=500, height=25*len(btitems), margin='10px')
-        self.listView1.onselection.do(self.wireless_list_view_on_selected)
-        self.ValveBlock1.append(self.listView1)
+        self.listView8 = gui.ListView.new_from_list(btitems, width=500, height=25*len(btitems), margin='10px')
+        self.listView8.onselection.do(self.wireless_list_view_on_selected)
+        self.ValveBlock1.append(self.listView8)
         
         vbox.append(self.ValveBlock1)
 
@@ -1915,7 +1962,7 @@ class SGSConfigure(App):
         EorM = self.F_English_Metric.get_value()
 
         if (EorM == False):  # english units
-            temperature = 5.0/9.0*(temperature - 32.0) 
+            temperature = 5.0/9.0*(float(temperature) - 32.0) 
         return int(round(temperature,0))
 
 
@@ -1925,7 +1972,7 @@ class SGSConfigure(App):
         EorM = self.F_English_Metric.get_value()
 
         if (EorM == False):  # english units
-            temperature = (9.0/5.0 * temperature) +32.0
+            temperature = (9.0/5.0 * float(temperature)) +32.0
         return int(round(temperature,0))
 
 
@@ -2282,12 +2329,19 @@ class SGSConfigure(App):
         if (len(myRecords) > 0):
 
             # deal with C to F conversion
+            print("temp min Records=", myRecords[0][9])
+            print("temp max Records=", myRecords[0][10])
             temperatureminimum = self.CTUnits(float(myRecords[0][9]))
             temperaturemaximum = self.CTUnits(float(myRecords[0][10]))
+            print("temp min =", temperatureminimum)
+            print("temp max =", temperaturemaximum) 
             triggerlimit = myRecords[0][12] 
             emailnotification = myRecords[0][14] 
             textnotification = myRecords[0][15] 
-      
+            moisturealarm = myRecords[0][5] 
+            moistureminimum = myRecords[0][6] 
+            moisturemaximum = myRecords[0][7] 
+            temperaturealarm = myRecords[0][8] 
         
             if (moisturealarm == "True"):
                 self.Display_Moisture.set_value(True)

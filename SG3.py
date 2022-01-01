@@ -11,7 +11,7 @@ from __future__ import print_function
 from builtins import range
 from past.utils import old_div
 
-SGSVERSION = "034"
+SGSVERSION = "036"
 
 #imports 
 
@@ -124,6 +124,9 @@ try:
     config.GardenCam_Present = True
 except:
     config.GardenCam_Present = False
+
+### set up directory
+os.makedirs("static/SkyCam", exist_ok=True)
 
 
 #############################

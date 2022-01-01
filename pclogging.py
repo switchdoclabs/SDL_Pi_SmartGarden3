@@ -148,24 +148,29 @@ def processBluetoothSensor(MQTTJSON):
                 con.commit()
                 # also update current sensor array
                 sensorUpdated = False
-                #print("state.LatestBluetoothSensors =", state.LatestBluetoothSensors)
                 for sensor in state.LatestBluetoothSensors:
-                    if (sensor["pickaddress"] == pickaddress):
+                    mypickaddress = sensor['macaddress'][len(sensor['macaddress'])-5:]
+                    if (mypickaddress == pickaddress):
+                        print("remove pickaddress=", pickaddress)
                         state.LatestBluetoothSensors.remove(sensor)
                         # add new one in
                         myDict = MQTTJSON
                         myDict["pickaddress"] = pickaddress
+                        myDict["temperature"] = round(float(myDict["temperature"])/10.0, 1)
                         state.LatestBluetoothSensors.append(myDict)
                         sensorUpdated = True
+                        break
                 if (sensorUpdated == False):
                     # new item 
                     myDict = MQTTJSON
                     myDict["pickaddress"] = pickaddress
+                    myDict["temperature"] = round(float(myDict["temperature"])/10.0, 1)
                     state.LatestBluetoothSensors.append(myDict)
+                
+                #print("state.LatestBluetoothSensors =", state.LatestBluetoothSensors)
 
-        except mdb.Error as e:
+        except:
                 traceback.print_exc()
-                print("Error %d: %s" % (e.args[0],e.args[1]))
                 con.rollback()
                 #sys.exit(1)
 
@@ -458,7 +463,14 @@ def writeHydroponicsRecord(MQTTJSON):
                         if (myWireless['hydroponics_level'] == "false"):
                                 Level = -1
                         break;
-                
+                # insert information into state hydroponics information
+                LatestHydroponicsValues.update({"ID" : myID})
+                LatestHydroponicsValues.update({"Temperature" : Temperature})
+                LatestHydroponicsValues.update({"TDS" : TDS})
+                LatestHydroponicsValues.update({"Ph" : Ph})
+                LatestHydroponicsValues.update({"Turbidity" : Turbidity})
+                LatestHydroponicsValues.update({"Level" : Level})
+                #LatestHydroponicsValues.update({"Timestamp" : datetime.now()})
                     
                 query = "INSERT INTO Hydroponics(DeviceID, Temperature, Turbidity, RawTurbidity, TDS, RawTDS, Level, RawLevel, Ph, RawPH) VALUES('%s', '%6.2f', %6.2f, '%d', '%6.2f',%d, %6.2f, %6.2f, %6.2f, %d)" % (MQTTJSON["id"], float(Temperature), Turbidity, int(MQTTJSON["rawturbidity"]), TDS, int(MQTTJSON["rawtds"]), Level, float(MQTTJSON["rawlevel"]), Ph, int(MQTTJSON["rawph"]))
                 
