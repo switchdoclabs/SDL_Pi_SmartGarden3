@@ -52,7 +52,8 @@ def valveCheck():
         if ((single["Control"] == "Timed") and (single["DOWCoverage"] != "NNNNNNN")):
            
             if (stateValveCheck(single["id"],single["ValveNumber"])):
-                    print("valveState Found for",single["id"],single["ValveNumber"])
+                    if (config.SWDEBUG):
+                        print("valveState Found for",single["id"],single["ValveNumber"])
                     NextTime = stateValveFetchTime(single["id"],single["ValveNumber"])
                     nowTime = datetime.datetime.now()
                     
@@ -90,7 +91,8 @@ def valveCheck():
                     "LengthTurnOn": single["OnTimeInSeconds"]
                     }
                 state.valveStatus.append(newValve)
-                print("newValve=", newValve) 
+                if (config.SWDEBUG):
+                    print("newValve=", newValve) 
         ################# 
         # check for BT MS Control
         ################# 
@@ -100,7 +102,8 @@ def valveCheck():
         #    print("LatestBluetoothSensors=", state.LatestBluetoothSensors)
         
         if (myControl[0:2] == "BT"):   # found Moisture sensor
-            print("Found Moisture Sensor =", myControl)
+            if (config.SWDEBUG):
+                print("Found Moisture Sensor =", myControl)
             # check for 15 minute lapse
             # never do pump turn ons because of BTMS control more than
             # every 15 minutes
@@ -124,9 +127,10 @@ def valveCheck():
                 else:
                     myMoistureReading = myMoistureSensor["moisture"]
                     myMoistureSensorType = myMoistureSensor["sensorType"]
-                print("myMoistureSensor = ", myMoistureSensor )
-                print("myMoistureReading = ", myMoistureReading)
-                print("myMoistureSensorType =", myMoistureSensorType)
+                if (config.SWDEBUG):
+                    print("myMoistureSensor = ", myMoistureSensor )
+                    print("myMoistureReading = ", myMoistureReading)
+                    print("myMoistureSensorType =", myMoistureSensorType)
                 
                 # check for threshold
                 

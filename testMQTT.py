@@ -70,7 +70,6 @@ if (len(wirelessJSON) == 0):
 
 
 
-while Connected != True:    #Wait for connection
     time.sleep(0.1)
 
 

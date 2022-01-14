@@ -36,6 +36,7 @@ import updateBlynk
 import bluetoothSensor
 #appends
 
+import InitExtenders
 from neopixel import *
 
 
@@ -46,7 +47,7 @@ from PIL import ImageFont
 
 import PictureManagement
 
-
+import sendemail
 
 
 import datetime
@@ -136,7 +137,7 @@ os.makedirs("static/SkyCam", exist_ok=True)
 #############################
 
 def tick():
-    print('The time is: %s' % datetime.datetime.now())
+    print('Tick! The time is: %s' % datetime.datetime.now())
 
 
 def killLogger():
@@ -215,6 +216,13 @@ def initializeSGSPart1():
 
         
     readJSON.readJSONSGSConfiguration("")
+
+    if (config.mailPassword != "yourmailpassword"):
+        # try to send email for start
+        sendemail.sendEmail("test", "SG3 Version %s"%SGSVERSION, "SmartGarden3 Startup ", config.notifyAddress,  config.fromAddress, "");
+
+
+
     #init blynk app state
     if (config.USEBLYNK):
         updateBlynk.blynkInit()
@@ -254,10 +262,9 @@ def initializeSGSPart2():
         scanForResources.updateDeviceStatus(True)
 
         bluetoothSensor.assignBluetoothSensors()
-        
+ 
         # turn off All Valves
         AccessValves.turnOffAllValves()
-    
     
         wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
         for single in wirelessJSON:
@@ -266,6 +273,7 @@ def initializeSGSPart2():
    
         # Set up Wireless MQTT Links
         MQTTFunctions.startWirelessMQTTClient("SG3")
+        
 
         # subscribe to IDs
         if (len(wirelessJSON) == 0):
@@ -275,6 +283,10 @@ def initializeSGSPart2():
             print("No Wireless SGS uinits present - run SGSConfigure.py")
             print("################################")
             exit()
+
+        for single in wirelessJSON:
+            InitExtenders.initializeOneExtender(single["id"])
+
 
         # wait for connection
         while state.WirelessMQTTClientConnected != True:    #Wait for connection
@@ -372,8 +384,8 @@ def initializeScheduler():
  
     
         # check for alarms
-        state.scheduler.add_job(alarms.checkForAlarms, 'interval', seconds=15)
-        #state.scheduler.add_job(alarms.checkForAlarms, 'interval', seconds=300)
+        #state.scheduler.add_job(alarms.checkForAlarms, 'interval', seconds=15)
+        state.scheduler.add_job(alarms.checkForAlarms, 'interval', seconds=300)
     
     
         #if (config.USEBLYNK):

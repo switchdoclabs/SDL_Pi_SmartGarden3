@@ -9,12 +9,20 @@ import sys
 import readJSON
 import pclogging
 
+import sendemail
+  
 # read JSON
 
 readJSON.readJSON("")
 readJSON.readJSONSGSConfiguration("")
 
 import MySQLdb as mdb
+
+
+
+
+
+
 
 def readAlarmConfiguration():
 
@@ -25,12 +33,12 @@ def readAlarmConfiguration():
                 
                 query = "SELECT * FROM Alarms" 
 
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 myRecords = cur.fetchall()
         except mdb.Error as e:
                 traceback.print_exc()
-                print("Error %d: %s" % (e.args[0],e.args[1]))
+                #print("Error %d: %s" % (e.args[0],e.args[1]))
                 myRecords = []
         finally:
                 cur.close()
@@ -50,9 +58,9 @@ def getMoistureFromSensor(address):
         #print("state.lbd=", state.LatestBluetoothSensors)
         for sensor in state.LatestBluetoothSensors:
             if (sensor['pickaddress'] == address):
-                print("selectedSensor=", sensor)
+                #print("selectedSensor=", sensor)
                 returnMoisture = int(sensor['moisture'])
-                print("returnMoisture=", returnMoisture)
+                #print("returnMoisture=", returnMoisture)
                 return returnMoisture 
     return returnMoisture
 
@@ -68,9 +76,9 @@ def getTemperatureFromSensor(address):
         #print("state.lbd=", state.LatestBluetoothSensors)
         for sensor in state.LatestBluetoothSensors:
             if (sensor['pickaddress'] == address):
-                print("selectedSensor=", sensor)
+                #print("selectedSensor=", sensor)
                 returnTemperature = int(sensor['temperature'])
-                print("returnTemperature=", returnTemperature)
+                #print("returnTemperature=", returnTemperature)
                 return returnTemperature 
     return returnTemperature
 
@@ -86,12 +94,12 @@ def clearAlarm(myAlarm):
                     formatted_date =  now.strftime('%Y-%m-%d %H:%M:%S')
                     query = "UPDATE Alarms SET lasttriggered = Null, triggercount = 0, currentmoisture = Null, currenttemperature = Null WHERE address= '%s'" % ( myAlarm[4])
 
-                    print("query=", query)
+                    #print("query=", query)
                     cur.execute(query)
                     con.commit()
             except mdb.Error as e:
                     traceback.print_exc()
-                    print("Error %d: %s" % (e.args[0],e.args[1]))
+                    #print("Error %d: %s" % (e.args[0],e.args[1]))
             finally:
                     cur.close()
                     con.close()
@@ -109,7 +117,7 @@ def updateActiveAlarm(myAlarm, myMoisture, myTemperature):
                     formatted_date =  now.strftime('%Y-%m-%d %H:%M:%S')
                     query = "UPDATE Alarms SET lasttriggered = '%s', triggercount = %d, currentmoisture=%d, currenttemperature=%d WHERE address= '%s'" % ( formatted_date, myAlarm[13]+1, myMoisture, myTemperature, myAlarm[4])
 
-                    print("query=", query)
+                    #print("query=", query)
                     cur.execute(query)
                     con.commit()
             except mdb.Error as e:
@@ -123,7 +131,7 @@ def updateActiveAlarm(myAlarm, myMoisture, myTemperature):
                     del con
 
 def processAlarm(myType, myAlarm, myMoisture, myTemperature):
-
+    
     print("Processing alarm: %s %s" % (myType, myAlarm[4]))
     if ((myAlarm[12] == 0) or (myAlarm[13] < myAlarm[12])):
         # process alarm
@@ -145,7 +153,7 @@ def checkForClearAlarms():
 
     AlarmCleared = False 
     for alarm in state.alarms:
-        print("checkForClearAlarms - alarm[11] = ", alarm[11])
+        #print("checkForClearAlarms - alarm[11] = ", alarm[11])
         if (alarm[11] != None):
             # check date
             #alarmDate = datetime.datetime.strptime(alarm[11], '%Y-%m-%d %H:%M:%S')
@@ -155,7 +163,8 @@ def checkForClearAlarms():
                 clearAlarm(alarm)
                 AlarmCleared = True
             else:
-                print("no Alarm Clear")
+                #print("no Alarm Clear")
+                pass
 
     if (AlarmCleared):
         readAlarmConfiguration()
@@ -169,9 +178,9 @@ def clearAllAlarms():
     pass
 
 def checkForAlarmEmailOrText(myType, myAlarm):
-    print("------>Check for Alarm Email or Text")
+    #print("------>Check for Alarm Email or Text")
     # only send email or text on new trigger (transition from Null to date)
-    print("myAlarm[11]=", myAlarm[11])
+    #print("myAlarm[11]=", myAlarm[11])
     if (myAlarm[11] == None):
         # send the email or text
         if (myAlarm[14] == "True"):
@@ -182,13 +191,13 @@ def checkForAlarmEmailOrText(myType, myAlarm):
 
 
 def checkForAlarms(): 
-    print("------>Check for Alarm Clears")
+    #print("------>Check for Alarm Clears")
     checkForClearAlarms()
-    print("------>Check for Alarms")
-    print("state.alarms=", state.alarms)
+    #print("------>Check for Alarms")
+    #print("state.alarms=", state.alarms)
     AlarmFired = False
     for alarm in state.alarms:
-        print("checking alarm %s"  %( alarm[4]))
+        #print("checking alarm %s"  %( alarm[4]))
         myMoisture = getMoistureFromSensor(alarm[4])
         
         myTemperature = getTemperatureFromSensor(alarm[4])
@@ -196,40 +205,42 @@ def checkForAlarms():
         #split hydroponics and bluetooth
         if (alarm[3] == "True"):
             # hydroponics alarms
-            print("hydroponic alarm check")
+            #print("hydroponic alarm check")
+            pass
         else:
             # bluetooth alarms
-            print("bluetooth alarm check")
+            #print("bluetooth alarm check")
+            pass
              
 
         # moisture alarm
         if (alarm[5] == "True"):
-            print("moisture check, myMosture=", myMoisture)
+            #print("moisture check, myMosture=", myMoisture)
             if (myMoisture != None):
                 if (myMoisture < int(alarm[6])):
-                    print(">>>>Low moisture alarm!")
+                    #print(">>>>Low moisture alarm!")
                     processAlarm("Low Moisture: %d < %d" % (myMoisture, int(alarm[6])), alarm, myMoisture, myTemperature)
                     AlarmFired = True
                 else:
                     if (myMoisture > int (alarm[7])):
-                        print(">>>>High moisture alarm!")
+                       # print(">>>>High moisture alarm!")
                         processAlarm("High Moisture: %d > %d" % (myMoisture, int(alarm[6])), alarm, myMoisture, myTemperature)
                         AlarmFired = True
 
             
         # temperature alarm
         if (alarm[8] == "True"):
-            print("temperature check myTemperature=", myTemperature)
-            print("check against mlarm[9,10]", alarm[9], alarm[10])
+            #print("temperature check myTemperature=", myTemperature)
+            #print("check against mlarm[9,10]", alarm[9], alarm[10])
         
             if (myTemperature != None):
                 if (myTemperature < int(alarm[9])):
-                    print(">>>>Low Temperature alarm!")
+                    #print(">>>>Low Temperature alarm!")
                     processAlarm("Low Temperature: %d < %d" % (myTemperature, int(alarm[9])), alarm, myMoisture, myTemperature)
                     AlarmFired = True
                 else:
                     if (myTemperature > int (alarm[10])):
-                        print(">>>>High Temperature alarm!")
+                        #print(">>>>High Temperature alarm!")
                         processAlarm("High Temperature: %d > %d" % (myTemperature, int(alarm[10])), alarm, myMoisture, myTemperature)
                         AlarmFired = True
         
@@ -242,28 +253,37 @@ def checkForAlarms():
 
 
 def sendEmailAlarm(myType, myAlarm):
-    print("------>Email Alarm %s" % (myType))
-    pclogging.systemlog(config.INFO, "Alarm Email Sent: %s %s " %(myAlarm[4], myType))
+    #print("------>Email Alarm %s" % (myType))
+    if (myAlarm[2] == "True"):
+        AType = "Bluetooth:"
+    else:
+        AType = "Hydroponics"
 
-    pass
+    pclogging.systemlog(config.INFO, "Alarm Email Sent: %s %s " %(myAlarm[4], myType))
+    sendemail.sendEmail("alarm", "SG3 Alarm %s %s " %(AType, myAlarm[4]), "%s" % myType, config.notifyAddress,  config.fromAddress, "");
 
 
 def sendTextAlarm(myType, myAlarm):
-    print("------>Text Alarm %s" % (myType))
-    pclogging.systemlog(config.INFO, "Alarm Text Sent: %s %s " %(myAlarm[4], myType))
+    #print("------>Text Alarm %s" % (myType))
+    if (myAlarm[2] == "True"):
+        AType = "Bluetooth:"
+    else:
+        AType = "Hydroponics"
 
-    pass
+    pclogging.systemlog(config.INFO, "Alarm Email Sent: %s %s " %(myAlarm[4], myType))
+    pclogging.systemlog(config.INFO, "Alarm Text Sent: %s %s " %(myAlarm[4], myType))
+    sendemail.sendEmail("alarm", "SG3 Alarm %s %s " %(AType, myAlarm[4]), "%s" % myType, config.textnotifyAddress,  config.fromAddress, "");
+
 
 
 def sendEmailStatus():
-    print("------>Email Status")
+    #print("------>Email Status")
     pclogging.systemlog(config.INFO, "Status Email Sent") 
 
-    pass
 
 
 def sendTextStatus():
-    print("------>Text Status")
+    #print("------>Text Status")
     pclogging.systemlog(config.INFO, "Status Text Sent") 
 
     pass

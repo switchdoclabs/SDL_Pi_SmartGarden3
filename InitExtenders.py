@@ -25,11 +25,14 @@ def initializeOneExtender(myID):
 
             if (myID == singleWireless["id"]):
                 myIP = singleWireless["ipaddress"]
+                #print ("singleWireless=", singleWireless)
                 if (singleWireless["hydroponicsmode"] == "true"):
                     myCommand = "enableHydroponicsMode?params=admin,1,0"
+                    print("myCommand=%s myIP=%s"%(myCommand, myIP))
                     returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
                 else:
                     myCommand = "enableHydroponicsMode?params=admin,0,0"
+                    print("myCommand=%s myIP=%s"%(myCommand, myIP))
                     returnJSON = AccessValves.sendCommandToWireless(myIP, myCommand)
                 #print("returnJSON=", returnJSON)            
                 break

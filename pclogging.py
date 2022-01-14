@@ -354,6 +354,8 @@ def convertRawLevelToLevel(rawLevel):
     DeltaSpread = int(config.Tank_Pump_Level_Empty)- int(config.Tank_Pump_Level_Full) 
     #Level = 100*(1- (rawLevel -  int(config.Tank_Pump_Level_Full))/DeltaSpread )
     myScale = float(rawLevel)/float(config.Tank_Pump_Level_Empty)
+    print("rawLeve=", rawLevel)
+    print("myScale = ", myScale)
     if (myScale >= 0.85): 
         Level = 41*(1-myScale)/0.15
     else:    
@@ -371,6 +373,7 @@ def convertRawLevelToLevel(rawLevel):
         Level = 100
     if (Level < 0):
         Level = 0
+    print("Level=", Level) 
     return Level
 
 def convertRawTDSToTDS(rawTDS):
@@ -415,10 +418,11 @@ def convertRawPhToPh(rawPh):
     _voltage        = 1500.0;
     slope = (7.0-4.0)/((_neutralVoltage-1500.0)/3.0 - (_acidVoltage-1500.0)/3.0);  #/ two point: (_neutralVoltage,7.0),(_acidVoltage,4.0)
     intercept =  7.0 - slope*(_neutralVoltage-1500.0)/3.0;
-    print("slope:");
-    print(slope);
-    print(",intercept:");
-    print(intercept);
+    if (config.SWDEBUG):
+        print("slope:");
+        print(slope);
+        print(",intercept:");
+        print(intercept);
     phValue = slope*(voltage-1500.0)/3.0+intercept;  #/y = k*x + b
     return phValue;
 
@@ -464,13 +468,13 @@ def writeHydroponicsRecord(MQTTJSON):
                                 Level = -1
                         break;
                 # insert information into state hydroponics information
-                LatestHydroponicsValues.update({"ID" : myID})
-                LatestHydroponicsValues.update({"Temperature" : Temperature})
-                LatestHydroponicsValues.update({"TDS" : TDS})
-                LatestHydroponicsValues.update({"Ph" : Ph})
-                LatestHydroponicsValues.update({"Turbidity" : Turbidity})
-                LatestHydroponicsValues.update({"Level" : Level})
-                #LatestHydroponicsValues.update({"Timestamp" : datetime.now()})
+                state.LatestHydroponicsValues.update({"ID" : myID})
+                state.LatestHydroponicsValues.update({"Temperature" : Temperature})
+                state.LatestHydroponicsValues.update({"TDS" : TDS})
+                state.LatestHydroponicsValues.update({"Ph" : Ph})
+                state.LatestHydroponicsValues.update({"Turbidity" : Turbidity})
+                state.LatestHydroponicsValues.update({"Level" : Level})
+                #state.LatestHydroponicsValues.update({"Timestamp" : datetime.now()})
                     
                 query = "INSERT INTO Hydroponics(DeviceID, Temperature, Turbidity, RawTurbidity, TDS, RawTDS, Level, RawLevel, Ph, RawPH) VALUES('%s', '%6.2f', %6.2f, '%d', '%6.2f',%d, %6.2f, %6.2f, %6.2f, %d)" % (MQTTJSON["id"], float(Temperature), Turbidity, int(MQTTJSON["rawturbidity"]), TDS, int(MQTTJSON["rawtds"]), Level, float(MQTTJSON["rawlevel"]), Ph, int(MQTTJSON["rawph"]))
                 

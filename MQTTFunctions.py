@@ -12,7 +12,7 @@ import traceback
 import InitExtenders
 import scanForResources
 
-
+import readJSON
 
 def on_WirelessMQTTClientconnect(client, userdata, flags, rc):
 
@@ -52,8 +52,9 @@ MQTTPUBVALVESET = 10
 
 
 def on_WirelessMQTTClientmessage(client, userdata, message):
-    print ("Wireless MQTT Message received: ",   message.payload)
-
+    if (config.SWDEBUG):
+        print ("Wireless MQTT Message received: ",   message.payload)
+        
     MQTTJSON = json.loads(message.payload.decode("utf-8"))
 
     if (str(MQTTJSON['messagetype']) == str(MQTTVALVECHANGE)):
@@ -78,6 +79,7 @@ def on_WirelessMQTTClientmessage(client, userdata, message):
 
         temp = str(MQTTJSON['id'])+", "+str(MQTTJSON['value'])
         pclogging.systemlog(config.DEBUG,temp)
+        print("MQTTJSON=", MQTTJSON)
         processRebootMessage(MQTTJSON)
 
     if (str(MQTTJSON['messagetype']) == str(MQTTHYDROPONICS)):
@@ -101,13 +103,27 @@ def on_WirelessMQTTClientmessage(client, userdata, message):
         processInfraredSensorMessage(MQTTJSON)
 
 def processRebootMessage(MQTTJSON):
-
+  try:
     print("+++++++++++++++++++++");
     print("Processing Reboot"); 
     print("+++++++++++++++++++++");
+    extIP = MQTTJSON["ipaddress"]
     myID = MQTTJSON["id"]      
+    # update JSON with IP
+
+    wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
+    newWireless = []
+    for single in wirelessJSON:
+        if (single["id"] == myID):
+            single['ipaddress'] = extIP 
+        newWireless.append(single)
+    print("newWireless=", newWireless)
+    config.JSONData['WirelessDeviceJSON'] = newWireless 
+    readJSON.saveJSON()
     InitExtenders.initializeOneExtender(myID)
     scanForResources.updateDeviceStatus(True)
+  except:
+    print(traceback.format_exc())
 
 
 

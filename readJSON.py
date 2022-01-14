@@ -4,6 +4,18 @@ import os
 
 
 
+def saveJSON():
+
+
+
+        json_data = config.JSONData 
+        #json_data = json.dumps(config.JSONData)        
+        # strip double or triple \\
+        
+        with open('SGS.JSON', 'w') as outfile:
+            json.dump(json_data, outfile)
+
+
 def readJSONSGSConfiguration(addPath):
         if os.path.isfile(addPath+'SGSConfiguration.JSON'):
             print (addPath+"SGSConfiguration.JSON File exists")
