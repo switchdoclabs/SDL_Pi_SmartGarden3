@@ -117,7 +117,7 @@ def processRebootMessage(MQTTJSON):
         if (single["id"] == myID):
             single['ipaddress'] = extIP 
         newWireless.append(single)
-    print("newWireless=", newWireless)
+    #print("newWireless=", newWireless)
     config.JSONData['WirelessDeviceJSON'] = newWireless 
     readJSON.saveJSON()
     InitExtenders.initializeOneExtender(myID)

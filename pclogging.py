@@ -17,7 +17,6 @@ import datetime
 import config
 
 import state
-import updateBlynk
 import MySQLdb as mdb
 
 import SkyCamera
@@ -39,12 +38,8 @@ def systemlog(level,  message):
    if (level >= LOWESTDEBUG):
         try:
                 if (level == config.JSON):
-                    if (config.USEBLYNK):
-                        updateBlynk.blynkTerminalUpdate("JSON Loaded") 
                     pass
                 else:
-                    if (config.USEBLYNK):
-                        updateBlynk.blynkTerminalUpdate(message) 
                     pass
                 #print("trying database")
                 con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');

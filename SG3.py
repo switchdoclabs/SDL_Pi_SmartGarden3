@@ -11,7 +11,7 @@ from __future__ import print_function
 from builtins import range
 from past.utils import old_div
 
-SGSVERSION = "036"
+SGSVERSION = "037"
 
 #imports 
 
@@ -31,7 +31,6 @@ import readJSON
 import logging; 
 logging.basicConfig(level=logging.ERROR) 
 
-import updateBlynk
 
 import bluetoothSensor
 #appends
@@ -165,8 +164,6 @@ def returnStatusLine(device, state):
                 returnString = returnString + ":   \t\tPresent"
         else:
                 returnString = returnString + ":   \t\tNot Present"
-        if (config.USEBLYNK):
-            updateBlynk.blynkTerminalUpdate("Device:"+returnString) 
         return returnString
 
 
@@ -176,9 +173,7 @@ def returnStatusLine(device, state):
 
 def checkForButtons():
 
-    if (config.USEBLYNK):
-        updateBlynk.blynkStatusUpdate()
-
+    pass
 
     
 
@@ -224,8 +219,6 @@ def initializeSGSPart1():
 
 
     #init blynk app state
-    if (config.USEBLYNK):
-        updateBlynk.blynkInit()
     message = "SGS Version "+SGSVERSION+" Started"
     pclogging.systemlog(config.INFO,message)
     pclogging.systemlog(config.JSON,"SGS.JSON Loaded: "+json.dumps(config.JSONData ))
@@ -319,11 +312,6 @@ def initializeSGSPart2():
         print("Valve Count: ",config.valve_count)
         print("Bluetooth Sensor Count: ",config.bluetooth_count)
         print()
-        if (config.USEBLYNK):
-            updateBlynk.blynkTerminalUpdate( "Wireless Unit Count:%d"% len(readJSON.getJSONValue("WirelessDeviceJSON")) )
-            updateBlynk.blynkTerminalUpdate("Pump Count: %d"%config.valve_count)
-            updateBlynk.blynkTerminalUpdate("Bluetooth Sensor Count: %d"%config.bluetooth_count)
-            updateBlynk.updateStaticBlynk() 
 
         print("----------------------")
         print("Other Smart Garden System Expansions")
@@ -331,7 +319,6 @@ def initializeSGSPart2():
         print(returnStatusLine("GardenCam",config.GardenCam_Present))
         print(returnStatusLine("Lightning Mode",config.Lightning_Mode))
         print(returnStatusLine("MySQL Logging Mode",config.enable_MySQL_Logging))
-        print(returnStatusLine("UseBlynk",config.USEBLYNK))
         print()
         print("----------------------")
 
@@ -388,8 +375,6 @@ def initializeScheduler():
         state.scheduler.add_job(alarms.checkForAlarms, 'interval', seconds=300)
     
     
-        #if (config.USEBLYNK):
-        #     state.scheduler.add_job(updateBlynk.blynkStateUpdate, 'interval', seconds=60)
     
         # MS sensor Read 
     
@@ -413,28 +398,10 @@ def initializeScheduler():
         
 def initializeSGSPart3():
 
-        if (config.SWDEBUG):
-            if (config.USEBLYNK):
-                print("Blynk Status=", updateBlynk.blynkSGSAppOnline())
-                updateBlynk.blynkAlarmUpdate();
     
         state.Last_Event = "SGS Started:"+time.strftime("%Y-%m-%d %H:%M:%S")
     
-        if (config.USEBLYNK):
-            updateBlynk.blynkEventUpdate()
     
-    	# display logo
-            image = Image.open('SmartPlantPiSquare128x64.ppm').convert('1')
-    
-            display.image(image)
-            display.display()
-            time.sleep(3.0)
-            display.clear()
-    
-    
-        
-         
-        
     
         alarms.checkForAlarms()
 

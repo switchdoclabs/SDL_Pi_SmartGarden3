@@ -28,7 +28,7 @@ myURLOpener = AppURLopener()
 
 class SuperImage(gui.Image):
     def __init__(self, file_path_name=None, **kwargs):
-        super(SuperImage, self).__init__("./static/SGfulllogocolor.png", **kwargs)
+        super(SuperImage, self).__init__("./static/smartgarden3.png", **kwargs)
         
         self.imagedata = None
         self.mimetype = None
@@ -298,8 +298,8 @@ class SGSConfigure(App):
         #m3.onclick.do(self.menu_screen3_clicked)
         m4 = gui.MenuItem('Cameras Bluetooth', width=70, height=60)
         m4.onclick.do(self.menu_screen4_clicked)
-        m5 = gui.MenuItem('Blynk', width=70, height=60)
-        m5.onclick.do(self.menu_screen5_clicked)
+        #m5 = gui.MenuItem('Blynk', width=70, height=60)
+        #m5.onclick.do(self.menu_screen5_clicked)
         #m6 = gui.MenuItem('Pins', width=70, height=60)
         #m6.onclick.do(self.menu_screen6_clicked)
         m7 = gui.MenuItem('CMQTTR', width=70, height=60)
@@ -307,7 +307,7 @@ class SGSConfigure(App):
         m8 = gui.MenuItem('Alarm/Status Configuration', width=90, height=60)
         m8.onclick.do(self.menu_screen8_clicked)
 
-        menu.append([m0, m05, m06, m1, m2, m4, m5,  m7, m8])
+        menu.append([m0, m05, m06, m1, m2, m4,  m7, m8])
     
     
         self.menubar = gui.MenuBar(width='100%', height='30px')
@@ -2499,8 +2499,8 @@ class SGSConfigure(App):
         self.mainContainer.style['align-items'] = 'flex-start'
 
 
-        logo = SuperImage("./static/SGfulllogocolor.png", width=400, height =142)
-        header = gui.Label("SmartGarden3 Configuration Tool V010", style='position:absolute; left:150px; top:120px')
+        logo = SuperImage("./static/smartgarden3.png", width=133, height =140)
+        header = gui.Label("SmartGarden3 Configuration Tool V011", style='position:absolute; left:200px; top:120px')
         # bottom buttons
 
         cancel = gui.Button('Cancel',style='position:absolute; left:550px; height: 30px; width:100px; margin:10px; top:5px')
@@ -2539,7 +2539,7 @@ class SGSConfigure(App):
         self.screen2 = self.buildScreen2()
         #self.screen3 = self.buildScreen3()
         self.screen4 = self.buildScreen4()
-        self.screen5 = self.buildScreen5()
+        #self.screen5 = self.buildScreen5()
         #self.screen6 = self.buildScreen6()
         self.screen7 = self.buildScreen7()
         self.screen8 = self.buildScreen8()
@@ -2567,7 +2567,7 @@ class SGSConfigure(App):
         self.mainContainer.remove_child(self.screen2)
         #self.mainContainer.remove_child(self.screen3)
         self.mainContainer.remove_child(self.screen4)
-        self.mainContainer.remove_child(self.screen5)
+        #self.mainContainer.remove_child(self.screen5)
         #self.mainContainer.remove_child(self.screen6)
         self.mainContainer.remove_child(self.screen7)
         self.mainContainer.remove_child(self.screen8)
@@ -2750,7 +2750,7 @@ class SGSConfigure(App):
         self.screen2 = self.buildScreen2()
         #self.screen3 = self.buildScreen3()
         self.screen4 = self.buildScreen4()
-        self.screen5 = self.buildScreen5()
+        #self.screen5 = self.buildScreen5()
         #self.screen6 = self.buildScreen6()
         self.screen7 = self.buildScreen7()
         self.screen8 = self.buildScreen8()
