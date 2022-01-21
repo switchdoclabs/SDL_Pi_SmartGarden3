@@ -1,8 +1,8 @@
 SmartGarden3<BR>
 SwitchDoc Labs<BR>
-January 2021<BR>
+January 2022<BR>
 
-Version 036 - January 2, 2021 - Release Candidate One <BR>
+Version 050 - January 21, 2022 - Initial Version<BR>
 
 To see what is happening on the MQTT channels:<BR>
 mosquitto_sub -d -t SGS/#
@@ -15,7 +15,7 @@ Installation
 
 1) Install MariaDB on Raspberry Pi
 
-2) Read in the SmartGardenSystem.sql file into the database
+2) Read in the SmartGarden3.sql file into the database
 
 3) Install python apscheduler<BR>
 
