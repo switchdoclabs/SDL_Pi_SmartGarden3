@@ -11,7 +11,7 @@ from __future__ import print_function
 from builtins import range
 from past.utils import old_div
 
-SGSVERSION = "050RC1"
+SGSVERSION = "050"
 
 #imports 
 
@@ -449,7 +449,7 @@ def restartSGS():
     # Main Program
 if __name__ == '__main__':
         
-
+    '''
     if (config.SWDEBUG):
         print("Starting pigpio daemon")
 
@@ -466,7 +466,7 @@ if __name__ == '__main__':
     cmd = [ '/usr/bin/pigpiod' ]
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     print(output)
-    
+    '''  
     initializeSGSPart1()
     
     # this is the big exception clause that will turn all pumps off if there is a problem

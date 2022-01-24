@@ -2,7 +2,7 @@ SmartGarden3<BR>
 SwitchDoc Labs<BR>
 January 2022<BR>
 
-Version 050 - January 21, 2022 - Initial Version<BR>
+Version 050 - January 24, 2022 - Initial Version<BR>
 
 To see what is happening on the MQTT channels:<BR>
 mosquitto_sub -d -t SGS/#
@@ -16,7 +16,8 @@ Installation
 1) Install MariaDB on Raspberry Pi
 
 2) Read in the SmartGarden3.sql file into the database
-
+sudo mysql -u root < SmartGarden3.sql
+    
 3) Install python apscheduler<BR>
 
  sudo pip3 install apscheduler
@@ -31,6 +32,8 @@ sudo pip3 install plotly<BR>
 
 sudo pip3 install remi<BR>
 
+6) Install SG3
+git clone github.com/switchdoclabs/SDL_Pi_SmartGarden3
 
 Depending on your system, you may have other missing files.   See the information printed out when your SG3.py software starts and install the missing librarys.
 <BR>
