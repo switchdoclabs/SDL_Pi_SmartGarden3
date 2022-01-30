@@ -453,7 +453,7 @@ def returnIndicators():
     #shortBTSensors = []
     #shortBTSensors.append(myBTSensors[0])
     #myBTSensors = shortBTSensors
-    #print("BTSensors=", myBTSensors)
+    print("BTSensors=", myBTSensors)
     for sensor in myBTSensors:
         # fetch Bluetooth Sensor Data
         mySensorData = getLastBTReading(sensor[2])
@@ -498,11 +498,23 @@ def returnIndicators():
                     moistureIndicator = "red"
                 else:
                     moistureIndicator = "greenyellow"
-
+       
+        mysensor3 = sensor[3]
+        if (mysensor3 == None):
+            mysensor3 = "" 
+        
+        mysensor4 = sensor[4]
+        if (mysensor4 == None):
+            mysensor4 = "" 
+        
+        mysensor5 = sensor[5]
+        if (mysensor5 == None):
+            mysensor5 = "" 
+        
         mySensorLayout= []
         mySensorLayout.append(
                      
-                     html.H6(sensor[3] +" / "+sensor[5]+ " / "+sensor[4],
+                     html.H6(mysensor3 +" / "+mysensor5+ " / "+mysensor4,
 		                    )
                         )
         myIndicatorLayout = [] 
@@ -697,6 +709,14 @@ def  generateCurrentAlarms():
                 
     return myCurrentAlarmLayout 
 
+def countHydroponics(myJSON):
+    count = 0
+    for wireless in myJSON:
+        if (wireless["hydroponicsmode"] == "true"):
+            count = count +1
+
+    return count
+
 def StatusPage():
 
 
@@ -704,6 +724,7 @@ def StatusPage():
     numberOfWireless = len(wirelessJSON)
     numberOfValves = numberOfWireless * 8
     numberOfSensors = countBluetooth()
+    numberOfHydroponics = countHydroponics(wirelessJSON)
     f = open("/proc/device-tree/model")
     piType = f.read()
     boottime =datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S") 
@@ -720,7 +741,7 @@ def StatusPage():
                         ["Number of BluetoothSensors", dbc.Badge(numberOfSensors, color="light", className="ml-1")],
                         color="primary",),
                     dbc.Button(
-                        ["Number of Hydroponic Units", dbc.Badge("1", color="light", className="ml-1")],
+                        ["Number of Hydroponic Units", dbc.Badge(numberOfHydroponics, color="light", className="ml-1")],
                         color="primary",),
                     dbc.Button(
                         ["Raspberry Pi", dbc.Badge(piType, color="light", className="ml-1")],

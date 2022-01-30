@@ -2,7 +2,7 @@ SmartGarden3<BR>
 SwitchDoc Labs<BR>
 January 2022<BR>
 
-Version 050 - January 24, 2022 - Initial Version<BR>
+Version 051 - January 30, 2022 - Initial Released Version<BR>
 
 To see what is happening on the MQTT channels:<BR>
 mosquitto_sub -d -t SGS/#

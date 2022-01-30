@@ -49,12 +49,16 @@ def buildTableFig(myData, title):
         redCheck = False
         count = 0
         for moisture in myData[6]:
+            if (moisture == ''):
+                moisture = 0
             if (moisture < 5):
                 myFillColor[0][count] = "red"
             count = count+1
         # next check battery
         count = 0
         for battery in myData[9]:
+            if (battery == ''):
+                battery = 0
             if (battery < 5):
                 myFillColor[0][count] = "pink"
             count = count+1

@@ -41,14 +41,6 @@ enablePixel = False
 INTERVAL_CAM_PICS__SECONDS = None
 Camera_Night_Enable = False
 
-############
-# Blynk configuration
-############
-
-USEBLYNK = False 
-BLYNK_AUTH = 'xxxxx'
-BLYNK_URL = 'http://blynk-cloud.com/'
-
 
 ############
 # REST
