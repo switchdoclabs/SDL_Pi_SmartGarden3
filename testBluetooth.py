@@ -2,12 +2,17 @@
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 import sys
-from subprocess import PIPE, Popen, STDOUT
+from subprocess import PIPE, Popen, STDOUT, run
 from threading  import Thread
 #import json
 import datetime
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+print("Starting Bluetooth Reset")
+cmd = ["/bin/hciconfig", "hci0",  "reset"]
+run(cmd)
+
+
 print("Starting Bluetooth Read")
 cmd = [ '/usr/bin/hcitool', 'lescan']
 
