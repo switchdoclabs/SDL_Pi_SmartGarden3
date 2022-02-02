@@ -12,10 +12,19 @@ import traceback
 import MySQLdb as mdb
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+<<<<<<< HEAD
 # reset bluetooth 
 print("Starting Bluetooth Reset")
 cmd = [ "/bin/hciconfig", "hci0", "reset"]
 run(cmd)
+=======
+
+print("Starting Bluetooth Reset")
+cmd = ["/bin/hciconfig", "hci0",  "reset"]
+run(cmd)
+
+
+>>>>>>> 97d4c1daa21a1474c43ab59c139bbc367afaac9f
 print("---------------------------------------")
 print("Starting Scan for new Bluetooth Sensors")
 print("---------------------------------------")
