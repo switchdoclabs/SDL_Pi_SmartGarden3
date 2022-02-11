@@ -88,6 +88,14 @@ Infrared_Low_Auto_Gain = False
 Infrared_High_Temp = 22.0
 Infrared_Low_Temp = 17.0
 
+
+
+
+############
+#pH Offset (not set by SG3Configure - must set here to change)
+############
+pHOffset = 3.7
+
 ############
 #pin defines
 ############

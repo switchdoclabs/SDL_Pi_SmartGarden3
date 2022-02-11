@@ -388,38 +388,50 @@ def convertRawTDSToTDS(rawTDS):
     return TDS
 
 def convertRawPhToPh(rawPh):
-
-    voltage = rawPh *0.003
-    print("voltage=", voltage)
-    '''
-    this->_temperature    = 25.0;
-    this->_phValue        = 7.0;
-    this->_acidVoltage    = 2032.44;    //buffer solution 4.0 at 25C
-    this->_neutralVoltage = 1500.0;     //buffer solution 7.0 at 25C
-    this->_voltage        = 1500.0;
-    float slope = (7.0-4.0)/((this->_neutralVoltage-1500.0)/3.0 - (this->_acidVoltage-1500.0)/3.0);  // two point: (_neutralVoltage,7.0),(_acidVoltage,4.0)
-    float intercept =  7.0 - slope*(this->_neutralVoltage-1500.0)/3.0;
-    //Serial.print("slope:");
-    //Serial.print(slope);
-    //Serial.print(",intercept:");
-    //Serial.println(intercept);
-    this->_phValue = slope*(voltage-1500.0)/3.0+intercept;  //y = k*x + b
-    '''
-    
-    _temperature    = 25.0;
-    _phValue        = 7.0;
-    _acidVoltage    = 2032.44;    #/buffer solution 4.0 at 25C
-    _neutralVoltage = 1500.0;     #/buffer solution 7.0 at 25C
-    _voltage        = 1500.0;
-    slope = (7.0-4.0)/((_neutralVoltage-1500.0)/3.0 - (_acidVoltage-1500.0)/3.0);  #/ two point: (_neutralVoltage,7.0),(_acidVoltage,4.0)
-    intercept =  7.0 - slope*(_neutralVoltage-1500.0)/3.0;
-    if (config.SWDEBUG):
-        print("slope:");
-        print(slope);
-        print(",intercept:");
-        print(intercept);
-    phValue = slope*(voltage-1500.0)/3.0+intercept;  #/y = k*x + b
+    phValue = (rawPh/2048)*3.3*3.5+config.pHOffset
     return phValue;
+
+def fetch24HourData(Value):
+
+
+ if (config.enable_MySQL_Logging == True):	
+	    # open mysql database
+	    # write log
+	    # commit
+	    # close
+        try:
+
+           
+                
+                con = mdb.connect('localhost', 'root', config.MySQL_Password, 'SmartGarden3');
+                cur = con.cursor()
+                
+                timeDelta = datetime.timedelta(minutes=24*60)
+                now = datetime.datetime.now()
+                before = now - timeDelta
+                before = before.strftime('%Y-%m-%d %H:%M:%S')
+                # 24 Hours
+                query = "SELECT id, %s, TimeStamp FROM Hydroponics WHERE TimeStamp > '%s' ORDER by id ASC" % (Value, before)
+                print("query=", query)
+                cur.execute(query)
+                records = cur.fetchall()
+                Hour24 = 0.0
+                Total = 0.0
+                for myRecord in records:
+                    Total = Total + float(myRecord[1])
+                if (len(records) > 0):    
+                    Hour24 = Total/len(records) 
+                    
+                
+                return Hour24
+
+        except mdb.Error as e:
+                traceback.print_exc()
+                print("Error %d: %s" % (e.args[0],e.args[1]))
+                con.rollback()
+                #sys.exit(1)
+
+ return 0.0 
 
 
 def writeHydroponicsRecord(MQTTJSON):
@@ -469,11 +481,18 @@ def writeHydroponicsRecord(MQTTJSON):
                 state.LatestHydroponicsValues.update({"Ph" : Ph})
                 state.LatestHydroponicsValues.update({"Turbidity" : Turbidity})
                 state.LatestHydroponicsValues.update({"Level" : Level})
+
+                Temperature24Hour = fetch24HourData("Temperature")
+                TDS24Hour = fetch24HourData("TDS")
+                Turbidity24Hour = fetch24HourData("Turbidity")
+                Ph24Hour = fetch24HourData("Ph")
+                Level24Hour = fetch24HourData("Level")
+
                 #state.LatestHydroponicsValues.update({"Timestamp" : datetime.now()})
                     
-                query = "INSERT INTO Hydroponics(DeviceID, Temperature, Turbidity, RawTurbidity, TDS, RawTDS, Level, RawLevel, Ph, RawPH) VALUES('%s', '%6.2f', %6.2f, '%d', '%6.2f',%d, %6.2f, %6.2f, %6.2f, %d)" % (MQTTJSON["id"], float(Temperature), Turbidity, int(MQTTJSON["rawturbidity"]), TDS, int(MQTTJSON["rawtds"]), Level, float(MQTTJSON["rawlevel"]), Ph, int(MQTTJSON["rawph"]))
+                query = "INSERT INTO Hydroponics(DeviceID, Temperature, Turbidity, RawTurbidity, TDS, RawTDS, Level, RawLevel, Ph, RawPH, Temperature24Hour, TDS24Hour, Turbidity24Hour, Ph24Hour, Level24Hour) VALUES('%s', '%6.2f', %6.2f, '%d', '%6.2f',%d, %6.2f, %6.2f, %6.2f, %d, %6.2f, %6.2f, %6.2f, %6.2f, %6.2f)" % (MQTTJSON["id"], float(Temperature), Turbidity, int(MQTTJSON["rawturbidity"]), TDS, int(MQTTJSON["rawtds"]), Level, float(MQTTJSON["rawlevel"]), Ph, int(MQTTJSON["rawph"]), Temperature24Hour, TDS24Hour, Turbidity24Hour, Ph24Hour, Level24Hour)
                 
-                print("query=", query)
+                #print("query=", query)
                 cur.execute(query)
                 con.commit()
         except mdb.Error as e:

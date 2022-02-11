@@ -1,7 +1,8 @@
 SmartGarden3<BR>
 SwitchDoc Labs<BR>
-January 2022<BR>
+February 2022<BR>
 
+Version 053 - February 11, 2022 - Added Hydoponics pH Meter and 24 Hour averages<BR>
 Version 052 - January 31, 2022 - Fixed Bluetooth<BR>
 Version 051 - January 30, 2022 - Initial Released Version<BR>
 

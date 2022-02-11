@@ -129,6 +129,7 @@ def generateCurrentHydroJSON(DeviceID):
 ####  Graph ####
 ###################
 
+
 def fetchData(Value, DeviceID, timeDelta):
 
         try:
@@ -138,7 +139,7 @@ def fetchData(Value, DeviceID, timeDelta):
                 now = datetime.datetime.now()
                 before = now - timeDelta
                 before = before.strftime('%Y-%m-%d %H:%M:%S')
-                query = "SELECT %s, timestamp FROM `Hydroponics` WHERE (timestamp > '%s') AND (DeviceID = '%s') ORDER BY id ASC" % (Value, before, DeviceID)
+                query = "SELECT %s, %s, timestamp FROM `Hydroponics` WHERE (timestamp > '%s') AND (DeviceID = '%s') ORDER BY id ASC" % (Value, Value+"24Hour", before, DeviceID)
                 #print("query=", query)
                 cur.execute(query)
                 con.commit()
@@ -157,7 +158,7 @@ def fetchData(Value, DeviceID, timeDelta):
 
 
 
-def buildGraph(Value, Units, Enable):
+def buildGraph(Value, Units, Enable ):
 
     fig = buildGraphFigure(Value, Units, Enable)
     graph =  dcc.Graph(
@@ -180,20 +181,25 @@ def buildGraphFigure(Value, Units, Enable):
 
     timeDelta = datetime.timedelta(days=7)
     records = fetchData(Value,CHJSON['DeviceID'],timeDelta)
-
     
     Time = []
     data = []
+    data24 = []
     for record in records:
-        Time.append(record[1])
+        Time.append(record[2])
         if (Value == "Temperature"):
             data.append(CTUnits(record[0]))
         else:
             data.append(record[0])
+        if (Value == "Temperature"):
+            data24.append(CTUnits(record[1]))
+        else:
+            data24.append(record[1])
 
     #print("BGF Records=", records)
     units = ""
-    
+  
+
     # Create figure with secondary y-axis
     if (len(records) == 0):
         fig = go.Figure()
@@ -202,13 +208,12 @@ def buildGraphFigure(Value, Units, Enable):
             title_text='No %s Data Available'% Value)
         return fig
 
+    trace1 = go.Scatter(x=Time, y=data, name=Value)
+    trace2 = go.Scatter(x=Time, y=data24, name='24 Hour Average '+Value,line=dict(width=3,color = "red" ))
 
+    
     fig = go.Figure(
-        data=[go.Scatter(x=Time, y=data, name=Value, line = dict(
-                    color = ('blue'),
-                    width = 2,
-                    ),
-        )]
+        data=[trace1, trace2],
         )
 
     # Add figure title
@@ -321,7 +326,7 @@ def HydroponicsPage():
             [
                 dbc.Col(
                 [
-                    buildGraph("Level", "%", getActiveSensorWireless(myID, "Level")),
+                    buildGraph("Level", "%", getActiveSensorWireless(myID, "Level") ),
                     buildGraph("Temperature", "Degrees ("+TUnits()+")",getActiveSensorWireless(myID, "Temperature")),
                     buildGraph("TDS", "ppm",getActiveSensorWireless(myID, "TDS")),
                     buildGraph("Turbidity", "NTU",getActiveSensorWireless(myID, "Turbidity")),
