@@ -38,7 +38,7 @@ import bluetoothSensor
 import InitExtenders
 from neopixel import *
 
-
+import MySQLdb as mdb
 
 from PIL import Image
 from PIL import ImageDraw
@@ -467,6 +467,62 @@ if __name__ == '__main__':
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     print(output)
     '''  
+
+
+if (config.enable_MySQL_Logging):
+    # SmartGarden3 SQL Database
+
+    try:
+
+        con = mdb.connect(
+          "localhost",
+          "root",
+          config.MySQL_Password,
+          "SmartGarden3"
+          )
+
+    except:
+        #print(traceback.format_exc())
+        print("--------")
+        print("MySQL Database SmartGarden3 Not Installed.")
+        print("Run this command:")
+        print("sudo mysql -u root -p < SmartGarden3.sql")
+        print("SmartGarden3 Stopped")
+        print("--------")
+        sys.exit("SmartGarden3 Requirements Error Exit")
+
+
+    # Check for updates having been applied
+    try:
+
+        con = mdb.connect(
+          "localhost",
+          "root",
+          config.MySQL_Password,
+          "SmartGarden3"
+          )
+        cur = con.cursor()
+        query = "SELECT Temperature24Hour  FROM Hydroponics"
+        cur.execute(query)
+    except:
+        #print(traceback.format_exc())
+        print("--------")
+        print("MySQL Database SmartGarden3 Updates Not Installed.")
+        print("Delete the SmartGarden3 Database and reinstall")
+        print("sudo mysql -u root -p < SmartGarden3.sql")
+        print("SmartGarden3 Stopped")
+        print("--------")
+        sys.exit("SmartGarden3 Requirements Error Exit")
+
+
+
+
+
+
+
+
+
+
     initializeSGSPart1()
     
     # this is the big exception clause that will turn all pumps off if there is a problem
