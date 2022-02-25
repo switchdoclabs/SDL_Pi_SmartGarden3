@@ -112,6 +112,81 @@ def findWirelessExtenders():
 
     return returnJSON 
 
+def fixWirelessExtenders():
+    IPAddr = subprocess.check_output(['hostname', '-I'])
+       
+    IPAddr = IPAddr.decode()
+    IPAddr = IPAddr.split(" ")
+    print("Your Computer IP Address is:" + IPAddr[0])  
+    myNetIP = IPAddr[0].split(".")
+    myNetIP = myNetIP[0]+"."+myNetIP[1]+"."+myNetIP[2]+".0"
+    CIDR = ipaddress.IPv4Network(myNetIP+"/24")
+    print("Your Computer CIDR is:", CIDR)
+    now = datetime.datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("Start Time =", str(now))
+    returnJSON = []
+
+    for ip in ipaddress.IPv4Network(CIDR):
+
+    
+        print ("checking IP:", str(ip))
+        JSON = checkForDeviceFromIP(ip)
+        #print("JSON=",JSON)
+        if len(JSON) != 0:
+            # check for SGS JSON
+            
+            #DumpedJSON = json.dumps(JSON)
+            #DumpedJSON = json.loads(DumpedJSON)
+            #DumpedJSON = json.loads(DumpedJSON)
+            DumpedJSON = JSON
+            #print("DumpedJSON =", DumpedJSON)
+            try:
+                if (len(DumpedJSON["id"]) == 4):
+                    if (len(DumpedJSON["return_string"]) > 0):
+                        print ("SGS Wireless Extender Found.  ID=", DumpedJSON["id"])
+                        print("check for wirelsssJSON match - if so update IP")
+                        changed = checkAndFixIPMatch(DumpedJSON)
+                        if (changed == True):
+                            print("IP Number Fixed for Extender")
+
+                            
+                        else:
+                            print("Extender %s IP Correct" % DumpedJSON['id'])
+            except:
+                #traceback.print_exc()
+                pass
+            
+    now = datetime.datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    print("Finish Time =", str(now))
+
+    return 
+
+def checkAndFixIPMatch(checkJSON):
+
+    changed = False
+    wirelessJSON = readJSON.getJSONValue("WirelessDeviceJSON")
+    #print("wirelessJSON Before = ", wirelessJSON)
+    for single in wirelessJSON:
+        if (single['id'] == checkJSON['id']):
+            if (single['ipaddress'] == checkJSON['ipaddress']):
+                changed = False 
+            else:
+                changed = True
+                single['ipaddress'] = checkJSON['ipaddress']
+                break
+    #print("changed=", changed) 
+    #print("wirelessJSON After = ", wirelessJSON)
+    if (changed == True):
+        # replace wirelessJSON on JSON and write to file
+
+        config.JSONData['WirelessDeviceJSON'] = wirelessJSON
+        readJSON.saveJSON()
+        #print ("config.JSONData=", config.JSONData, end='')
+        pass
+    return changed
+
 def get_ip_address():
  ip_address = '';
  s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
