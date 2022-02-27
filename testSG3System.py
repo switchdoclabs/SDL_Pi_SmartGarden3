@@ -6,7 +6,7 @@
 
 # set SGSEXT_IP to the IP address of your connected Wireless Extender to be tested
 # Example:  SGSEXT_IP = "192.168.1.52"
-SGSEXT_IP = "192.168.1.6"
+SGSEXT_IP = ""
 
 import sys, traceback
 import os
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         print("Error: MUST SET SGSEXT_IP to run Wireless Extender test")
         print("###########################")
         exit()
-    print("Wireless Extender Address = ", SGSEXT_IP)
+    print("Wireless Extender Address Test Requested = ", SGSEXT_IP)
 
 
     print("###########################")

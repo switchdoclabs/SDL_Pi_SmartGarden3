@@ -94,7 +94,7 @@ Infrared_Low_Temp = 17.0
 ############
 #pH Offset (not set by SG3Configure - must set here to change)
 ############
-pHOffset = 3.7
+pHOffset = 4.7
 
 ############
 #pin defines

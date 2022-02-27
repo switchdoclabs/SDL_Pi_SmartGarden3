@@ -10,4 +10,4 @@ print("config.notifyAddress=", config.notifyAddress)
 print("config.fromAddress=", config.fromAddress)
 print("config.mailPassword=", config.mailPassword)
 
-sendemail.sendEmail("test", "Test SmartGarden3 Email", "From Smart Garden 3 down.", config.notifyAddress,  config.fromAddress, "");
+sendemail.sendEmail("test", "Test SmartGarden3 Email", "From SmartGarden 3 test.", config.notifyAddress,  config.fromAddress, "");
