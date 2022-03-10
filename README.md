@@ -1,7 +1,8 @@
 SmartGarden3<BR>
 SwitchDoc Labs<BR>
-February 2022<BR>
+March 2022<BR>
 
+Version 056 - March 10, 2022 - Fixed Merge Error in scanBluetooth.py<BR>
 Version 055 - February 27, 2022 - Minor bug fixes and removal of unused code <BR>
 Version 054 - February 25, 2022 - Added scanAndFixExtenders.py utility for when IP numbers change due to Access Point reset<BR>
 Version 053 - February 11, 2022 - Added Hydoponics pH Meter and 24 Hour averages<BR>
