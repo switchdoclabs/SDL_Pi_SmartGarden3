@@ -990,7 +990,7 @@ class SGSConfigure(App):
                 mySplit = selected_item_key.split("/")
                 myWirelessAddress = mySplit[0]
 
-            self.CurrentBTAddress = myPickAddreess
+            self.CurrentBTAddress = myPickAddress
 
             # open the sql file and update
         
