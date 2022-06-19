@@ -122,6 +122,8 @@ def processRebootMessage(MQTTJSON):
     readJSON.saveJSON()
     InitExtenders.initializeOneExtender(myID)
     scanForResources.updateDeviceStatus(True)
+    InitExtenders.getAndSetCurrentStateOnReboot(myID)
+
   except:
     print(traceback.format_exc())
 

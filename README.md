@@ -1,7 +1,8 @@
 SmartGarden3<BR>
 SwitchDoc Labs<BR>
-March 2022<BR>
+June 2022<BR>
 
+Version 058 - June 20, 2022 - Fixed reboot of extender - restore valve state on reboot<BR>
 Version 057 - March 28, 2022 - Fixed Type in SG3Configure.py<BR>
 Version 056 - March 10, 2022 - Fixed Merge Error in scanBluetooth.py<BR>
 Version 055 - February 27, 2022 - Minor bug fixes and removal of unused code <BR>

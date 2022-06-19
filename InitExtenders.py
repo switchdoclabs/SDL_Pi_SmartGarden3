@@ -7,7 +7,7 @@ import datetime
 import json
 import pclogging
 
-
+import Valves
 
 def initializeOneExtender(myID):
         # force read from wireless systems
@@ -43,3 +43,12 @@ def initializeOneExtender(myID):
             print("UpdateStateLock Released - initializeOneExtender")
 
 
+def getAndSetCurrentStateOnReboot(myExt):
+    print("------------------------")
+    print("getAndSetCurrentStateOnReboot for:", myExt)
+    print("------------------------")
+
+    Valves.checkAndSetValveCurrentState(myExt)
+    print("------------------------")
+    print("End of getAndSetCurrentStateOnReboot for:", myExt)
+    print("------------------------")

@@ -51,6 +51,8 @@ def valveCheck():
 
         if ((single["Control"] == "Timed") and (single["DOWCoverage"] != "NNNNNNN")):
            
+            if (config.SWDEBUG):
+                print("ValveCheck single valve=", single)
             if (stateValveCheck(single["id"],single["ValveNumber"])):
                     if (config.SWDEBUG):
                         print("valveState Found for",single["id"],single["ValveNumber"])
@@ -240,8 +242,11 @@ def calculateFirstTime(single):
     pass
 
 def stateValveCheck(myID, myValveNumber):
+   
+    print("state.valveStatus=", state.valveStatus)
     
     for vState in state.valveStatus:
+        print("vState=", vState)
         if(str(vState["id"]).replace(" ","") == str(myID).replace(" ","")):
             if(str(vState["ValveNumber"]).replace(" ","") == str(myValveNumber).replace(" ","")):
                  return True 
@@ -281,3 +286,63 @@ def manualCheck():
     if (config.LOCKDEBUG):
         print("UpdateStateLock Released -  manualCheck ")
 
+
+def checkAndSetValveCurrentState(myExt):
+
+    if (config.SWDEBUG):
+        print(">>>>>>Valve Reboot State Check <<<<<<")
+
+
+    if (config.LOCKDEBUG):
+        print("UpdateStateLock Acquire Attempt - Reboot valveCheck")
+    state.UpdateStateLock.acquire()
+    if (config.LOCKDEBUG):
+        print("UpdateStateLock Acquired - Reboot valveCheck")
+
+    myValves = config.SGSConfigurationJSON["Valves"]
+    for single in myValves:
+        
+      if(scanForResources.isDeviceActive(single["id"]) == True):
+
+        ################# 
+        # check for timed
+        ################# 
+
+        if ((single["Control"] == "Timed") and (single["DOWCoverage"] != "NNNNNNN")):
+           
+            if (config.SWDEBUG):
+                print("Reboot ValveCheck single valve=", single)
+            #if (stateValveCheck(single["id"],single["ValveNumber"])):
+            if (True):
+                    if (config.SWDEBUG):
+                        print("Reboot valveState Found for",single["id"],single["ValveNumber"])
+                    TurnValveOn = shouldValveBeOn(single["id"],single["ValveNumber"])
+                    
+                    if (TurnValveOn): 
+                  
+                        AccessValves.turnOnTimedValveWithDiff(single)
+                        if (config.SWDEBUG):
+                             print("Reboot Valve Set On")
+                        pclogging.valvelog(single["id"], single["ValveNumber"], 1, "Reboot Event ", "", single["OnTimeInSeconds"])
+
+            else:
+                
+                #myNextTime = calculateFirstTime(single)
+                if (config.SWDEBUG):
+                    print("Reboot Valve Not Turned On") 
+      else:
+          if (config.SWDEBUG):
+                        print("Inactive Wireless Device %s / Valve %s " %( str(single["id"]), str(single["ValveNumber"])))
+
+    
+    if (config.LOCKDEBUG):
+        print("UpdateStateLock Releasing - Reboot valveCheck ")
+    state.UpdateStateLock.release()
+    if (config.LOCKDEBUG):
+        print("UpdateStateLock Released - Reboot valveCheck ")
+
+
+def shouldValveBeOn(myExt, ValveNumber):
+
+    pass
+    return True
